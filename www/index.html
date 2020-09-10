@@ -3,86 +3,64 @@
   <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width,viewport-fit=cover" />
-	<meta http-equiv="Content-Security-Policy" content="default-src * gap: ws: https://ssl.gstatic.com https://www.oncampus.ng; img-src * 'self' data: content:;style-src 'self' 'unsafe-inline' https://flutterwave.com data: blob:;script-src * 'unsafe-inline' 'unsafe-eval' data: blob:;" />
+	<meta http-equiv="Content-Security-Policy" content="default-src * gap: ws: https://ssl.gstatic.com https://www.oncampus.ng http://www.oncampus.ng; img-src * 'self' data: content:;style-src 'self' 'unsafe-inline' https://flutterwave.com http://flutterwave.com data: blob:;script-src * 'unsafe-inline' 'unsafe-eval' data: blob:;" />
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
     <link rel="stylesheet" type="text/css" href="css/index.css">
     <title>Welcome to OnCampus</title>
   </head>
   <body>
-  	<div id="splashView" class="Cream active-view" data-function="View">
-  		<div class="fw fh fx fx-ac fx-jc">
-  			<div class="fw fx fx-jc pd16">
-	  			<img src="res/img/logo.png" class="w80p">
+  	<div id="splashView" class="Cream z4 active-view" data-function="View">
+  		<div id="swipe-container" class="fh psa" style="width: 300vw!important;" data-index="0">
+	  		<div class="vw fh fx fx-ac fx-jc psa t0" style="left: 0;" data-index="0">
+	  			<div class="fw fx fx-jc pd16">
+		  			<img src="res/img/logo.png" class="w80p">
+		  		</div>
+	  		</div>
+
+	  		<div class="vw fh fx fx-ac fx-jc psa t0 cd" style="left: 100vw;" data-index="1">
+	  			<div class="fw fx fx-jc pd30">
+		  			<img src="res/img/freelancer-lady.png">
+		  		</div>
+		  		<div class="fw c-b pd030 t-c f24 b">Welcome to OnCampus</div>
+		  		<div class="fw c-g t-c pd16 f16">Your number one student digital platform</div>
+		  		<div class="h28 fw"></div>
+		  		<div class="h28 fw"></div>
+	  		</div>
+
+	  		<div class="vw fh fx fx-ac fx-jc psa t0 cd" style="left: 200vw;">
+	  			<div class="fw fx fx-jc pd30">
+		  			<img src="res/img/online-shopping.png">
+		  		</div>
+		  		<div class="fw c-b pd030 t-c f24 b">With OnCampus</div>
+		  		<div class="fw c-g t-c pd16 f16">You can buy cheap, choose convenience and beat stress</div>
+		  		<div class="h28 fw"></div>
+		  		<div class="h28 fw"></div>
 	  		</div>
   		</div>
-
-  		<div class="fw psa z1 fx fx-ac b0 l0 pd8">
-	  		<div class="fx fx-ac fx-jc fx60">
-  				<span class="box12 mg10 Orange"></span>
-  				<span class="box10 mg10 bg-fd"></span>
-  				<span class="box10 mg10 bg-fd"></span>
+  		<div id="swipe-footer" class="vw psf z1 fx fx-ac b0 l0 pd8 st-p">
+	  		<div id="swipe-boxes" class="fx fx-ac fx-jc fx60">
+  				<span class="box10 mg10 box-0"></span>
+  				<span class="box10 mg10 box-1"></span>
+  				<span class="box10 mg10 box-2"></span>
   			</div>
+  			<div id="next-btn" class="swipe-btn view-locator psa r0 mg-r pd516 ba bm-r b fx c-o" data-view="#emailRegView">START</div>
   		</div>
   	</div>
-  	<!-- end splash view -->
-  	<div id="progress1View" class="Pink" data-function="View">
-  		<div class="fw fh fx fx-ac fx-jc cd">
-  			<div class="fw fx fx-jc pd30">
-	  			<img src="res/img/freelancer-lady.png">
-	  		</div>
-	  		<div class="fw c-b pd030 t-c f24 b">Welcome to OnCampus</div>
-	  		<div class="fw c-g t-c pd16 f16">Your number one student digital platform</div>
-	  		<div class="h28 fw"></div>
-	  		<div class="h28 fw"></div>
-  		</div>
-  		
-  		<div class="fw psa z1 fx fx-ac b0 l0 bg pd8">
-  			<div class="view-locator end-onboarding f16 pd012 b5 c-g" data-view="#emailRegView">Skip</div>
-  			<div class="fx fx-ac fx-jc fx60">
-  				<span class="box10 mg10 bg-fd"></span>
-  				<span class="box12 mg10 Orange"></span>
-  				<span class="box10 mg10 bg-fd"></span>
-  			</div>
-  			<div class="view-locator f16 pd012 b5 fx c-o" data-view="#progress2View">Next</div>
-  		</div>
-  	</div><!-- end progress-1 view -->
-
-  	<div id="progress2View" class="Pink" data-function="View">
-  		<div class="fw fh fx fx-ac fx-jc cd">
-  			<div class="fw fx fx-jc pd30">
-	  			<img src="res/img/online-shopping.png">
-	  		</div>
-	  		<div class="fw c-b pd030 t-c f24 b">With OnCampus</div>
-	  		<div class="fw c-g t-c pd16 f16">You can buy cheap, choose convenience and beat stress</div>
-	  		<div class="h28 fw"></div>
-	  		<div class="h28 fw"></div>
-  		</div>
-
-  		<div class="fw psa z1 fx fx-ac b0 l0 bg pd8">
-  			<div class="view-locator end-onboarding f16 pd012 b5 c-g" data-view="#emailRegView">Skip</div>
-  			<div class="fx fx-ac fx-jc fx60">
-  				<span class="box10 mg10 bg-fd"></span>
-  				<span class="box10 mg10 bg-fd"></span>
-  				<span class="box12 mg10 Orange"></span>
-  			</div>
-  			<div class="view-locator end-onboarding f16 pd012 b5 fx c-o" data-view="#emailRegView">Next</div>
-  		</div>
-  	</div><!-- end progress-2 view -->
 
 
-  	<div id="emailRegView" class="Grey" data-function="View">
+  	<div id="emailRegView" class="bg" data-function="View">
   		<div class="hr h60 fw bg sh-b fx fx-ac psa pd030 t0 l0 z1 Orange white">
   			<div class="b f16">Sign Up With Email</div>
   		</div>
   		<div class="fw fh fx fx-ac fx-jc">
-	  		<form id="signup-form-email" class="start-form f16 pd030" autocomplete="off">
+	  		<form id="signup-form-email" class="start-form fw f16 pd030" autocomplete="off">
   				<div class="sh-a b4-r ba ov-h">
 	  				<input type="email" name="email" class="pd20 fw bb" placeholder="Enter Your Email Address">
 	  				<input type="submit" name="submit" class="pd20 b f16 fw Orange white" value="SUBMIT">
 	  			</div>
   			</form>
-  			<div class="fw pd1015 t-c f10 psa b0 l0">Already have an account? <span class="view-locator b ac c-o" data-view="#loginView">SIGN IN</span></div>
+  			<div class="fw pd1015 t-c f10 psa mg-b b0 l0">Already have an account? <span class="view-locator b ac c-o" data-view="#loginView">SIGN IN</span></div>
   		</div>
   	</div>
 
@@ -93,7 +71,7 @@
   			<div class="b f16">Email Verification</div>
   		</div>
   		<div class="fw fh fx fx-ac fx-jc">
-	  		<form id="signup-form-code" class="start-form f16 pd030" autocomplete="off">
+	  		<form id="signup-form-code" class="start-form fw f16 pd030" autocomplete="off">
   				<div class="sh-a b4-r ba ov-h">
 	  				<div class="b5 pd20 bb">Enter the verification code that was sent to your email.</div>
                     <input type="text" name="token" class="pd20 fw bb" placeholder="Enter Your Verification Code">
@@ -105,7 +83,7 @@
 
 
   	<div id="signupView" class="bg" data-function="View">
-			<div class="h84 fw bg ps-f t0 l0 b sh-b">
+			<div class="h84 fw bg psf z4 t0 l0 b sh-b">
 				<div class="fw t-c pd10 f20">Sign up</div>
 				<div class="fw fx f14 t-c c-g">
   				<div class="signup-option fx50 pd10 c-o" data-index="0">BUYER</div>
@@ -114,17 +92,16 @@
 			</div>
 
   		<div class="fw fh pd84t ovx-h ovy-a">
-  			<div class="fw pd8 f12 t-c white Orange">You are registering as a <span id="reg-type">BUYER</span></div>
+  			<div class="fw pd12 b5 t-c white Orange" style="font-size: 12px;">YOU ARE REGISTERING AS A <span id="reg-type" style="font-weight: 900;">BUYER</span></div>
 	  		<div class="fw fx fx-jc pd16">
 	  			<img src="res/img/logo.png" class="w80p">
-	  		</div><!-- end logo-area -->
+	  		</div>
 
 	  		<div class="pd1030">
-	  			<form id="signup-form-user" class="start-form f16" autocomplete="off" data-index="0">
+	  			<form id="signup-form-buyer" class="start-form fw f16" autocomplete="off" data-index="0">
 	  				<div class="sh-a b4-r ov-h">
 		  				<input type="text" name="fullname" class="pd20 fw bb" placeholder="Full Name">
 		  				<input type="text" name="username" class="pd20 fw bb" placeholder="Display Name">
-		  				<!-- <input type="email" name="email" class="pd20 fw bb" placeholder="Email Address"> -->
 		  				<div class="triangle-down"><select name="institute" class="pd20 fw bb c-g">
 		  					<option value="0">Select Institute</option>
 		  					<option value="1">Unilorin</option>
@@ -133,6 +110,7 @@
 		  					<option value="4">Uniabuja</option>
 		  					<option value="5">Uniport</option>
 		  				</select></div>
+		  				<input type="tel" name="phone" class="pd20 fw bb" placeholder="Phone Number">
 		  				<div class="psr">
 		  					<input type="password" name="password" class="pd20 fw" placeholder="Password">
 		  					<span class="password-toggle pd20 psa r0 b0 icon-eye"></span>
@@ -140,11 +118,10 @@
 		  				<input type="submit" name="submit" class="pd20 b f16 fw Orange white" value="SIGN UP">
 		  			</div>
 	  			</form>
-	  			<form id="signup-form-seller" class="start-form f16" autocomplete="off" data-index="1" style="display: none;">
+	  			<form id="signup-form-seller" class="start-form fw f16" autocomplete="off" data-index="1" style="display: none;">
 	  				<div class="sh-a b4-r ov-h">
 		  				<input type="text" name="fullname" class="pd20 fw bb" placeholder="Full Name">
 		  				<input type="text" name="username" class="pd20 fw bb" placeholder="Brand/Display Name">
-		  				<!-- <input type="email" name="email" class="pd20 fw bb" placeholder="Email Address"> -->
 		  				<textarea name="officeAddress" class="h60 pd20 fw bb" placeholder="Office Address"></textarea>
 		  				<div class="triangle-down"><select name="category" class="pd20 fw bb c-g">
 		  					<option value="0">Select Selling Category</option>
@@ -156,7 +133,6 @@
 		  					<option value="6">Dry Cleaning</option>
 		  					<option value="7">Gas Delivery</option>
 		  				</select></div>
-		  				
 		  				<div class="triangle-down"><select name="institute" class="pd20 fw bb c-g">
 		  					<option value="0">Select Institute</option>
 		  					<option value="1">Unilorin</option>
@@ -165,7 +141,6 @@
 		  					<option value="4">Uniabuja</option>
 		  					<option value="5">Uniport</option>
 		  				</select></div>
-
 		  				<input type="tel" name="phone" class="pd20 fw bb" placeholder="Phone Number">
 		  				<div class="psr">
 		  					<input type="password" name="password" class="pd20 fw" placeholder="Password">
@@ -197,7 +172,7 @@
 	  		</div><!-- end logo-area -->
 
 	  		<div class="fw pd1030">
-	  			<form id="login-form" class="start-form sh-a b4-r ov-h" autocomplete="off">
+	  			<form id="login-form" class="start-form fw sh-a b4-r ov-h" autocomplete="off">
 	  				<input type="text" name="emailaddress" class="pd20 fw bb" placeholder="Email Address">
 	  				<div class="psr">
 	  					<input type="password" name="password" class="pd20 fw" placeholder="Password">
@@ -230,11 +205,10 @@
 
   	<div id="channelPrompt" class="Grey" data-function="View">
 		<div class="fw fh fx fx-jc cd pd20 ovx-h ovy-a" style="background-image:url(res/img/icon/fashion.jpg);background-size: cover;background-repeat: no-repeat;">
-			<div class="pd16 Grey b4-r ba sh-b">
+			<div class="pd1030 Grey b4-r ba sh-b">
 		  		<div class="fw c-o t-c pd20 b f16">One More Step...</div>
 		  		<div class="fw t-c f16 pd16 sh-b ba b4-r">How did you hear about us?</div>
-		  		<!-- <div class="fw c-g t-c pd20 f16">How did you hear about us?</div> -->
-		  		<form autocomplete="off">
+		  		<form class="fw mg-b" autocomplete="off">
 					<div class="triangle-down"><select id="channel-select" name="channel" class="pd16 Orange fw ba b4-r white">
 						<option value="0">Select One</option>
 						<option value="1">Twitter Influencer</option>
@@ -260,40 +234,28 @@
 		  		<div class="fw h60 fx fx-jc pd16">
 		  			<img src="res/img/logo.png" class="w50p">
 		  		</div>
-	  			<div id="total-notice" class="forSeller psa r0 t0 fx fx-ac fx-jc c-o box60"><div class="f24 icon-bell"></div></div>
+	  			<div id="notifications-btn" class="pops psa r0 t0 fx fx-ac fx-jc c-o box60 f24 icon-bell" data-total="0"></div>
 	  		</div>
 
 	  		<div id="timeline-content" class="fw fh pd60t pd75b bg-ac ovx-h ovy-a psa t0 l0">
 	  			<div class="forBuyer" data-role="screen">
 		  			<div class="bg bt bb mg-t">
 						<div class="fw pd1015 b bb">Hire Services in your School</div>
-						<div class="fw pd16 f0 lh0">
-			  				<div class="boxes4 ba bs-r ov-h sh-a psr i-b Purple white services-link" data-catg="4">
-			  					<div class="fw h80p bg-mod ov-h fx fx-ac fx-jc">
-			  						<img src="res/img/icon/design.png" style="height: 130%;">
-			  					</div>
-		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el service-link-name" data-name="Graphics Design">GRAPHICS DESIGN</div>
+						<div class="fw fx fx-jc fx-ww pd8 f0 lh0">
+			  				<div class="boxes4 ba bs-r ov-h sh-a psr i-b services-link bg-im-cv" data-catg="4" style="background-image: url(res/img/icon/design.png);">
+		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el service-link-name Purple white" data-name="Graphics Design">GRAPHICS DESIGN</div>
 			  				</div>
 			  				
-			  				<div class="boxes4 ba bs-r ov-h sh-a psr i-b Orange white services-link" data-catg="5">
-			  					<div class="fw h80p bg-mod ov-h fx fx-ac fx-jc">
-			  						<img src="res/img/icon/makeup.jpg" style="height: 130%;">
-			  					</div>
-		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el service-link-name" data-name="Makeup Artist">MAKEUP ARTIST</div>
+			  				<div class="boxes4 ba bs-r ov-h sh-a psr i-b services-link bg-im-cv" data-catg="5" style="background-image: url(res/img/icon/makeup.jpg);">
+		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el service-link-name Orange white" data-name="Makeup Artist">MAKEUP ARTIST</div>
 			  				</div>
 			  				
-			  				<div class="boxes4 ba bs-r ov-h sh-a psr i-b Peach white services-link" data-catg="6">
-			  					<div class="fw h80p bg-mod ov-h fx fx-ac fx-jc">
-			  						<img src="res/img/icon/laundry.jpg" style="height: 130%;">
-			  					</div>
-		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el service-link-name" data-name="Dry Cleaning">DRY CLEANING</div>
+			  				<div class="boxes4 ba bs-r ov-h sh-a psr i-b services-link bg-im-cv" data-catg="6" style="background-image: url(res/img/icon/laundry.jpg);">
+		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el service-link-name Peach white" data-name="Dry Cleaning">DRY CLEANING</div>
 			  				</div>
 			  				
-			  				<div class="boxes4 ba bs-r ov-h sh-a psr i-b Dark white services-link" data-catg="7">
-			  					<div class="fw h80p bg-mod ov-h fx fx-ac fx-jc">
-			  						<img src="res/img/icon/gas.jpg" style="height: 130%;">
-			  					</div>
-		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el service-link-name" data-name="Gas Delivery">GAS DELIVERY</div>
+			  				<div class="boxes4 ba bs-r ov-h sh-a psr i-b services-link bg-im-cv" data-catg="7" style="background-image: url(res/img/icon/gas.jpg);">
+		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el service-link-name Dark white" data-name="Gas Delivery">GAS DELIVERY</div>
 			  				</div>
 			  			</div>
 			  		</div>
@@ -301,48 +263,50 @@
 		  			<div class="bg bt bb mg-t">
 			  			<div class="fw pd1015 b bb">Buy and sell in your institute</div>
 			  			<div id="carousel-shop-by-categories" class="carousel pd16 f0 lh0">
-			  				<div class="w42v-c i-b ov-h Pink sh-a mg-r ba bs-r products-catg-entry">
-			  					<div class="fw h80p ov-h">
-			  						<img src="res/img/icon/appliances.jpg" style="height: 130%;">
-			  					</div>
-		  						<div class="fw f10 b h20p fx fx-ac fx-jc pd012 tx-el">HOSTEL APPLIANCES</div>
+			  				<div class="w42v-c psr i-b ov-h sh-a mg-r ba bs-r products-catg-entry bg-im-cv" style="background-image: url(res/img/icon/appliances.jpg);">
+		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el Pink">HOSTEL APPLIANCES</div>
 			  				</div>
-			  				<div class="w42v-c i-b ov-h Pink sh-a mg-r ba bs-r products-catg-entry">
-			  					<div class="fw h80p ov-h">
-			  						<img src="res/img/icon/electronics.jpg" style="height: 130%;">
-			  					</div>
-		  						<div class="fw f10 b h20p fx fx-ac fx-jc pd012 tx-el">ELECTRONICS</div>
+			  				<div class="w42v-c psr i-b ov-h sh-a mg-r ba bs-r products-catg-entry bg-im-cv" style="background-image: url(res/img/icon/electronics.jpg);">
+		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el Pink">ELECTRONICS</div>
 			  				</div>
-			  				<div class="w42v-c i-b ov-h Pink sh-a mg-r ba bs-r products-catg-entry">
-			  					<div class="fw h80p ov-h">
-			  						<img src="res/img/icon/phones.png" style="height: 130%;">
-			  					</div>
-		  						<div class="fw f10 b h20p fx fx-ac fx-jc pd012 tx-el">MOBILE PHONES</div>
+			  				<div class="w42v-c psr i-b ov-h sh-a mg-r ba bs-r products-catg-entry bg-im-cv" style="background-image: url(res/img/icon/phones.png);">
+		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el Pink">MOBILE PHONES</div>
 			  				</div>
-			  				<div class="w42v-c i-b ov-h Pink sh-a mg-r ba bs-r products-catg-entry">
-			  					<div class="fw h80p ov-h">
-			  						<img src="res/img/icon/fashion.jpg" style="height: 130%;">
-			  					</div>
-		  						<div class="fw f10 b h20p fx fx-ac fx-jc pd012 tx-el">FASHION PRODUCTS</div>
+			  				<div class="w42v-c psr i-b ov-h sh-a mg-r ba bs-r products-catg-entry bg-im-cv" style="background-image: url(res/img/icon/fashion.jpg);">
+		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el Pink">FASHION PRODUCTS</div>
 			  				</div>
-			  				<div class="w42v-c i-b ov-h Pink sh-a mg-r ba bs-r products-catg-entry">
-			  					<div class="fw h80p ov-h">
-			  						<img src="res/img/icon/more.jpg" style="height: 130%;">
-			  					</div>
-		  						<div class="fw f10 b h20p fx fx-ac fx-jc pd012 tx-el">MORE</div>
+			  				<div class="w42v-c psr i-b ov-h sh-a mg-r ba bs-r products-catg-entry bg-im-cv" style="background-image: url(res/img/icon/more.jpg);">
+		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el Pink">MORE</div>
 			  				</div>
-			  				
 			  			</div>
 			  		</div>
 
-			  		<div class="bg bt bb mg-t"><!-- [[continue]] -->
+			  		<div class="bg bt bb mg-t">
 						<div class="fw pd1015 b bb">Buy Event Tickets</div>
-						<div id="carousel-buy-ticket" class="carousel pd16 f0 lh0"></div>
+						<div id="carousel-buy-ticket" class="carousel pd16 f0 lh0">
+							<div class='w85p-c i-b ov-h mg-r ba psr bs-r'>
+			                    <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'></div>
+			                    <div class='fw psa bg-ac h60 b0 l0 pd10'></div>
+			                </div>
+			                <div class='w85p-c i-b ov-h mg-r ba psr bs-r'>
+			                    <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'></div>
+			                    <div class='fw psa bg-ac h60 b0 l0 pd10'></div>
+			                </div>
+						</div>
 			  		</div>
 						
-					<div class="bg bt bb mg-t"><!-- [[continue]] -->
+					<div class="bg bt bb mg-t">
 						<div class="fw pd1015 b bb">Restaurants around you</div>
-						<div id="carousel-buy-food" class="carousel pd16 f0 lh0"></div>
+						<div id="carousel-buy-food" class="carousel pd16 f0 lh0">
+							<div class='w85p-c i-b ov-h mg-r ba psr bs-r'>
+			                    <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'></div>
+			                    <div class='fw psa bg-ac h60 b0 l0 pd10'></div>
+			                </div>
+			                <div class='w85p-c i-b ov-h mg-r ba psr bs-r'>
+			                    <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'></div>
+			                    <div class='fw psa bg-ac h60 b0 l0 pd10'></div>
+			                </div>
+						</div>
 			  		</div>
 			  	</div>
 
@@ -383,33 +347,33 @@
 		  		<!-- <div class="orders-filter fx fx-ac fx-jc white box60" data-container="#"><div class="f20 icon-search"></div></div> -->
 	  		</div>
 			<div class="fw fh pd60t pd100b bg ovx-h ovy-a psa t0 l0 not-null" placeholder="E-Commerce feature will be available soon..."></div>
-				<!-- <div class="boxes-container fw pd20">
-					<div class="boxes-2 ba b4-r">
-						<div class="h100 fx fx-ac fx-jc">
-  					</div>
-						<div class="fw f12 b t-c c-g pd12z tx-el">PHONES</div>
-					</div><div class="boxes-2 ba b4-r">
-						<div class="h100 fx fx-ac fx-jc">
-  					</div>
-						<div class="fw f12 b t-c c-g pd12z tx-el">APPLIANCES</div>
-					</div><div class="boxes-2 ba b4-r">
-						<div class="h100 fx fx-ac fx-jc">
-  					</div>
-						<div class="fw f12 b t-c c-g pd12z tx-el">VEHICLE</div>
-					</div><div class="boxes-2 ba b4-r">
-						<div class="h100 fx fx-ac fx-jc">
-  					</div>
-						<div class="fw f12 b t-c c-g pd12z tx-el">FOOD</div>
-					</div><div class="boxes-2 ba b4-r">
-						<div class="h100 fx fx-ac fx-jc">
-  					</div>
-						<div class="fw f12 b t-c c-g pd12z tx-el">ELECTRONICS</div>
-					</div><div class="boxes-2 ba b4-r">
-						<div class="h100 fx fx-ac fx-jc">
-  					</div>
-						<div class="fw f12 b t-c c-g pd12z tx-el">LAUNDRY</div>
+			<!-- <div class="boxes-container fw pd20">
+				<div class="boxes-2 ba b4-r">
+					<div class="h100 fx fx-ac fx-jc">
 					</div>
-				</div> -->
+					<div class="fw f12 b t-c c-g pd12z tx-el">PHONES</div>
+				</div><div class="boxes-2 ba b4-r">
+					<div class="h100 fx fx-ac fx-jc">
+					</div>
+					<div class="fw f12 b t-c c-g pd12z tx-el">APPLIANCES</div>
+				</div><div class="boxes-2 ba b4-r">
+					<div class="h100 fx fx-ac fx-jc">
+					</div>
+					<div class="fw f12 b t-c c-g pd12z tx-el">VEHICLE</div>
+				</div><div class="boxes-2 ba b4-r">
+					<div class="h100 fx fx-ac fx-jc">
+					</div>
+					<div class="fw f12 b t-c c-g pd12z tx-el">FOOD</div>
+				</div><div class="boxes-2 ba b4-r">
+					<div class="h100 fx fx-ac fx-jc">
+					</div>
+					<div class="fw f12 b t-c c-g pd12z tx-el">ELECTRONICS</div>
+				</div><div class="boxes-2 ba b4-r">
+					<div class="h100 fx fx-ac fx-jc">
+					</div>
+					<div class="fw f12 b t-c c-g pd12z tx-el">LAUNDRY</div>
+				</div>
+			</div> -->
 		</div>
 
 		<div id="ordersTab" data-function="Tab"><!-- checkout -->
@@ -422,56 +386,47 @@
 	  		</div>
 		</div>
 		<!-- </div> -->
-	  	<div class="fw ps-f fx fx-ac b0 l0 bg h56 bt sh-b z1 c-g">
+	  	<div class="fw psf fx fx-ac b0 l0 bg h56 bt sh-b z1 c-g">
 			<div class="tab-locator fx15 fx fx-jc c-o" data-tab="#timeline"><div class="f24 icon-home"></div></div>
 			<div class="tab-locator fx15 fx fx-jc forBuyer" data-tab="#catalogScreen"><div class="f24 icon-search"></div></div>
 			<div class="tab-locator fx15 fx fx-jc forSeller" data-tab="#reviewsTab" id="reviews-link"><div class="f24 icon-mail-alt"></div></div>
 			<div class="tab-locator fx15 fx fx-jc" data-tab="#ordersTab" id="orders-link"><div class="f24 icon-basket"></div></div>
 		</div>
-  	</div>
-	<div id="drawer-listener" class="bg-tr ps-f z3 fh t0 l0" style="width: 12px;"></div>
-	<div id="side-nav" class="fh psa t0 l0">
-	    <div id="side-nav-modal" class="vw fh psa t0 l0 z2 ov-h bg-fd"></div>
-	    <div id="side-nav-menu-view" class="fh fx cd psa t0 l0 fx-jc pd100b c-g bg ovx-h ovy-a">
-	        <div class="fw pd20 st-p">
-		        <div class="view-locator box120 ba ov-h psr fx fx-ac fx-jc b-rd" data-view="#dpEditor">
-		    	    <img src="res/img/icon/upload.png">
-		    	    <img src="" class="fw fh user-display-picture psa t0 l0">
-		        </div>
-		    </div>
-	        <!-- buyer -->
-		    <div class="forBuyer fw bg-pl pd16 bb fx fx-ac ac b5 bt" id="buyer-messages">
-		    	<div class="w32 fx fx-ac fx-jc f20 icon-mail"></div>
-		    	<div class="fx60 mg-l f14">Messages</div>
-		    </div>
-		    <!-- seller -->
-		    <div class="forSeller st-p fw pd16 bb fx fx-ac b bt Pink">
-		    	<div class="w32 fx fx-ac fx-jc f20 icon-suitcase"></div>
-		    	<div id="my-service-name" class="fx60 mg-l f14 tx-uc"></div>
-		    </div>
-		    <div class="forSeller fw bg-pl pd16 bb fx fx-ac ac b5" id="withdraw-cash">
-					<div class="w32 fx fx-ac fx-jc f20 icon-wallet"></div>
-		    	<div class="fx60 mg-l f14">Withdraw from Wallet</div>
-		    </div>
-		    <div class="forSeller fw bg-pl pd16 bb fx fx-ac ac b5" id="add-item">
-					<div class="w32 fx fx-ac fx-jc f20 icon-check"></div>
-		    	<div class="fx60 mg-l f14">Upload Menu</div>
-		    </div>
-		    <div class="forSeller fw bg-pl pd16 bb fx fx-ac ac b5" id="myItemsLink">
-					<div class="w32 fx fx-ac fx-jc f20 icon-restaurant"></div>
-		    	<div class="fx60 mg-l f14">Products List</div>
-		    </div>
-		    <!-- both -->
-		    <div class="fw bg-pl pd16 bb fx fx-ac ac b5" id="profile-link">
-		    	<div class="w32 fx fx-ac fx-jc f20 icon-user"></div>
-		    	<div class="fx60 mg-l f14">My Account</div>
-		    </div>
-			<div class="fw bg-pl pd16 bb fx fx-ac ac b5" id="logoutLink">
-		    	<div class="w32 fx fx-ac fx-jc f20 icon-logout"></div>
-		    	<div class="fx60 mg-l f14">Logout</div>
-		    </div>
-		</div>
+		<div id="drawer-listener" class="bg-tr psf z3 fh t0 l0" style="width: 12px;"></div>
+		<div id="side-nav" class="fh psa t0 l0">
+		    <div id="side-nav-modal" class="vw fh psa t0 l0 z2 ov-h bg-fd"></div>
+		    <div id="side-nav-menu-view" class="fh fx cd psa t0 l0 fx-jc pd100b c-g bg ovx-h ovy-a">
+		        <div class="fw pd20 st-p">
+			        <div class="view-locator box120 ba ov-h psr fx fx-ac fx-jc b-rd" data-view="#dpEditor">
+			    	    <img src="res/img/icon/upload.png">
+			    	    <img src="" class="fw fh user-display-picture psa t0 l0">
+			        </div>
+			    </div>
+			    <!-- seller -->
+			    <div class="forSeller st-p fw pd16 bb fx fx-ac b bt Pink">
+			    	<div class="w32 fx fx-ac fx-jc f20 icon-suitcase"></div>
+			    	<div id="my-service-name" class="fx60 mg-l f14 tx-uc"></div>
+			    </div>
+			    <div class="forSeller fw bg-pl pd16 bb fx fx-ac ac b5" id="withdraw-cash">
+						<div class="w32 fx fx-ac fx-jc f20 icon-wallet"></div>
+			    	<div class="fx60 mg-l f14">Withdraw from Wallet</div>
+			    </div>
+			    <div class="forSeller fw bg-pl pd16 bb fx fx-ac ac b5" id="myItemsLink">
+						<div class="w32 fx fx-ac fx-jc f20 icon-restaurant"></div>
+			    	<div class="fx60 mg-l f14">Products List/Upload Menu</div>
+			    </div>
+			    <!-- both -->
+			    <div class="fw bg-pl pd16 bb fx fx-ac ac b5" id="profile-link">
+			    	<div class="w32 fx fx-ac fx-jc f20 icon-user"></div>
+			    	<div class="fx60 mg-l f14">My Account</div>
+			    </div>
+				<div class="fw bg-pl pd16 bb fx fx-ac ac b5" id="logoutLink">
+			    	<div class="w32 fx fx-ac fx-jc f20 icon-logout"></div>
+			    	<div class="fx60 mg-l f14">Logout</div>
+			    </div>
+			</div>
 	    </div>
+  	</div>
 
 	<div id="createView" class="Grey" data-function="View">
   		<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
@@ -481,14 +436,14 @@
 
   		<div class="fw fh ovx-h ovy-a bg-ac pd60t" style="padding-bottom: 56px;">
 
-	  		<form id="product-add-form" class="create-form pd16" data-catg="1" autocomplete="off">
+	  		<form id="product-add-form" class="create-form fw pd16" data-catg="1" autocomplete="off">
 	  			<div class="fw psr fx fx-jc fx-ww mg-b16">
 	  				<div class="product-image fx40 h200 bg b4-r fx fx-ac fx-jc ov-h ba bg-im-ct psr">
 	  					<img src="res/img/icon/upload.png">
 	  					<img class="fw psa im-sh" src="">
 		  				<input type="file" accept="image/*" name="images" class="images fw fh psa t0 l0 op0">
 	  				</div>
-	  				<div class="add-more-photos psa t0 l0 mg-t mg-l pd5 ba b4-r Pink b5">Add more photos</div>
+	  				<div class="add-more-photos psa t0 l0 mg-t mg-l pd5 f10 ba b4-r Pink b5">+ Add more photos</div>
 	  			</div>
 	  			<input type="text" name="name" class="fw pd20 bg mg-b16 b4-r ba" placeholder="Name">
 	  			<div class="triangle-down mg-b16"><select name="product_type" class="fw pd20 bg b4-r ba">
@@ -556,7 +511,7 @@
 	  			<input type="submit" name="create-submit" class="fw psa b0 l0 b h56 pd020 fx fx-ac Orange white hideWhenShrink" value="SAVE & CONTINUE">
 	  		</form>
 
-			<form id="food-add-form" class="create-form pd16" data-catg="2" autocomplete="off">
+			<form id="food-add-form" class="create-form fw pd16" data-catg="2" autocomplete="off">
 				<div class="food-item pd16 Grey b4-r">
 		  			<div class="fw psr fx fx-jc mg-b16">
 		  				<div class="fw h200 bg b4-r fx fx-ac fx-jc ov-h ba bg-im-ct psr">
@@ -579,7 +534,7 @@
 				<input type="submit" name="create-submit" class="fw psa b0 l0 b h56 pd020 fx fx-ac Orange white hideWhenShrink" value="SAVE & CONTINUE">
 			</form>
 
-			<form id="event-add-form" class="create-form pd16" data-catg="3" autocomplete="off">
+			<form id="event-add-form" class="create-form fw pd16" data-catg="3" autocomplete="off">
   				<div class="fw h200 bg bs-r fx fx-ac fx-jc ov-h ba psr mg-b16">
   					<img src="res/img/icon/upload.png">
   					<img class="fw psa im-sh" src="">
@@ -625,8 +580,8 @@
 					</div>
 				</div>
 
-				<div class="fw ticket_category pd10 b4-r mg-b16 Orange white">
-					<div class="fw f12 mg-b b">ADD A TICKET</div>
+				<div class="fw ticket_category pd10 b4-r mg-b16 bg">
+					<div class="fw f10 t-c mg-b b">ADD A TICKET</div>
 					<div class="triangle-down"><select name="category" class="fw pd20 bg mg-b16 b4-r ba">
 						<option value="0">Select Ticket Type</option>
 						<option value="1">Regular</option>
@@ -647,7 +602,7 @@
 				<input type="submit" name="create-submit" class="fw psa b0 l0 b h56 pd020 fx fx-ac Orange white hideWhenShrink" value="SAVE & CONTINUE">
 			</form>
 
-			<form id="graphics-add-form" class="create-form pd16" data-catg="4" autocomplete="off">
+			<form id="graphics-add-form" class="create-form fw pd16" data-catg="4" autocomplete="off">
 				<div class="pd16 Grey b4-r">
 		  			<div class="fw psr fx fx-jc mg-b16">
 		  				<div class="fw h200 bg b4-r fx fx-ac fx-jc ov-h ba bg-im-ct psr">
@@ -671,7 +626,7 @@
 				<input type="submit" name="create-submit" class="fw psa b0 l0 b h56 pd020 fx fx-ac Orange white hideWhenShrink" value="SAVE & CONTINUE">
 			</form>
 
-			<form id="makeup-add-form" class="create-form pd16" data-catg="5" autocomplete="off">
+			<form id="makeup-add-form" class="create-form fw pd16" data-catg="5" autocomplete="off">
 				<div class="pd16 Grey b4-r">
 		  			<div class="fw psr fx fx-jc mg-b16">
 		  				<div class="fw h200 bg b4-r fx fx-ac fx-jc ov-h ba bg-im-ct psr">
@@ -694,7 +649,7 @@
 				<input type="submit" name="create-submit" class="fw psa b0 l0 b h56 pd020 fx fx-ac Orange white hideWhenShrink" value="SAVE & CONTINUE">
 			</form>
 
-			<form id="laundry-add-form" class="create-form pd16" data-catg="6" autocomplete="off">
+			<form id="laundry-add-form" class="create-form fw pd16" data-catg="6" autocomplete="off">
 				<div class="laundry-item pd16 mg-b16 Grey b4-r">
 					<div class="triangle-down mg-b16"><select name="itemID" class="fw pd20 bg b4-r ba">
 		  				<option value="">Select Item Type</option>
@@ -732,7 +687,7 @@
 				<input type="submit" class="fw psa b0 l0 b h56 pd020 fx fx-ac Orange white hideWhenShrink" value="SAVE & CONTINUE">
 			</form>
 
-			<form id="gas-add-form" class="create-form pd16" data-catg="7" autocomplete="off">
+			<form id="gas-add-form" class="create-form fw pd16" data-catg="7" autocomplete="off">
 				<div class="gas-item pd16 mg-b16 Grey b4-r">
 		  			<div class="triangle-down mg-b16"><select name="itemID" class="fw pd20 bg b4-r ba">
 		  				<option value="">Select Cylinder Size</option>
@@ -740,7 +695,6 @@
 		  				<option value="2">5kg</option>
 		  				<option value="3">6kg</option>
 		  				<option value="4">12kg</option>
-		  				<option value="5">1kg</option>
 		  			</select></div>
 					<input type="number" name="price" class="fw pd20 bg b4-r ba" placeholder="Price">
 				</div>
@@ -764,7 +718,8 @@
 	            <div id="display-name" class="fw tx-el b f20"></div>
 	            <div id="user-address" class="fw h36_4 ovx-h ovy-a"></div>
 	          </div>
-	          <div id="store-review" class="forBuyer  psa t0 r0 fx fx-ac fx-jc tx-sh bg-fd b-rd white box60 mg-r mg-t cd t-c icon-edit"><span class="f10">Drop a<br>review</span></div>
+              <div class="forSeller psa t0 r0 fx fx-ac fx-jc tx-sh bg-fd b-rd white box60 mg-r mg-t cd t-c" id="add-item">+<span class="f10">Add an<br>Item</span></div>
+	          <div id="store-review" class="forBuyer psa t0 r0 fx fx-ac fx-jc tx-sh bg-fd b-rd white box60 mg-r mg-t cd t-c icon-edit"><span class="f10">Drop a<br>review</span></div>
 	        </div>
 	    </div>
 	    <!--  -->
@@ -813,7 +768,7 @@
 	    	<div id="gas-container" class="fw fh ovx-h ovy-a pd75b psr not-null" placeholder="No items was found"></div>
 	    </div>
 
-        <div id="proceed-to-cart" class="forBuyer go-to-cart fw h56 ps-f z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink" style="display: none;">Proceed to cart</div>
+        <div id="proceed-to-cart" class="forBuyer go-to-cart fw h56 psf z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink" style="display: none;">Proceed to cart</div>
   	</div>
 
 
@@ -835,7 +790,7 @@
   		<div class="fw fh ovx-h ovy-a pd60t">
   			<div id="invoice-content" class="fw pd10"></div>
   		</div>
-  		<div id="proceed-to-address" class="fw h56 ps-f z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Proceed to checkout</div>
+  		<div id="proceed-to-address" class="fw h56 psf z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Proceed to checkout</div>
   	</div>
 
   	<div id="dropoffView" class="bg" data-function="View">
@@ -856,7 +811,7 @@
   				<textarea name="deliveryInstruction" class="fw pd20 mg-b16 bg-ac b4-r ba h60" placeholder="Add delivery instructions (Optional)"></textarea>
   			</div>
   		</div>
-  		<div id="submit-for-review" class="fw h56 ps-f z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Submit for review</div>
+  		<div id="submit-for-review" class="fw h56 psf z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Submit for review</div>
   	</div>
 
   	<div id="successView" class="bg" data-function="View">
@@ -905,7 +860,7 @@
 
   			</div>
   		</div>
-  		<div id="submit-card-details" class="fw h56 ps-f z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Submit</div>
+  		<div id="submit-card-details" class="fw h56 psf z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Submit</div>
   	</div>
 
   	<div id="PINView" class="bg" data-function="View">
@@ -937,7 +892,7 @@
 	  			<div class='fw fx pd20 t-c mg-b16 bg-ac c-g f10 b4-r ba t-c'>You agree to use the debit card for payment of this transaction.</div>
   			</div>
   		</div>
-  		<div id="submit-card-pin" class="fw h56 ps-f z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Proceed</div>
+  		<div id="submit-card-pin" class="fw h56 psf z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Proceed</div>
   	</div>
 
   	<div id="OTPView" class="bg" data-function="View">
@@ -955,10 +910,10 @@
 	  			</div>
   			</div>
   		</div>
-  		<div id="submit-card-token" class="fw h56 ps-f z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Pay</div>
+  		<div id="submit-card-token" class="fw h56 psf z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Pay</div>
   	</div>
 
-	<div id="reviewingView" class="bg" data-function="View">
+	<div id="reviewView" class="bg" data-function="View">
 	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="b f16">Review store</div>
@@ -968,21 +923,23 @@
   				<textarea id="review-input" class="fw pd20 Grey mg-b16 bs-r ba h200" placeholder="Type a review"></textarea>
   			</div>
   		</div>
-  		<div id="post-a-review" class="fw h56 ps-f z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Post review</div>
+  		<div id="post-a-review" class="fw h56 psf z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Post review</div>
   	</div>
 
   	<div id="profileEditor" class="Grey" data-function="View">
-		<div class="fw fh ovx-h ovy-a">
-			<div class="view-closer psa t0 l0 f20 fx fx-ac fx-jc icon-left box60"></div>
-	  		<div class="fw t-c f16 pd20 mg-txx b">UPDATE PROFILE</div>
-	  		<div class="fw c-g t-c pd020 f16">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod...</div>
+		<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
+  			<div class="b f16">Profile Update</div>
+  		</div>
+		<div class="fw fh pd60t ovx-h ovy-a">
+	  		<div class="fw h60 c-g t-c pd020 f16"></div>
 	  		<div class="pd30">
-		  		<form id="profile-edit-form" class="start-form pd60b" autocomplete="off">
+		  		<form id="profile-edit-form" class="start-form fw pd16" autocomplete="off">
 					<input type="text" name="fullname" class="fw pd20 Grey mg-b16 b4-r ba" placeholder="Full Name">
 					<input type="text" name="username" class="fw pd20 Grey mg-b16 b4-r ba" placeholder="Display/Brand Name">
-					<div class="forBuyer triangle-down"><input type="date" name="birthday" class="fw pd20 Grey b4-r ba" value="2000-12-31"></div>
-					<input type="tel" name="phone" class="forSeller fw pd20 Grey mg-b16 b4-r ba" placeholder="Phone Number">
-	  				<textarea name="officeAddress" class="forSeller fw pd20 Grey mg-b16 b4-r ba h60" placeholder="Office Address"></textarea>
+					<input type="tel" name="phone" class="fw pd20 Grey mg-b16 b4-r ba" placeholder="Phone Number">
+					<div class="forBuyer triangle-down"><span class="pd20 Grey ba b4-r mg-rx b">DOB:</span> <input type="date" name="birthday" class="fw pd20 Grey b4-r ba" value="2000-12-31"></div>
+	  				<textarea name="officeAddress" class="forSeller fw pd20 Grey b4-r ba h60" placeholder="Office Address"></textarea>
 					<input type="submit" name="edit-submit" class="fw psa b0 l0 b h56 pd020 fx fx-ac Orange white hideWhenShrink" value="SAVE & CONTINUE">
 				</form>
 			</div>
@@ -1057,7 +1014,7 @@
   		</div>
   	</div>
 
-  	<div id="ordersCompleteView" class="bg" data-function="View">
+  	<div id="ordersCompletedView" class="bg" data-function="View">
 	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="fx60 b f16">Completed Orders</div>
@@ -1079,6 +1036,40 @@
   		</div>
   	</div>
 
+  	<div id="inboxView" class="bg" data-function="View">
+	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
+  			<div class="fx60 b f16">Inbox</div>
+  		</div>
+  		<div class="fw fh ovx-h ovy-a pd60t">
+  			<div id="messagesWrapper" class="fw pd16 not-null" placeholder="Your messages will show here"></div>
+  		</div>
+  	</div>
+
+  	<div id="messageView" class="bg" data-function="View">
+	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
+  			<div class="fx60 b f16">Message</div>
+  		</div>
+  		<div class="fw fh ovx-h ovy-a pd60t">
+  			<div id="messageWrapper" class="fw pd16 mg-b16 not-null" placeholder="Loading message..."></div>
+  			<div id="repliesWrapper" class="fw pd16 psr not-null" placeholder="Loading replies..."></div>
+  		</div>
+  	</div>
+
+  	<div id="replyView" class="bg" data-function="View">
+	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
+  			<div class="b f16">Post a Reply</div>
+  		</div>
+  		<div class="fw fh ovx-h ovy-a pd60t">
+  			<div class="fw pd30">
+  				<textarea id="reply-input" class="fw pd20 Grey mg-b16 bs-r ba h200" placeholder="Type your message..."></textarea>
+  			</div>
+  		</div>
+  		<div id="post-a-reply" class="fw h56 psf z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Post a reply</div>
+  	</div>
+
   	<div id="menuModal" class="Modal bg-mod">
   	  <div class="fw fh pd20 fx fx-ac fx-jc">
   	    <div id="menuFlexer" class="sh-a i-b bg ov-h ovy-a b2-r"></div>
@@ -1086,10 +1077,10 @@
   	</div>
 
   	<div id="searchModal" class="Modal bg-tr">
-  		<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white bb pd016 st-p">
+  		<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white bb pd012 st-p">
   			<div id="searchHeader" class="fw fx pd1015 bg-fd b4-r" style="display: none;">
   				<div class="icon-search white mg-rx"></div>
-  				<input id="search-input" type="text" class="fx60 white">
+  				<input id="search-input" type="text" class="fx60 white" placeholder="Enter Order ID">
   			</div>
   		</div>
   	</div>

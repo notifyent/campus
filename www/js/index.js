@@ -13,15 +13,13 @@
  //||
  /*
  * TODO
- * filter orders
+ * notifications (post-a-reply) fetchMessageReplies buildReply
+ * multiple sizes
  * withdraw from wallet
- * notifications
  * gallery for graphics and beauty
  * increase upload limit on server
  * buyers interface - products**
  *
- * email sending
- * SMS token sending
  *
  * 
  *
@@ -31,20 +29,19 @@
     document.addEventListener('deviceready', onDeviceReady, false);
     window.addEventListener('resize', handleResize, false);
 
-
     var VERSION = '1.0.0'
     //
-    // , MY_URL = "http://localhost/api/v1"
+    , MY_URL = "http://localhost/api/v1"
     // 
     // , MY_URL = "http://192.168.43.75/api/v1"
     //
     // , MY_URL = "http://172.20.10.4/api/v1"
     //
-    , MY_URL = "https://www.oncampus.ng/api/v1"
+    // , MY_URL = "https://www.oncampus.ng/api/v1"
     //
     , BASE_URL = "https://www.oncampus.ng"
     //
-    , PLATFORM = 'web'
+    , PLATFORM = 'android'
     , Views = ['#splashView']
     , ChangingView = false
     //
@@ -61,9 +58,16 @@
 
 
     , SPINNER = `<svg class="pull-to-refresh-spinner loaderN" width="32" height="32" viewBox="25 25 50 50">
-          <circle class="pull-to-refresh-path" cx="50" cy="50" r="20" fill="none" stroke="#0060ff" stroke-width="4" stroke-miterlimit="10" />
+          <circle class="pull-to-refresh-path" cx="50" cy="50" r="20" fill="none" stroke="#fe5215" stroke-width="4" stroke-miterlimit="10" />
         </svg>`
     , PAGELOADER = '<div class="loaderHolder box48 psa centered fx fx-ac fx-jc">' + SPINNER + '</div>'
+    , $H = "<div class='fw fx ov-h bb bg mg-b16 ba psr'>\
+            <div class='box120 mg-r fx fx-ac fx-jc ov-h bg-ac'></div>\
+            <div class='fx60 pd10'></div>\
+        </div>"
+
+    , $MM = $('#menuModal')
+    , $MF = $('#menuFlexer')
 
 
 
@@ -109,6 +113,8 @@
     , COLORPICKER = null
 
     , ITEMS_DATA = []
+
+    , MY_MAILS = []
 
 
 
@@ -161,11 +167,10 @@
     }
 
     function onDeviceReady() {
-
-        StatusBar.backgroundColorByHexString('#FE5215');/*add the plugin*/
+        StatusBar.backgroundColorByHexString('#FE5215');
         document.addEventListener('backbutton', onBackButton, false);
-        PLATFORM = cordova.platformId;
-        
+        //online
+        //resume
     }
     
     function onBackButton() {
@@ -174,6 +179,7 @@
         if ($('#searchModal').is(':visible')) {
             $('#searchHeader').hide();
             $('#searchModal').hide();
+            showAllOrderEntries();
             return;
         }
         if ($('#side-nav-modal').is(':visible')) return navEnd.call(mNav);
@@ -186,13 +192,12 @@
                 if (activeTab !== 'timeline') {
                     App.switchTabTo('#timeline');
                     $('.tab-locator').removeClass('c-o');
-                    document.querySelector('.active-tab[data-tab="#timeline"]').classList.add('c-o');
+                    document.querySelector('.tab-locator[data-tab="#timeline"]').classList.add('c-o');
                 }
                 else if ($('#timeline-content').scrollTop() != 0) $('#timeline-content').scrollTop(0);
                 else navigator.Backbutton.goHome();
                 break;
-            case 'progress1View':
-            case 'progress2View':
+            case 'splashView':
             case 'emailRegView':
             case 'signupView':
             case 'channelPrompt':
@@ -321,11 +326,8 @@
                         ;
                         loadUserPicture();
                         if (r.channel == 0) showChannelScreen();
-                        else preparePage();
-                    } else {//no data
-                        if (Store.getItem('doneBoarding')) App.changeViewTo('#emailRegView');
-                        else App.changeViewTo('#progress1View');
-                    }
+                        else preparePage(true);
+                    }//else App.changeViewTo('#emailRegView');
                 });
             });
     }, function() {/*error*/}, function() {/*success*/});
@@ -342,8 +344,9 @@
     function showChannelScreen() {
         App.changeViewTo('#channelPrompt');
     }
-    function preparePage() {
+    function preparePage(existing) {
         App.changeViewTo('#home');
+        if (existing) checkMail();
         if (USERTYPE == 0) {//buyer
             $('.forSeller').addClass('hd');
             $('.forBuyer').removeClass('hd');
@@ -355,8 +358,10 @@
             $('.create-form:not([data-catg="'+CATEGORY+'"])').hide();
             var tx = CATEGORIES[CATEGORY];
             $('#my-service-name').text(tx);
-            updateWallet();
-            fetchProgress();
+            if (existing) {
+                checkWallet();
+                fetchProgress();
+            }
         }
     }
 
@@ -402,22 +407,21 @@
             window.location.reload();
         }, 300);
     }).on('mousedown', 'select', function(e) {
-        ACTIVESELECT = this;
         e.preventDefault();
+        ACTIVESELECT = this;
         //
         $(':focus').blur();//UI improvement
         //
         var options = this.options;
         var selIdx = this.selectedIndex;
-        // toast(typeof options);
-        // console.log(options);
+        //
         var h = '';
         Array.prototype.slice.call(options).forEach(function(op, i) {
             h += '<div class="fx fx-ac c-g option pd1215 f16 bb" data-index="'+op.index+'" data-selected="'+(selIdx==i)+'">'+op.text+'</div>';
         });
         //
-        $('#menuModal').show();
-        $('#menuFlexer').html(h).zoom();
+        $MM.show();
+        $MF.html(h).zoom();
         return false;
     }).on('click', '.option', function() {
         var idx = this.dataset.index;
@@ -437,7 +441,7 @@
                 success: function(p) {
                     if (p == 1) {
                         toast('Thanks for your feedback');
-                        preparePage();
+                        preparePage(false);
                         SQL.transaction(function(i) {
                             i.executeSql("UPDATE on_user SET channel=? WHERE id=?", [idx, 1]);
                         });
@@ -1025,8 +1029,8 @@
                 <div class="box32 i-b ba b-rd" style="background:#9ACD32;" ></div>
             </div>
         </div>`;
-        $('#menuModal').show();
-        $('#menuFlexer').html(h).zoom();
+        $MM.show();
+        $MF.html(h).zoom();
 
         var selectedOptions = [];
         var so = this.dataset.selectedOptions;
@@ -1075,8 +1079,6 @@
         this.classList.add('c-o');
     }).on('click', '.view-closer', function() {
         App.closeCurrentView();
-    }).on('click', '.end-onboarding', function() {
-        Store.setItem('doneBoarding', 'true');
     }).on('click', '.terms-link', function() {
         cordova.InAppBrowser.open(BASE_URL + '/legal/terms.html', '_blank', BROWSEROPTIONS);
     }).on('click', '.forgot-password', function() {
@@ -1198,25 +1200,24 @@
                     }
                 });
                 break;
-            case 'signup-form-user':
-                // var Email = Store.getItem('userEmail');
+            case 'signup-form-buyer':
                 var Fullname = el.querySelector('input[name="fullname"]').value;
                 var Username = el.querySelector('input[name="username"]').value.toLowerCase().split(' ').join('');
                 var Campus = el.querySelector('select[name="institute"]').value;
+                var Phone = el.querySelector('input[name="phone"]').value
                 var Pass = el.querySelector('input[name="password"]').value;
 
-                //
-                // if (!Email && !error) error = "<div class='b bb pd10'>Provide your email address</div><div class='pd10'>Your email address is needed to validate your account.</div>";
                 if (!Fullname && !error) error = "<div class='b bb pd10'>Full Name is Required</div><div class='pd10'>Your full name is required.</div>";
                 if (!UsernameRegexp.test(Username) && !error) error = "<div class='b bb pd10'>Display name error</div><div class='pd10'>Username must be 4 or more characters long and may contain letters, underscore and numbers but cannot start with a number. Special characters and full-stop are not allowed</div>";
                 if (Campus == 0 && !error) error = "<div class='b bb pd10'>Please select your institution</div><div class='pd10'>Select your institution to help us serve you nearby items.</div>";
+                if (!Phone && !error) error = "<div class='b bb pd10'>Provide your phone number</div><div class='pd10'>Your phone number is required for notifications.</div>";
                 if ((Pass.length < 8 || Pass.length > 32) && !error) error = "<div class='b bb pd10'>Password not accepted</div><div class='pd10'>Password must be between 8 - 32 characters long.</div>";
                 
                 if (error) {
                     var h = '<div class="pd10">'+error+'<div class="fw fx"><div class="fx60"></div><div class="pd516 b bg-ac c-o ac">OK</div></div></div>';
 
-                    $('#menuModal').show();
-                    $('#menuFlexer').html(h).zoom();
+                    $MM.show();
+                    $MF.html(h).zoom();
 
                     return;
                 }
@@ -1231,6 +1232,7 @@
                         fullname: Fullname,
                         username: Username,
                         campus: Campus,
+                        phone: Phone,
                         password: Pass,
                         usertype: '0',
                         platform: PLATFORM
@@ -1245,16 +1247,14 @@
                                 , un: Username
                                 , em: Store.getItem('userEmail')
                                 , sk: Campus
+                                , ph: Phone
                                 , ut: '0'
-                                , ph: null
                                 , ma: null
                                 , fn: null
                                 , ad: null
                                 , cg: '0'
                                 , ch: '0'
                             };
-                            // console.log(data);
-                            // store in db and go home
                             toast('Registration Completed Successfully');
                             localizeUserDetails(data, 'signup');
                         } else {
@@ -1274,7 +1274,6 @@
                 break;
 
             case 'signup-form-seller':
-                 /*Email = Store.getItem('userEmail'),*/
                 var Fullname = el.querySelector('input[name="fullname"]').value
                   , Username = el.querySelector('input[name="username"]').value
                   , Address = el.querySelector('textarea[name="officeAddress"]').value
@@ -1286,7 +1285,6 @@
                 
                 if (!Fullname && !error) error = "<div class='b bb pd10'>Full Name is Required</div><div class='pd10'>Your full name is required.</div>";
                 if (!Username && !error) error = "<div class='b bb pd10'>Display/Brand Name is Required</div><div class='pd10'>Your Display/Brand name would be displayed on your profile.</div>";
-                // if (!Email && !error) error = "<div class='b bb pd10'>Provide your email address</div><div class='pd10'>Your email address is needed to validate your account.</div>";
                 if (!Address && !error) error = "<div class='b bb pd10'>Your Address is Required</div><div class='pd10'>Your address is required for pickup.</div>";
                 if (Category == '0' && !error) error = "<div class='b bb pd10'>You must select your business category</div>";
                 if (!Phone && !error) error = "<div class='b bb pd10'>Provide your phone number</div><div class='pd10'>Your phone number is required for notifications.</div>";
@@ -1296,8 +1294,8 @@
                 if (error) {
                     var h = '<div class="pd10">'+error+'<div class="fw fx"><div class="fx60"></div><div class="pd516 b bg-ac c-o ac">OK</div></div></div>';
 
-                    $('#menuModal').show();
-                    $('#menuFlexer').html(h).zoom();
+                    $MM.show();
+                    $MF.html(h).zoom();
 
                     return;
                 }
@@ -1337,7 +1335,6 @@
                                 , cg: Category
                                 , ch: '0'
                             };
-                            // console.log(data);
                             toast('Registration Completed Successfully.');
                             localizeUserDetails(data, 'signup');
                         } else {
@@ -1353,17 +1350,13 @@
                         $('body').unspin();
                     }
                 });
-
                 break;
-
             case 'login-form':
                 var Email = this.querySelector("input[name='emailaddress']").value.toLowerCase();
                 var Pass = this.querySelector("input[name='password']").value;
                 if (Email && Pass) {
-                    //
                     el.dataset.disabled = 'true';
                     $('body').spin();
-
                     $.ajax({
                         url: MY_URL + "/fetch.php",
                         data: {
@@ -1388,23 +1381,21 @@
                         complete: function() { el.dataset.disabled = 'false'; $('body').unspin();}
                     });
                 }
-                
                 break;
             case 'profile-edit-form':
                 var Fullname = el.querySelector('input[name="fullname"]').value
                   , Username = el.querySelector('input[name="username"]').value
+                  , Phone = el.querySelector('input[name="phone"]').value
                   , Birthday = null
-                  , Phone = null
                   , Address = null
                   ;
                 if (!Fullname && !error) error = "<div class='b bb pd10'>Full Name is Required</div><div class='pd10'>Your full name is required.</div>";
+                if (!Phone && !error) error = "<div class='b bb pd10'>Provide your phone number</div><div class='pd10'>Your phone number is required for notifications.</div>";
                 
                 if (USERTYPE == 1) {
-                        Phone = el.querySelector('input[name="phone"]').value
-                      , Address = el.querySelector('textarea[name="officeAddress"]').value
+                      Address = el.querySelector('textarea[name="officeAddress"]').value
                       ;
                     if (!Username && !error) error = "<div class='b bb pd10'>Display/Brand Name is Required</div><div class='pd10'>Your Display/Brand name would be displayed on your profile.</div>";
-                    if (!Phone && !error) error = "<div class='b bb pd10'>Provide your phone number</div><div class='pd10'>Your phone number is required for notifications.</div>";
                     if (!Address && !error) error = "<div class='b bb pd10'>Your Address is Required</div><div class='pd10'>Your address is required for pickup.</div>";
                 } else {
                     Birthday = el.querySelector('input[name="birthday"]').value;
@@ -1414,8 +1405,8 @@
                 if (error) {
                     var h = '<div class="pd10">'+error+'<div class="fw fx"><div class="fx60"></div><div class="pd516 b bg-ac c-o ac">OK</div></div></div>';
 
-                    $('#menuModal').show();
-                    $('#menuFlexer').html(h).zoom();
+                    $MM.show();
+                    $MF.html(h).zoom();
 
                     return;
                 }
@@ -1505,8 +1496,8 @@
         <br>
         <br>
         Charges varies on each department and other terms and conditions apply.</div>`;
-        $('#menuModal').show();
-        $('#menuFlexer').html(h).zoom();
+        $MM.show();
+        $MF.html(h).zoom();
     }).on('click', '.add-more-photos', function() {
         if ($(this).siblings('.product-image').length == 4) return toast("You can only add up to four (4) photos");
         var h = `<div class="product-image main-wrapper fx40 h200 mg-l bg b4-r fx fx-ac fx-jc ov-h ba bg-im-ct psr" style="display:none;">
@@ -1546,8 +1537,8 @@
                 //
                 if (error) {
                     var h = '<div class="pd10">'+error+'<div class="fw fx"><div class="fx60"></div><div class="pd516 b bg-ac c-o ac">OK</div></div></div>';
-                    $('#menuModal').show();
-                    $('#menuFlexer').html(h).zoom();
+                    $MM.show();
+                    $MF.html(h).zoom();
                     return;
                 }
                 var fd = new FormData();
@@ -1619,8 +1610,8 @@
                 //
                 if (error) {
                     var h = '<div class="pd10">'+error+'<div class="fw fx"><div class="fx60"></div><div class="pd516 b bg-ac c-o ac">OK</div></div></div>';
-                    $('#menuModal').show();
-                    $('#menuFlexer').html(h).zoom();
+                    $MM.show();
+                    $MF.html(h).zoom();
                     return;
                 }
                 //
@@ -1708,8 +1699,8 @@
                 //
                 if (error) {
                     var h = '<div class="pd10">'+error+'<div class="fw fx"><div class="fx60"></div><div class="pd516 b bg-ac c-o ac">OK</div></div></div>';
-                    $('#menuModal').show();
-                    $('#menuFlexer').html(h).zoom();
+                    $MM.show();
+                    $MF.html(h).zoom();
                     return;
                 }
                 $('body').spin();
@@ -1766,8 +1757,8 @@
                 //
                 if (error) {
                     var h = '<div class="pd10">'+error+'<div class="fw fx"><div class="fx60"></div><div class="pd516 b bg-ac c-o ac">OK</div></div></div>';
-                    $('#menuModal').show();
-                    $('#menuFlexer').html(h).zoom();
+                    $MM.show();
+                    $MF.html(h).zoom();
                     return;
                 }
                 //
@@ -1822,8 +1813,8 @@
                 //
                 if (error) {
                     var h = '<div class="pd10">'+error+'<div class="fw fx"><div class="fx60"></div><div class="pd516 b bg-ac c-o ac">OK</div></div></div>';
-                    $('#menuModal').show();
-                    $('#menuFlexer').html(h).zoom();
+                    $MM.show();
+                    $MF.html(h).zoom();
                     return;
                 }
                 //
@@ -1884,8 +1875,8 @@
                     if (error) {
                         if (!localError) {
                             var h = '<div class="pd10">'+error+'<div class="fw fx"><div class="fx60"></div><div class="pd516 b bg-ac c-o ac">OK</div></div></div>';
-                            $('#menuModal').show();
-                            $('#menuFlexer').html(h).zoom();
+                            $MM.show();
+                            $MF.html(h).zoom();
                             fm.classList.add('Red');
                             localError = true;
                             //scroll to fm
@@ -1940,8 +1931,8 @@
                     if (error) {
                         if (!localError) {
                             var h = '<div class="pd10">'+error+'<div class="fw fx"><div class="fx60"></div><div class="pd516 b bg-ac c-o ac">OK</div></div></div>';
-                            $('#menuModal').show();
-                            $('#menuFlexer').html(h).zoom();
+                            $MM.show();
+                            $MF.html(h).zoom();
                             fm.classList.add('Red');
                             localError = true;
                             //scroll to fm
@@ -1990,8 +1981,8 @@
             $el.remove();
         });
     }).on('click', '#ticket-add', function(e) {
-        var h="<div class='fw main-wrapper ticket_category pd10 b4-r mg-b16 Orange white'>\
-                <div class='fw f10 mg-b psr b'>ADD ANOTHER TICKET<span class='wrapper-closer psa t-c t0 r0 w32'>x</span></div>\
+        var h="<div class='fw main-wrapper ticket_category pd10 b4-r mg-b16 bg'>\
+                <div class='fw f10 t-c mg-b b psr'>ADD ANOTHER TICKET<span class='wrapper-closer psa t-c t0 r0 w32'>x</span></div>\
                 <select name='category' class='fw pd20 bg mg-b16 b4-r ba'>\
                     <option value='0'>Select Ticket Type</option>\
                     <option value='1'>Regular</option>\
@@ -2070,7 +2061,10 @@
         e.stopPropagation();
     }).on('click', '.Modal', function() {
         $(this).hide();
-        $('#searchHeader').hide();
+        if (this.id == 'searchModal') {
+            $('#searchHeader').hide();
+            showAllOrderEntries();
+        }
     }).on('click', '.modalClose', function() {
         $('#menuModal').hide();
     }).on('touchmove', '.Modal', function(e) {
@@ -2085,7 +2079,7 @@
         App.changeViewTo('#itemsView');
         $('.items-container').hide();
 
-        var catg, shopId, shopName, shopAddress, $v;
+        var catg, shopId, shopName, shopAddress;
         if (this.id == 'myItemsLink') {//owner's item.
             catg = CATEGORY;
             shopId = UUID;
@@ -2100,15 +2094,7 @@
             $('#proceed-to-cart').show().attr('data-catg', catg);
         }
 
-        var img = new Image();
-        img.onload = function() {
-            $('#shop-banner').css('backgroundImage', 'url('+img.src+')');
-        }
-        img.src = MY_URL+'/img/users/'+shopId+'.jpg?id=1';
-        
-        $('#display-name').text(shopName);
-        $('#user-address').text(shopAddress);
-        $('.items-container[data-catg="'+catg+'"]').show();
+        updateStoreInformation(shopId, shopName, shopAddress, catg);
         
         $('body').spin();
         $.ajax({
@@ -2131,7 +2117,6 @@
             },
             complete: function() {$('body').unspin();}
         });
-        //
     }).on('click', '.item-remove', function(e) {
         console.log('Will delete: ' + this.dataset.itemId);//[[***]]
     }).on('click', '.item-order-spinner', function(e) {
@@ -2230,16 +2215,14 @@
             dataType: 'json',
             success: function(p) {
                 // console.log(p);
-                if (p.error) {
-                    //notify failure
-                    toast('Error');
+                if (p.state == '0') {
+                    toast('Order create error. Please submit your order again.');
                 } else {
                     Views = ['#home'];
                     App.changeViewTo('#successView');
                     Store.setItem('delivery_address', address);
                     Store.setItem('delivery_name', name);
                     Store.setItem('delivery_phone', phone);
-                    //keep track at localStorage to make polling easier
                 }
             },
             complete: function() {
@@ -2248,7 +2231,7 @@
         });
     }).on('click', '.services-link', function(e) {
         var catg = this.dataset.catg;
-        $('#services-found').empty();
+        $('#services-found').html($H+$H+$H);
         $('#current-service').text(this.querySelector('.service-link-name').dataset.name);
         App.changeViewTo('#servicesView');
         $('body').spin();
@@ -2266,19 +2249,19 @@
                 // console.log(p);
                 if (p.length == 0) return toast('No seller was found');
                 $('#services-found').html(buildServices(p));
-                //
             },
             complete: function() {$('body').unspin();}
         });
     }).on('click', '.more-services', function(e) {
         var g = this.dataset.catg;
+        $('#services-found').html($H+$H+$H);
+        $('#current-service').text(this.dataset.name);
+        App.changeViewTo('#servicesView');
+        //
         if (g == '2') fetchRestaurants('more', 20);
         else if (g == '3') fetchEvents('more', 20);
         else return;
         $('body').spin();
-        $('#services-found').empty();
-        $('#current-service').text(this.dataset.name);
-        App.changeViewTo('#servicesView');
     }).on('click', '.products-catg-entry', function(e) {
         toast('Coming soon...');
     }).on('click', '#orders-link', function(e) {
@@ -2308,7 +2291,7 @@
                     $('.order-status[data-order-id="'+i+'"]').attr('data-status', '1').text('Completed');
                     var order = MY_ORDERS.find(function(e) {return e.orderID == i;});
                     order.delivery_status = 1;
-                    updateWallet();
+                    checkWallet();
                     fetchProgress();
                     App.closeCurrentView();
                 } else toast('Please try again');
@@ -2392,15 +2375,28 @@
         App.changeViewTo('#ordersPendingView');
     }).on('click', '#completed-orders-btn', function(e) {
         fetchMyOrders($('#completedOrders'), 'completed');
-        App.changeViewTo('#ordersCompleteView');
+        App.changeViewTo('#ordersCompletedView');
     }).on('click', '.orders-filter', function(e) {
-        document.querySelector('#search-input').dataset.container = this.dataset.container;
         $('#searchModal').show();
         $('#searchHeader').show(300);
+        var ip = document.querySelector('#search-input');
+        ip.dataset.container = this.dataset.container;
+        ip.value = '';
+        ip.focus();
+    }).on('keyup', '#search-input', function(e) {
+        var query=this.value;
+        var ct = this.dataset.container;
+        var items = document.querySelectorAll(ct + ' .order-entry');
+        items.forEach(function(el){
+            var id = el.dataset.orderId;
+            if(id && id.startsWith(query)){
+                el.style.display = '';
+            } else el.style.display = 'none';
+        });
     }).on('click', '#store-review', function(e) {
-        App.changeViewTo('#reviewingView');
+        App.changeViewTo('#reviewView');
     }).on('click', '#post-a-review', function(e) {
-        var text = document.querySelector('#review-input').value;
+        var text = document.querySelector('#review-input').value.trim();
         if (!text) return;
         var el = this;
         if (el.dataset.disabled == 'true') return;
@@ -2450,10 +2446,98 @@
         });
     }).on('click', '#withdraw-cash', function(e) {
         toast('Connecting...');
-    }).on('click', '#total-notice', function(e) {
-        toast('Loading...');
-    }).on('click', '#buyer-messages', function(e) {
-        toast('Preparing...');
+    }).on('click', '#notifications-btn', function(e) {
+        this.dataset.total = '0';
+        App.changeViewTo('#inboxView');
+        fetchMails();
+    }).on('click', '.msg-entry', function(e) {
+        var key = this.dataset.key;
+        var msg = MY_MAILS.find(function(m) {return m.k = key;});
+        $('#repliesWrapper').empty();
+        App.changeViewTo('#messageView');
+        buildMessage(msg);
+        // fetchMessageReplies(key);
+    }).on('click', '.msg-reply', function(e) {
+        App.changeViewTo('#replyView');
+        $('#post-a-reply').attr('data-key', this.dataset.key);
+    }).on('click', '#post-a-reply', function(e) {//[[***]]
+        var reply = $('#reply-input').val().trim();
+        if (!reply) return;
+        // console.log(reply);
+        var el = this;
+        if (el.dataset.disabled == 'true') return;
+        el.dataset.disabled = 'true';
+        $('body').spin();
+        $.ajax({
+            url: MY_URL + "/send.php",
+            data: {
+                action: 'submitAReply',
+                reply: reply,
+                messageKey: el.dataset.key,
+                senderID: UUID
+            },
+            method: "POST",
+            timeout: 30000,
+            dataType: 'json',
+            success: function(p) {
+                if (p.state == '1') {
+                    // buildReply();
+                    App.closeCurrentView();
+                } else {
+                    toast(p.state);
+                }
+            },
+            complete: function() {
+                el.dataset.disabled = 'false';
+                $('body').unspin();
+            }
+        });
+    }).on('click', '.msg-close', function(e) {
+        buildConfirm('message-close-confirm', 'Confirm to Close this Message?', this.dataset.key);
+    }).on('click', '#message-close-confirm', function(e) {
+        var key = this.dataset.key;
+        $.ajax({
+            url: MY_URL + "/send.php",
+            data: {
+                action: 'messageClose',
+                ownerID: UUID,
+                key: key
+            },
+            dataType: 'json',
+            timeout: 30000,
+            method: "POST",
+            success: function(p) {
+                if (p == 1) {
+                    var msg = MY_MAILS.find(function(m) {return m.k = key;});
+                    msg.isopen = 0;
+                    buildMessage(msg);
+                    $('.mail-status[data-key="'+key+'"]').removeClass('Orange').addClass('bg-fd').text('closed');
+                }
+            }
+        });
+    }).on('click', '.msg-delete', function(e) {
+        buildConfirm('message-delete-confirm', 'Confirm to Delete this Message?', this.dataset.key);
+    }).on('click', '#message-delete-confirm', function(e) {
+        var key = this.dataset.key;
+        $.ajax({
+            url: MY_URL + "/send.php",
+            data: {
+                action: 'messageDelete',
+                ownerID: UUID,
+                key: key
+            },
+            dataType: 'json',
+            timeout: 30000,
+            method: "POST",
+            success: function(p) {
+                if (p == '1') {
+                    $('.msg-entry[data-key="'+key+'"]').remove();
+                    var msg = MY_MAILS.find(function(m) {return m.k = key;});
+                    msg.isdeleted = 1;
+                    App.closeCurrentView();
+                }
+            }
+        });
     })
     ;
 
@@ -2506,7 +2590,6 @@
     var nav = { x: 0, y: 0, z: 0 }
     mNav.addEventListener('touchstart', function(e) {
         e.stopPropagation();
-        // e = e.originalEvent || e;
         mDrawer.style.transition = '';
         var touch = e.touches[0];
         nav.x = touch.pageX, nav.y = touch.pageY, nav.z = 0;
@@ -2514,7 +2597,6 @@
         this.addEventListener('touchend', navEnd);
     });
     function navMove(e) {
-         // e = e.originalEvent || e, 
         var touch = e.touches[0];
         var distance = touch.pageX - nav.x, p = Math.min(distance * 0.8, 1);
         if (Math.abs(touch.pageY - nav.y) > Math.abs(distance)) return this.removeEventListener('touchmove', navMove); // user scrolling vertically
@@ -2525,7 +2607,6 @@
     function navEnd(e) {
         this.removeEventListener('touchmove', navMove);
         this.removeEventListener('touchend', navEnd);
-        // if (e.target.id == 'side-nav-modal') e.preventDefault();
         if (e.target == mModal) e.preventDefault();
         // console.log(nav.z);
         if (nav.z > -150 && nav.z !== 0) {//not down to -150
@@ -2537,6 +2618,48 @@
             mModal.style.display = 'none';
         }
         mDrawer.style.transition = 'all 200ms ease-in';
+    }
+
+
+    var S = {a:0,z:0}
+    document.getElementById('swipe-container').addEventListener('touchstart', function(e) {
+        e.stopPropagation();
+        this.style.transition = '';
+        var touch = e.touches[0];
+        S.a = touch.pageX;
+        this.addEventListener('touchmove', swipeMove);
+        this.addEventListener('touchend', swipeEnd);
+    });
+    function swipeMove(e) {
+        var touch = e.touches[0];
+        var distance = touch.pageX - S.a
+        var p = Math.min(distance * 0.8 + S.z, 0);
+        p = Math.max(p, -VIEWPORTWIDTH * 2);
+        if (e.cancelable) e.preventDefault();
+        this.style.transform = 'translate3d(' + p + 'px, 0, 0)';
+        this.dataset.left = p;
+    }
+    function swipeEnd(e) {
+        this.removeEventListener('touchmove', swipeMove);
+        this.removeEventListener('touchend', swipeEnd);
+        S.z = parseInt(this.dataset.left);
+        if (S.z < -VIEWPORTWIDTH * 0.4 - VIEWPORTWIDTH) {
+            var p = -VIEWPORTWIDTH * 2;
+            this.style.transform = 'translate3d(' + p + 'px, 0, 0)';
+            this.dataset.index = '2';
+            S.z = p;
+        } else if (S.z < -VIEWPORTWIDTH * 0.4) {
+            var p = -VIEWPORTWIDTH;
+            this.style.transform = 'translate3d(' + p + 'px, 0, 0)';
+            this.dataset.index = '1';
+            S.z = p;
+        } else {
+            var p = 0;
+            this.style.transform = 'translate3d(' + p + 'px, 0, 0)';
+            this.dataset.index = '0';
+            S.z = p;
+        }
+        this.style.transition = 'transform 150ms ease-out';
     }
 
  
@@ -2558,7 +2681,25 @@
             method: "GET",
             success: function(p) {
                 // console.log(p);
-                if (p.length == 0) return;
+                if (p.length == 0) {
+                    if (source == 'timeline') {
+                        var h = "<div class='w85p-c i-b ov-h mg-r ba psr bs-r more-services' data-catg='3' data-name='Events'>\
+                                <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'>\
+                                    <img src='res/img/icon/party.jpg' width='110%'>\
+                                </div>\
+                                <div class='fw psa white info-banner h60 lh-i b0 l0 pd10'>\
+                                    <div class='fw b f14'>No suggested events</div>\
+                                    <div class='fw ovx-h f14'>Browse other events...?</div>\
+                                </div>\
+                            </div>\
+                            <div class='w85p-c i-b ov-h mg-r ba psr bs-r'>\
+                                <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'></div>\
+                                <div class='fw psa bg-ac h60 b0 l0 pd10'></div>\
+                            </div>";
+                        $('#carousel-buy-ticket').html(h);
+                    }
+                    return;
+                }
                 if (source == 'timeline') {
                     $('#carousel-buy-ticket').html(buildEvents(p));
                 }else if (source == 'more') $('#services-found').html(buildMoreEvents(p));
@@ -2579,7 +2720,25 @@
             method: "GET",
             success: function(p) {
                 // console.log(p);
-                if (p.length == 0) return;
+                if (p.length == 0) {
+                    if (source == 'timeline') {
+                        var h = "<div class='w85p-c i-b ov-h mg-r ba psr bs-r more-services' data-catg='2' data-name='Restaurants'>\
+                                <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'>\
+                                    <img src='res/img/icon/food.jpg' width='110%'>\
+                                </div>\
+                                <div class='fw psa white info-banner h60 lh-i b0 l0 pd10'>\
+                                    <div class='fw b f14'>No suggested restaurants</div>\
+                                    <div class='fw ovx-h f14'>Check our top rated sellers...?</div>\
+                                </div>\
+                            </div>\
+                            <div class='w85p-c i-b ov-h mg-r ba psr bs-r'>\
+                                <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'></div>\
+                                <div class='fw psa bg-ac h60 b0 l0 pd10'></div>\
+                            </div>";
+                        $('#carousel-buy-food').html(h);
+                    }
+                    return;
+                }
                 if (source == 'timeline') {
                     $('#carousel-buy-food').html(buildRestaurants(p));
                 }else if (source == 'more') $('#services-found').html(buildMoreRestaurants(p));
@@ -2612,7 +2771,7 @@
                 </div>\
                 <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
                     <div class='fw b f14'>Want something different?</div>\
-                    <div class='fw ovx-h ovy-a f10'>Browse more events...</div>\
+                    <div class='fw f10'>Browse more events...</div>\
                 </div>\
             </div>";
         return h;
@@ -2707,7 +2866,7 @@
         });
         return h;
     }
-    function updateWallet() {
+    function checkWallet() {
         $.ajax({
             url: MY_URL + "/fetch.php",
             data: {
@@ -2737,6 +2896,66 @@
                 $('#pending-orders').text(comma(p.pending));
             }
         });
+    }
+    function checkMail() {
+        $.ajax({
+            url: MY_URL + "/fetch.php",
+            data: {
+                action: 'checkMail',
+                ownerID: UUID
+            },
+            timeout: 30000,
+            dataType: 'json',
+            method: "GET",
+            success: function(p) {
+                $('#notifications-btn').attr('data-total', p.total);
+            }
+        });
+    }
+    function fetchMails() {
+        $.ajax({
+            url: MY_URL + "/fetch.php",
+            data: {
+                action: 'fetchMails',
+                ownerID: UUID
+            },
+            timeout: 30000,
+            dataType: 'json',
+            method: "GET",
+            success: function(p) {
+                if (p.length > 0) {
+                    MY_MAILS = p;
+                    $('#messagesWrapper').html(buildMails(p));
+                }
+            }
+        });
+    }
+    function buildMails(p) {
+        var h = '';
+        p.forEach(function(c) {//admins will close it. To reopen this ticket, reply this message
+            h += "<div class='msg-entry fw pd10 psr b4-r mg-b16 ba sh-a ov-h' data-key='"+c.k+"'>\
+                <div class='mail-status psa t0 r0 white "+(c.isopen == 1 ? 'Orange' : 'bg-fd')+"' data-key='"+c.k+"' style='padding:2px 5px;'>"+(c.isopen == 1 ? 'open' : 'closed')+"</div>\
+                <div class='fw b f16'>"+c.title+"</div>\
+                <div class='fw ov-h pd10z b5 tx-el c-g' style='white-space:nowrap;'>"+c.message+"</div>\
+                <div class='f10 c-g'>"+checkTime(c.time_*1000)+"</div>\
+            </div>";
+        });
+        return h;
+    }
+    function buildMessage(c) {
+        var h = "<div class='fw pd10 psr b4-r ba sh-a ov-h'>\
+                <div class='psa t0 r0 white "+(c.isopen == 1 ? 'Orange' : 'bg-fd')+"' style='padding:2px 5px;'>"+(c.isopen == 1 ? 'open' : 'closed')+"</div>\
+                <div class='fw b f16'>"+c.title+"</div>\
+                <div class='f10 c-g'>"+checkTime(c.time_*1000)+"</div>\
+                <div class='fw pd10z'>"+c.message+"</div>\
+                <div class='fw fx c-g b5'>\
+                    <div class='msg-reply mg-r' data-key='"+c.k+"'>Reply</div>\
+                    <div class='"+(c.isopen == '1' ? 'msg-close' : '')+" mg-r' data-key='"+c.k+"'>"+(c.isopen == '1' ? 'Close' : "<span class='bg-fd'>Closed</span>")+"</div>\
+                    <div class='msg-delete' data-key='"+c.k+"'>Delete</div>\
+                </div>\
+                <div class='fw pd10 mg-t ba b4-r bg-ac i c-g'>This message will be closed by the admin if you do not respond within 3 days. You may close it if you are satisfied. You can re-open the message anytime by sending a reply. If you delete this message, you would not see it in your inbox again.</div>\
+            </div>";
+        $('#messageWrapper').html(h);
     }
     function buildItems(p, catg, local) {
         var h = '';
@@ -3053,7 +3272,7 @@
         orders.forEach(function(c) {
             if (type == 'pending' && c.delivery_status != '0') return;
             if (type == 'completed' && c.delivery_status != '1') return;
-            h += "<div class='fw ba b4-r ov-h bg mg-b16 sh-a'>\
+            h += "<div class='order-entry fw ba b4-r ov-h bg mg-b16 sh-a' data-order-id='"+c.orderID+"'>\
                 <div class='fw fx fx-fs bb'>\
                     <div class='fx60 fx-js pd10'>\
                         <div class='b'>#"+c.orderID+"</div>\
@@ -3171,12 +3390,39 @@
             , ADDRESS = p.ad
             , CATEGORY = p.cg
             ;
-            if (action == 'signup' || p.ch == 0) showChannelScreen();
-            else {
-                preparePage();
+            if (action == 'signup' || p.ch == 0) showChannelScreen();//sign in? if ch == 0, means no activities yet
+            else {//has passed ch check, possibly has some activities
+                preparePage(true);//existing
                 loadUserPicture();
             }
         });
+    }
+    function updateStoreInformation(shopId, shopName, shopAddress, catg) {
+        var img = new Image();
+        img.onload = function() {
+            $('#shop-banner').css('backgroundImage', 'url('+img.src+')');
+        }
+        img.src = MY_URL+'/img/users/'+shopId+'.jpg?id=1';
+        
+        $('#display-name').text(shopName);
+        $('#user-address').text(shopAddress);
+        $('.items-container[data-catg="'+catg+'"]').show();
+    }
+    function showAllOrderEntries() {
+        var ct = document.querySelector('#search-input').dataset.container;
+        var items = document.querySelectorAll(ct + ' .order-entry');
+        items.forEach(function(el){
+            el.style.display = '';
+        });
+    }
+    function buildConfirm(id, message, key) {
+        h="<div class='pd16 st-p t-c b'>"+message+"</div>\
+            <div class='fx bt modalClose'>\
+                <div id='"+id+"' class='pd16z t-c fx50 b-rg b ac' data-key='"+key+"'>YES</div>\
+                <div class='pd16z t-c fx50 b ac'>CANCEL</div>\
+            </div>";
+        $MM.show();
+        $MF.html(h).zoom();
     }
     function checkTime(val){
         if(!val)return'';
