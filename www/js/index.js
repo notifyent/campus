@@ -1,27 +1,21 @@
 /*
- * on_item contains all items listed for sale.
- * some would expire and some won't
- * each food menu is an item with a long life
- * each ticket entry is an item with an expiry life
- * each gas size is an item with a long life
- * each laundry item is an item with a long life
- * graphics
- * makeup
- * 
  */
  //\
  //||
  /*
  * TODO
- * notifications (post-a-reply) fetchMessageReplies buildReply
- * multiple sizes
- * withdraw from wallet
- * gallery for graphics and beauty
+ * password retrieval
+ * catalog infinite scroll
+ *
+ * SERVER
  * increase upload limit on server
- * buyers interface - products**
+ * check for existing review on server and update if found
  *
  *
- * 
+ * UPDATE
+ * items edit
+ * withdrawals history
+ * gallery items delete and add-more
  *
  */
  $(document).ready(function() {
@@ -31,13 +25,13 @@
 
     var VERSION = '1.0.0'
     //
-    , MY_URL = "http://localhost/api/v1"
+    // , MY_URL = "http://localhost/api/v1"
     // 
     // , MY_URL = "http://192.168.43.75/api/v1"
     //
     // , MY_URL = "http://172.20.10.4/api/v1"
     //
-    // , MY_URL = "https://www.oncampus.ng/api/v1"
+    , MY_URL = "https://www.oncampus.ng/api/v1"
     //
     , BASE_URL = "https://www.oncampus.ng"
     //
@@ -69,6 +63,9 @@
     , $MM = $('#menuModal')
     , $MF = $('#menuFlexer')
 
+    , $SM = $('#searchModal')
+    , $SH = $('#searchHeader')
+
 
 
     /**/
@@ -85,6 +82,9 @@
     , BIRTHDAY = null
     , ADDRESS = null
 
+    , MY_BALANCE = 0
+    , MIN_WITHDRAWAL = 0
+
 
     , mDrawer = document.querySelector('#side-nav-menu-view')
     , mModal = document.querySelector('#side-nav-modal')
@@ -93,9 +93,12 @@
 
 
     , CURRENT_SHOP = null
+    , CURRENT_CATG = null
     , CURRENT_ORDER = {}
+    , ISTICKET = null
     , ORDER_TOTAL = 0
     , CURRENT_ORDER_ID = null
+    // , CURRENT_SELLER_ID = null
     , PAYLOAD = null
     , TRN_REF = null
 
@@ -111,15 +114,187 @@
 
     , ACTIVESELECT = null
     , COLORPICKER = null
+    , COLORS = [
+        {dex: '137', hex: '#FFFFFF', name: 'White'},
+        {dex: '8', hex: '#000000', name: 'Black'},
+        {dex: '114', hex: '#FF0000', name: 'Red'},
+        {dex: '100', hex: '#FFA500', name: 'Orange'},
+        {dex: '139', hex: '#FFFF00', name: 'Yellow'},
+        {dex: '52', hex: '#008000', name: 'Green'},
+        {dex: '10', hex: '#0000FF', name: 'Blue'},
+        {dex: '57', hex: '#4B0082', name: 'Indigo'},
+        {dex: '135', hex: '#EE82EE', name: 'Violet'},
+        {dex: '49', hex: '#FFD700', name: 'Gold'},
+        {dex: '51', hex: '#808080', name: 'Gray'},
+        {dex: '110', hex: '#FFC0CB', name: 'Pink'},
+        {dex: '113', hex: '#800080', name: 'Purple'},
+        {dex: '96', hex: '#000080', name: 'Navy'},
+        {dex: '123', hex: '#C0C0C0', name: 'Silver'},
+        {dex: '1', hex: '#F0F8FF', name: 'Alice Blue'},
+        {dex: '2', hex: '#FAEBD7', name: 'Antique White'},
+        {dex: '3', hex: '#00FFFF', name: 'Aqua'},
+        {dex: '4', hex: '#7FFFD4', name: 'Aquamarine'},
+        {dex: '5', hex: '#F0FFFF', name: 'Azure'},
+        {dex: '6', hex: '#F5F5DC', name: 'Beige'},
+        {dex: '7', hex: '#FFE4C4', name: 'Bisque'},
+        {dex: '9', hex: '#FFEBCD', name: 'Blanched Almond'},
+        {dex: '11', hex: '#8A2BE2', name: 'Blue Violet'},
+        {dex: '12', hex: '#A52A2A', name: 'Brown'},
+        {dex: '13', hex: '#DEB887', name: 'Burly Wood'},
+        {dex: '14', hex: '#5F9EA0', name: 'Cadet Blue'},
+        {dex: '15', hex: '#7FFF00', name: 'Chartreuse'},
+        {dex: '16', hex: '#D2691E', name: 'Chocolate'},
+        {dex: '17', hex: '#FF7F50', name: 'Coral'},
+        {dex: '18', hex: '#6495ED', name: 'Cornflower Blue'},
+        {dex: '19', hex: '#FFF8DC', name: 'Cornsilk'},
+        {dex: '20', hex: '#DC143C', name: 'Crimson'},
+        {dex: '21', hex: '#00FFFF', name: 'Cyan'},
+        {dex: '22', hex: '#00008B', name: 'Dark Blue'},
+        {dex: '23', hex: '#008B8B', name: 'Dark Cyan'},
+        {dex: '24', hex: '#B8860B', name: 'Dark Goldenrod'},
+        {dex: '25', hex: '#A9A9A9', name: 'Dark Gray'},
+        {dex: '26', hex: '#006400', name: 'Dark Green'},
+        {dex: '27', hex: '#BDB76B', name: 'Dark Khaki'},
+        {dex: '28', hex: '#8B008B', name: 'Dark Magenta'},
+        {dex: '29', hex: '#556B2F', name: 'Dark Olive Green'},
+        {dex: '30', hex: '#FF8C00', name: 'Dark Orange'},
+        {dex: '31', hex: '#9932CC', name: 'Dark Orchid'},
+        {dex: '32', hex: '#8B0000', name: 'Dark Red'},
+        {dex: '33', hex: '#E9967A', name: 'Dark Salmon'},
+        {dex: '34', hex: '#8FBC8F', name: 'Dark Sea Green'},
+        {dex: '35', hex: '#483D8B', name: 'Dark Slate Blue'},
+        {dex: '36', hex: '#2F4F4F', name: 'Dark Slate Gray'},
+        {dex: '37', hex: '#00CED1', name: 'Dark Turquoise'},
+        {dex: '38', hex: '#9400D3', name: 'Dark Violet'},
+        {dex: '39', hex: '#FF1493', name: 'Deep Pink'},
+        {dex: '40', hex: '#00BFFF', name: 'Deep Sky Blue'},
+        {dex: '41', hex: '#696969', name: 'Dim Gray'},
+        {dex: '42', hex: '#1E90FF', name: 'Dodger Blue'},
+        {dex: '43', hex: '#B22222', name: 'Fire Brick'},
+        {dex: '44', hex: '#FFFAF0', name: 'Floral White'},
+        {dex: '45', hex: '#228B22', name: 'Forest Green'},
+        {dex: '46', hex: '#FF00FF', name: 'Fuchsia'},
+        {dex: '47', hex: '#DCDCDC', name: 'Gainsboro'},
+        {dex: '48', hex: '#F8F8FF', name: 'Ghost White'},
+        {dex: '50', hex: '#DAA520', name: 'Goldenrod'},
+        {dex: '53', hex: '#ADFF2F', name: 'Green Yellow'},
+        {dex: '54', hex: '#F0FFF0', name: 'Honey Dew'},
+        {dex: '55', hex: '#FF69B4', name: 'Hot Pink'},
+        {dex: '56', hex: '#CD5C5C', name: 'Indian Red'},
+        {dex: '58', hex: '#FFFFF0', name: 'Ivory'},
+        {dex: '59', hex: '#F0E68C', name: 'Khaki'},
+        {dex: '60', hex: '#E6E6FA', name: 'Lavender'},
+        {dex: '61', hex: '#FFF0F5', name: 'Lavender Blush'},
+        {dex: '62', hex: '#7CFC00', name: 'Lawn Green'},
+        {dex: '63', hex: '#FFFACD', name: 'Lemon Chiffon'},
+        {dex: '64', hex: '#ADD8E6', name: 'Light Blue'},
+        {dex: '65', hex: '#F08080', name: 'Light Coral'},
+        {dex: '66', hex: '#E0FFFF', name: 'Light Cyan'},
+        {dex: '67', hex: '#FAFAD2', name: 'Light Goldenrod Yellow'},
+        {dex: '68', hex: '#90EE90', name: 'Light Green'},
+        {dex: '69', hex: '#D3D3D3', name: 'Light Grey'},
+        {dex: '70', hex: '#FFB6C1', name: 'Light Pink'},
+        {dex: '71', hex: '#FFA07A', name: 'Light Salmon'},
+        {dex: '72', hex: '#20B2AA', name: 'Light Sea Green'},
+        {dex: '73', hex: '#87CEFA', name: 'Light Sky Blue'},
+        {dex: '74', hex: '#778899', name: 'Light Slate Gray'},
+        {dex: '75', hex: '#B0C4DE', name: 'Light Steel Blue'},
+        {dex: '76', hex: '#FFFFE0', name: 'Light Yellow'},
+        {dex: '77', hex: '#00FF00', name: 'Lime'},
+        {dex: '78', hex: '#32CD32', name: 'LimeGreen'},
+        {dex: '79', hex: '#FAF0E6', name: 'Linen'},
+        {dex: '80', hex: '#FF00FF', name: 'Magenta'},
+        {dex: '81', hex: '#800000', name: 'Maroon'},
+        {dex: '82', hex: '#66CDAA', name: 'Medium Aquamarine'},
+        {dex: '83', hex: '#0000CD', name: 'Medium Blue'},
+        {dex: '84', hex: '#BA55D3', name: 'Medium Orchid'},
+        {dex: '85', hex: '#9370DB', name: 'Medium Purple'},
+        {dex: '86', hex: '#3CB371', name: 'Medium Sea Green'},
+        {dex: '87', hex: '#7B68EE', name: 'Medium Slate Blue'},
+        {dex: '88', hex: '#00FA9A', name: 'Medium Spring Green'},
+        {dex: '89', hex: '#48D1CC', name: 'Medium Turquoise'},
+        {dex: '90', hex: '#C71585', name: 'Medium Violet Red'},
+        {dex: '91', hex: '#191970', name: 'Midnight Blue'},
+        {dex: '92', hex: '#F5FFFA', name: 'Mint Cream'},
+        {dex: '93', hex: '#FFE4E1', name: 'Misty Rose'},
+        {dex: '94', hex: '#FFE4B5', name: 'Moccasin'},
+        {dex: '95', hex: '#FFDEAD', name: 'Navajo White'},
+        {dex: '97', hex: '#FDF5E6', name: 'Old Lace'},
+        {dex: '98', hex: '#808000', name: 'Olive'},
+        {dex: '99', hex: '#6B8E23', name: 'Olive Drab'},
+        {dex: '101', hex: '#FF4500', name: 'Orange Red'},
+        {dex: '102', hex: '#DA70D6', name: 'Orchid'},
+        {dex: '103', hex: '#EEE8AA', name: 'Pale Goldenrod'},
+        {dex: '104', hex: '#98FB98', name: 'Pale Green'},
+        {dex: '105', hex: '#AFEEEE', name: 'Pale Turquoise'},
+        {dex: '106', hex: '#DB7093', name: 'Pale Violet Red'},
+        {dex: '107', hex: '#FFEFD5', name: 'Papaya Whip'},
+        {dex: '108', hex: '#FFDAB9', name: 'Peach Puff'},
+        {dex: '109', hex: '#CD853F', name: 'Peru'},
+        {dex: '111', hex: '#DDA0DD', name: 'Plum'},
+        {dex: '112', hex: '#B0E0E6', name: 'Powder Blue'},
+        {dex: '115', hex: '#BC8F8F', name: 'Rosy Brown'},
+        {dex: '116', hex: '#4169E1', name: 'Royal Blue'},
+        {dex: '117', hex: '#8B4513', name: 'Saddle Brown'},
+        {dex: '118', hex: '#FA8072', name: 'Salmon'},
+        {dex: '119', hex: '#F4A460', name: 'Sandy Brown'},
+        {dex: '120', hex: '#2E8B57', name: 'Sea Green'},
+        {dex: '121', hex: '#FFF5EE', name: 'Seashell'},
+        {dex: '122', hex: '#A0522D', name: 'Sienna'},
+        {dex: '124', hex: '#87CEEB', name: 'Sky Blue'},
+        {dex: '125', hex: '#6A5ACD', name: 'Slate Blue'},
+        {dex: '126', hex: '#708090', name: 'Slate Gray'},
+        {dex: '127', hex: '#FFFAFA', name: 'Snow'},
+        {dex: '128', hex: '#00FF7F', name: 'Spring Green'},
+        {dex: '129', hex: '#4682B4', name: 'Steel Blue'},
+        {dex: '130', hex: '#D2B48C', name: 'Tan'},
+        {dex: '131', hex: '#008080', name: 'Teal'},
+        {dex: '132', hex: '#D8BFD8', name: 'Thistle'},
+        {dex: '133', hex: '#FF6347', name: 'Tomato'},
+        {dex: '134', hex: '#40E0D0', name: 'Turquoise'},
+        {dex: '136', hex: '#F5DEB3', name: 'Wheat'},
+        {dex: '138', hex: '#F5F5F5', name: 'White Smoke'},
+        {dex: '140', hex: '#9ACD32', name: 'Yellow Green'}
+    ]
+
+    , SIZEPICKER = null
+    , SIZES = [
+        {dex: '1', val: 'Small'},
+        {dex: '2', val: 'Medium'},
+        {dex: '3', val: 'Big'},
+        {dex: '4', val: 'Large'},
+        {dex: '5', val: 'XL'},
+        {dex: '6', val: 'XXL'},
+        {dex: '7', val: 'XXXL'},
+        {dex: '8', val: '30'},
+        {dex: '9', val: '31'},
+        {dex: '10', val: '32'},
+        {dex: '11', val: '33'},
+        {dex: '12', val: '34'},
+        {dex: '13', val: '35'},
+        {dex: '14', val: '36'},
+        {dex: '15', val: '37'},
+        {dex: '16', val: '38'},
+        {dex: '17', val: '39'},
+        {dex: '18', val: '40'},
+        {dex: '19', val: '41'},
+        {dex: '20', val: '42'},
+        {dex: '21', val: '43'},
+        {dex: '22', val: '44'},
+        {dex: '23', val: '45'},
+        {dex: '24', val: '46'},
+        {dex: '25', val: '47'},
+        {dex: '26', val: '48'},
+        {dex: '27', val: '49'},
+        {dex: '28', val: '50'}
+    ]
 
     , ITEMS_DATA = []
+    , PRODUCTS = []
 
     , MY_MAILS = []
 
 
-
-
-    , BROWSEROPTIONS = 'location=yes,closebuttoncolor=#FE5215,footer=no,hardwareback=no,hidenavigationbuttons=yes,toolbarcolor=#FFFFFF,shouldPauseOnSuspend=yes'
     ;
 
     /*SQL.transaction(function(i){
@@ -176,9 +351,9 @@
     function onBackButton() {
 
         if ($('#menuModal').is(':visible')) return $('#menuModal').hide();
-        if ($('#searchModal').is(':visible')) {
-            $('#searchHeader').hide();
-            $('#searchModal').hide();
+        if ($SM.is(':visible')) {
+            $SH.hide();
+            $SM.hide();
             showAllOrderEntries();
             return;
         }
@@ -218,76 +393,16 @@
             return this;
         },
         unspin: function() { this.find('.loaderHolder').remove(); return this; },
-        hasID: function(id) { return this.attr('id') == id; },
-        disable: function() { this.attr('data-disabled', 'true'); return this; },
-        enable: function() { this.attr('data-disabled', 'false'); return this; },
-        isDisabled: function() { return this.attr('data-disabled') == 'true'; },
-        isLoading: function() { return this.find('.loaderN').length == 1; },
-        blink: function() {
-            var el = this;
-            el.addClass('blink');
-            setTimeout(function(){ el.removeClass('blink'); },2000);
-            return el;
-        },
-        flash: function() {
-            var el = this;
-            el.addClass('flash');
-            setTimeout(function(){ el.removeClass('flash'); },400);
-            return el;
-        },
-        scrollToPosition: function(value, callback) {
+        /*scrollToPosition: function(value, callback) {
             var h = this.prop('scrollHeight');
             this.animate({ scrollTop: h - value }, 500, callback);
             return this;
-        },
+        },*/
         zoom: function(level) {
             var el = this;
             el.addClass('zoom');
             setTimeout(function(){ el.removeClass('zoom'); }, 300);
             return el;
-        },
-        countdown: function(callback) {
-            var el = this;
-            var v = Number(el.text());
-            var tokenTime = setInterval(function() {
-                --v;
-                el.text(v);
-                if (v == 0) {
-                    callback();
-                    clearInterval(tokenTime);
-                }
-            }, 1000);
-            return this;
-        },
-        showPad: function(sendId) {
-            this.html(`
-            <div class="fw fx b f20 h40 ba b4-r mg-b"></div>
-          <div class="input-6 i-b b4-r psr b ac token-code ba" data-code="1">
-            <div class="fw fh fx f20 psa">1</div>
-          </div><div class="input-6 i-b b4-r psr b ac token-code ba" data-code="2">
-            <div class="fw fh fx f20 psa">2</div>
-          </div><div class="input-6 i-b b4-r psr b ac token-code ba" data-code="3">
-            <div class="fw fh fx f20 psa">3</div>
-          </div><div class="input-6 i-b b4-r psr b ac token-code ba" data-code="4">
-            <div class="fw fh fx f20 psa">4</div>
-          </div><div class="input-6 i-b b4-r psr b ac token-code ba" data-code="5">
-            <div class="fw fh fx f20 psa">5</div>
-          </div><div class="input-6 i-b b4-r psr b ac token-code ba" data-code="6">
-            <div class="fw fh fx f20 psa">6</div>
-          </div><div class="input-6 i-b b4-r psr b ac token-code ba" data-code="7">
-            <div class="fw fh fx f20 psa">7</div>
-          </div><div class="input-6 i-b b4-r psr b ac token-code ba" data-code="8">
-            <div class="fw fh fx f20 psa">8</div>
-          </div><div class="input-6 i-b b4-r psr b ac token-code ba" data-code="9">
-            <div class="fw fh fx f20 psa">9</div>
-          </div><div class="input-6 i-b b4-r psr b ac token-code Red" data-code="x">
-            <div class="fw fh fx f20 psa icon-times"></div>
-          </div><div class="input-6 i-b b4-r psr b ac token-code ba" data-code="0">
-            <div class="fw fh fx f20 psa">0</div>
-          </div><div class="input-6 i-b b4-r psr b ac Theme code-submit" id="${sendId}">
-            <div class="fw fh fx f20 psa icon-mark"></div>
-          </div>`);
-            return this;
         }
     });
 
@@ -359,7 +474,7 @@
             var tx = CATEGORIES[CATEGORY];
             $('#my-service-name').text(tx);
             if (existing) {
-                checkWallet();
+                checkWallet('landing');
                 fetchProgress();
             }
         }
@@ -461,574 +576,26 @@
         }
     }).on('click', '.color-picker', function() {
         COLORPICKER = this;
-        var h=`
-        <div id="color-palette" class="pd010 b5 st-p">
-            <div id="select-color" class="fx fx-ac pd16 bb" data-index="0">
-                <div class="fx60">Select Color</div>
-                <div id="color-palette-submit" class="modalClose c-o b">Done</div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="137" data-hex="#FFFFFF">
-                <div class="fx60">White</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFFFFF;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="8" data-hex="#000000">
-                <div class="fx60">Black</div>
-                <div class="box32 i-b ba b-rd" style="background:#000000;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="114" data-hex="#FF0000">
-                <div class="fx60">Red</div>
-                <div class="box32 i-b ba b-rd" style="background:#FF0000;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="100" data-hex="#FFA500">
-                <div class="fx60">Orange</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFA500;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="139" data-hex="#FFFF00">
-                <div class="fx60">Yellow</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFFF00;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="52" data-hex="#008000">
-                <div class="fx60">Green</div>
-                <div class="box32 i-b ba b-rd" style="background:#008000;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="10" data-hex="#0000FF">
-                <div class="fx60">Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#0000FF;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="57" data-hex="#4B0082">
-                <div class="fx60">Indigo</div>
-                <div class="box32 i-b ba b-rd" style="background:#4B0082;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="135" data-hex="#EE82EE">
-                <div class="fx60">Violet</div>
-                <div class="box32 i-b ba b-rd" style="background:#EE82EE;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="49" data-hex="#FFD700">
-                <div class="fx60">Gold</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFD700;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="51" data-hex="#808080">
-                <div class="fx60">Gray</div>
-                <div class="box32 i-b ba b-rd" style="background:#808080;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="110" data-hex="#FFC0CB">
-                <div class="fx60">Pink</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFC0CB;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="113" data-hex="#800080">
-                <div class="fx60">Purple</div>
-                <div class="box32 i-b ba b-rd" style="background:#800080;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="96" data-hex="#000080">
-                <div class="fx60">Navy</div>
-                <div class="box32 i-b ba b-rd" style="background:#000080;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="123" data-hex="#C0C0C0">
-                <div class="fx60">Silver</div>
-                <div class="box32 i-b ba b-rd" style="background:#C0C0C0;" ></div>
-            </div>
-
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="1" data-hex="#F0F8FF">
-                <div class="fx60">Alice Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#F0F8FF;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="2" data-hex="#FAEBD7">
-                <div class="fx60">Antique White</div>
-                <div class="box32 i-b ba b-rd" style="background:#FAEBD7;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="3" data-hex="#00FFFF">
-                <div class="fx60">Aqua</div>
-                <div class="box32 i-b ba b-rd" style="background:#00FFFF;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="4" data-hex="#7FFFD4">
-                <div class="fx60">Aquamarine</div>
-                <div class="box32 i-b ba b-rd" style="background:#7FFFD4;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="5" data-hex="#F0FFFF">
-                <div class="fx60">Azure</div>
-                <div class="box32 i-b ba b-rd" style="background:#F0FFFF;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="6" data-hex="#F5F5DC">
-                <div class="fx60">Beige</div>
-                <div class="box32 i-b ba b-rd" style="background:#F5F5DC;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="7" data-hex="#FFE4C4">
-                <div class="fx60">Bisque</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFE4C4;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="9" data-hex="#FFEBCD">
-                <div class="fx60">Blanched Almond</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFEBCD;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="11" data-hex="#8A2BE2">
-                <div class="fx60">Blue Violet</div>
-                <div class="box32 i-b ba b-rd" style="background:#8A2BE2;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="12" data-hex="#A52A2A">
-                <div class="fx60">Brown</div>
-                <div class="box32 i-b ba b-rd" style="background:#A52A2A;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="13" data-hex="#DEB887">
-                <div class="fx60">Burly Wood</div>
-                <div class="box32 i-b ba b-rd" style="background:#DEB887;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="14" data-hex="#5F9EA0">
-                <div class="fx60">Cadet Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#5F9EA0;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="15" data-hex="#7FFF00">
-                <div class="fx60">Chartreuse</div>
-                <div class="box32 i-b ba b-rd" style="background:#7FFF00;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="16" data-hex="#D2691E">
-                <div class="fx60">Chocolate</div>
-                <div class="box32 i-b ba b-rd" style="background:#D2691E;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="17" data-hex="#FF7F50">
-                <div class="fx60">Coral</div>
-                <div class="box32 i-b ba b-rd" style="background:#FF7F50;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="18" data-hex="#6495ED">
-                <div class="fx60">Cornflower Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#6495ED;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="19" data-hex="#FFF8DC">
-                <div class="fx60">Cornsilk</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFF8DC;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="20" data-hex="#DC143C">
-                <div class="fx60">Crimson</div>
-                <div class="box32 i-b ba b-rd" style="background:#DC143C;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="21" data-hex="#00FFFF">
-                <div class="fx60">Cyan</div>
-                <div class="box32 i-b ba b-rd" style="background:#00FFFF;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="22" data-hex="#00008B">
-                <div class="fx60">Dark Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#00008B;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="23" data-hex="#008B8B">
-                <div class="fx60">Dark Cyan</div>
-                <div class="box32 i-b ba b-rd" style="background:#008B8B;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="24" data-hex="#B8860B">
-                <div class="fx60">Dark Goldenrod</div>
-                <div class="box32 i-b ba b-rd" style="background:#B8860B;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="25" data-hex="#A9A9A9">
-                <div class="fx60">Dark Gray</div>
-                <div class="box32 i-b ba b-rd" style="background:#A9A9A9;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="26" data-hex="#006400">
-                <div class="fx60">Dark Green</div>
-                <div class="box32 i-b ba b-rd" style="background:#006400;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="27" data-hex="#BDB76B">
-                <div class="fx60">Dark Khaki</div>
-                <div class="box32 i-b ba b-rd" style="background:#BDB76B;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="28" data-hex="#8B008B">
-                <div class="fx60">Dark Magenta</div>
-                <div class="box32 i-b ba b-rd" style="background:#8B008B;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="29" data-hex="#556B2F">
-                <div class="fx60">Dark Olive Green</div>
-                <div class="box32 i-b ba b-rd" style="background:#556B2F;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="30" data-hex="#FF8C00">
-                <div class="fx60">Dark Orange</div>
-                <div class="box32 i-b ba b-rd" style="background:#FF8C00;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="31" data-hex="#9932CC">
-                <div class="fx60">Dark Orchid</div>
-                <div class="box32 i-b ba b-rd" style="background:#9932CC;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="32" data-hex="#8B0000">
-                <div class="fx60">Dark Red</div>
-                <div class="box32 i-b ba b-rd" style="background:#8B0000;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="33" data-hex="#E9967A">
-                <div class="fx60">Dark Salmon</div>
-                <div class="box32 i-b ba b-rd" style="background:#E9967A;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="34" data-hex="#8FBC8F">
-                <div class="fx60">Dark Sea Green</div>
-                <div class="box32 i-b ba b-rd" style="background:#8FBC8F;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="35" data-hex="#483D8B">
-                <div class="fx60">Dark Slate Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#483D8B;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="36" data-hex="#2F4F4F">
-                <div class="fx60">Dark Slate Gray</div>
-                <div class="box32 i-b ba b-rd" style="background:#2F4F4F;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="37" data-hex="#00CED1">
-                <div class="fx60">Dark Turquoise</div>
-                <div class="box32 i-b ba b-rd" style="background:#00CED1;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="38" data-hex="#9400D3">
-                <div class="fx60">Dark Violet</div>
-                <div class="box32 i-b ba b-rd" style="background:#9400D3;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="39" data-hex="#FF1493">
-                <div class="fx60">Deep Pink</div>
-                <div class="box32 i-b ba b-rd" style="background:#FF1493;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="40" data-hex="#00BFFF">
-                <div class="fx60">Deep Sky Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#00BFFF;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="41" data-hex="#696969">
-                <div class="fx60">Dim Gray</div>
-                <div class="box32 i-b ba b-rd" style="background:#696969;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="42" data-hex="#1E90FF">
-                <div class="fx60">Dodger Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#1E90FF;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="43" data-hex="#B22222">
-                <div class="fx60">Fire Brick</div>
-                <div class="box32 i-b ba b-rd" style="background:#B22222;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="44" data-hex="#FFFAF0">
-                <div class="fx60">Floral White</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFFAF0;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="45" data-hex="#228B22">
-                <div class="fx60">Forest Green</div>
-                <div class="box32 i-b ba b-rd" style="background:#228B22;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="46" data-hex="#FF00FF">
-                <div class="fx60">Fuchsia</div>
-                <div class="box32 i-b ba b-rd" style="background:#FF00FF;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="47" data-hex="#DCDCDC">
-                <div class="fx60">Gainsboro</div>
-                <div class="box32 i-b ba b-rd" style="background:#DCDCDC;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="48" data-hex="#F8F8FF">
-                <div class="fx60">Ghost White</div>
-                <div class="box32 i-b ba b-rd" style="background:#F8F8FF;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="50" data-hex="#DAA520">
-                <div class="fx60">Goldenrod</div>
-                <div class="box32 i-b ba b-rd" style="background:#DAA520;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="53" data-hex="#ADFF2F">
-                <div class="fx60">Green Yellow</div>
-                <div class="box32 i-b ba b-rd" style="background:#ADFF2F;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="54" data-hex="#F0FFF0">
-                <div class="fx60">Honey Dew</div>
-                <div class="box32 i-b ba b-rd" style="background:#F0FFF0;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="55" data-hex="#FF69B4">
-                <div class="fx60">Hot Pink</div>
-                <div class="box32 i-b ba b-rd" style="background:#FF69B4;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="56" data-hex="#CD5C5C">
-                <div class="fx60">Indian Red</div>
-                <div class="box32 i-b ba b-rd" style="background:#CD5C5C;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="58" data-hex="#FFFFF0">
-                <div class="fx60">Ivory</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFFFF0;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="59" data-hex="#F0E68C">
-                <div class="fx60">Khaki</div>
-                <div class="box32 i-b ba b-rd" style="background:#F0E68C;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="60" data-hex="#E6E6FA">
-                <div class="fx60">Lavender</div>
-                <div class="box32 i-b ba b-rd" style="background:#E6E6FA;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="61" data-hex="#FFF0F5">
-                <div class="fx60">Lavender Blush</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFF0F5;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="62" data-hex="#7CFC00">
-                <div class="fx60">Lawn Green</div>
-                <div class="box32 i-b ba b-rd" style="background:#7CFC00;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="63" data-hex="#FFFACD">
-                <div class="fx60">Lemon Chiffon</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFFACD;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="64" data-hex="#ADD8E6">
-                <div class="fx60">Light Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#ADD8E6;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="65" data-hex="#F08080">
-                <div class="fx60">Light Coral</div>
-                <div class="box32 i-b ba b-rd" style="background:#F08080;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="66" data-hex="#E0FFFF">
-                <div class="fx60">Light Cyan</div>
-                <div class="box32 i-b ba b-rd" style="background:#E0FFFF;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="67" data-hex="#FAFAD2">
-                <div class="fx60">Light Goldenrod Yellow</div>
-                <div class="box32 i-b ba b-rd" style="background:#FAFAD2;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="68" data-hex="#90EE90">
-                <div class="fx60">Light Green</div>
-                <div class="box32 i-b ba b-rd" style="background:#90EE90;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="69" data-hex="#D3D3D3">
-                <div class="fx60">Light Grey</div>
-                <div class="box32 i-b ba b-rd" style="background:#D3D3D3;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="70" data-hex="#FFB6C1">
-                <div class="fx60">Light Pink</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFB6C1;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="71" data-hex="#FFA07A">
-                <div class="fx60">Light Salmon</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFA07A;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="72" data-hex="#20B2AA">
-                <div class="fx60">Light Sea Green</div>
-                <div class="box32 i-b ba b-rd" style="background:#20B2AA;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="73" data-hex="#87CEFA">
-                <div class="fx60">Light Sky Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#87CEFA;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="74" data-hex="#778899">
-                <div class="fx60">Light Slate Gray</div>
-                <div class="box32 i-b ba b-rd" style="background:#778899;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="75" data-hex="#B0C4DE">
-                <div class="fx60">Light Steel Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#B0C4DE;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="76" data-hex="#FFFFE0">
-                <div class="fx60">Light Yellow</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFFFE0;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="77" data-hex="#00FF00">
-                <div class="fx60">Lime</div>
-                <div class="box32 i-b ba b-rd" style="background:#00FF00;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="78" data-hex="#32CD32">
-                <div class="fx60">LimeGreen</div>
-                <div class="box32 i-b ba b-rd" style="background:#32CD32;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="79" data-hex="#FAF0E6">
-                <div class="fx60">Linen</div>
-                <div class="box32 i-b ba b-rd" style="background:#FAF0E6;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="80" data-hex="#FF00FF">
-                <div class="fx60">Magenta</div>
-                <div class="box32 i-b ba b-rd" style="background:#FF00FF;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="81" data-hex="#800000">
-                <div class="fx60">Maroon</div>
-                <div class="box32 i-b ba b-rd" style="background:#800000;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="82" data-hex="#66CDAA">
-                <div class="fx60">Medium Aquamarine</div>
-                <div class="box32 i-b ba b-rd" style="background:#66CDAA;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="83" data-hex="#0000CD">
-                <div class="fx60">Medium Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#0000CD;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="84" data-hex="#BA55D3">
-                <div class="fx60">Medium Orchid</div>
-                <div class="box32 i-b ba b-rd" style="background:#BA55D3;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="85" data-hex="#9370DB">
-                <div class="fx60">Medium Purple</div>
-                <div class="box32 i-b ba b-rd" style="background:#9370DB;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="86" data-hex="#3CB371">
-                <div class="fx60">Medium Sea Green</div>
-                <div class="box32 i-b ba b-rd" style="background:#3CB371;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="87" data-hex="#7B68EE">
-                <div class="fx60">Medium Slate Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#7B68EE;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="88" data-hex="#00FA9A">
-                <div class="fx60">Medium Spring Green</div>
-                <div class="box32 i-b ba b-rd" style="background:#00FA9A;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="89" data-hex="#48D1CC">
-                <div class="fx60">Medium Turquoise</div>
-                <div class="box32 i-b ba b-rd" style="background:#48D1CC;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="90" data-hex="#C71585">
-                <div class="fx60">Medium Violet Red</div>
-                <div class="box32 i-b ba b-rd" style="background:#C71585;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="91" data-hex="#191970">
-                <div class="fx60">Midnight Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#191970;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="92" data-hex="#F5FFFA">
-                <div class="fx60">Mint Cream</div>
-                <div class="box32 i-b ba b-rd" style="background:#F5FFFA;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="93" data-hex="#FFE4E1">
-                <div class="fx60">Misty Rose</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFE4E1;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="94" data-hex="#FFE4B5">
-                <div class="fx60">Moccasin</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFE4B5;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="95" data-hex="#FFDEAD">
-                <div class="fx60">Navajo White</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFDEAD;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="97" data-hex="#FDF5E6">
-                <div class="fx60">Old Lace</div>
-                <div class="box32 i-b ba b-rd" style="background:#FDF5E6;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="98" data-hex="#808000">
-                <div class="fx60">Olive</div>
-                <div class="box32 i-b ba b-rd" style="background:#808000;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="99" data-hex="#6B8E23">
-                <div class="fx60">Olive Drab</div>
-                <div class="box32 i-b ba b-rd" style="background:#6B8E23;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="101" data-hex="#FF4500">
-                <div class="fx60">Orange Red</div>
-                <div class="box32 i-b ba b-rd" style="background:#FF4500;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="102" data-hex="#DA70D6">
-                <div class="fx60">Orchid</div>
-                <div class="box32 i-b ba b-rd" style="background:#DA70D6;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="103" data-hex="#EEE8AA">
-                <div class="fx60">Pale Goldenrod</div>
-                <div class="box32 i-b ba b-rd" style="background:#EEE8AA;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="104" data-hex="#98FB98">
-                <div class="fx60">Pale Green</div>
-                <div class="box32 i-b ba b-rd" style="background:#98FB98;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="105" data-hex="#AFEEEE">
-                <div class="fx60">Pale Turquoise</div>
-                <div class="box32 i-b ba b-rd" style="background:#AFEEEE;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="106" data-hex="#DB7093">
-                <div class="fx60">Pale Violet Red</div>
-                <div class="box32 i-b ba b-rd" style="background:#DB7093;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="107" data-hex="#FFEFD5">
-                <div class="fx60">Papaya Whip</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFEFD5;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="108" data-hex="#FFDAB9">
-                <div class="fx60">Peach Puff</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFDAB9;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="109" data-hex="#CD853F">
-                <div class="fx60">Peru</div>
-                <div class="box32 i-b ba b-rd" style="background:#CD853F;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="111" data-hex="#DDA0DD">
-                <div class="fx60">Plum</div>
-                <div class="box32 i-b ba b-rd" style="background:#DDA0DD;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="112" data-hex="#B0E0E6">
-                <div class="fx60">Powder Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#B0E0E6;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="115" data-hex="#BC8F8F">
-                <div class="fx60">Rosy Brown</div>
-                <div class="box32 i-b ba b-rd" style="background:#BC8F8F;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="116" data-hex="#4169E1">
-                <div class="fx60">Royal Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#4169E1;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="117" data-hex="#8B4513">
-                <div class="fx60">Saddle Brown</div>
-                <div class="box32 i-b ba b-rd" style="background:#8B4513;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="118" data-hex="#FA8072">
-                <div class="fx60">Salmon</div>
-                <div class="box32 i-b ba b-rd" style="background:#FA8072;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="119" data-hex="#F4A460">
-                <div class="fx60">Sandy Brown</div>
-                <div class="box32 i-b ba b-rd" style="background:#F4A460;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="120" data-hex="#2E8B57">
-                <div class="fx60">Sea Green</div>
-                <div class="box32 i-b ba b-rd" style="background:#2E8B57;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="121" data-hex="#FFF5EE">
-                <div class="fx60">Seashell</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFF5EE;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="122" data-hex="#A0522D">
-                <div class="fx60">Sienna</div>
-                <div class="box32 i-b ba b-rd" style="background:#A0522D;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="124" data-hex="#87CEEB">
-                <div class="fx60">Sky Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#87CEEB;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="125" data-hex="#6A5ACD">
-                <div class="fx60">Slate Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#6A5ACD;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="126" data-hex="#708090">
-                <div class="fx60">Slate Gray</div>
-                <div class="box32 i-b ba b-rd" style="background:#708090;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="127" data-hex="#FFFAFA">
-                <div class="fx60">Snow</div>
-                <div class="box32 i-b ba b-rd" style="background:#FFFAFA;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="128" data-hex="#00FF7F">
-                <div class="fx60">Spring Green</div>
-                <div class="box32 i-b ba b-rd" style="background:#00FF7F;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="129" data-hex="#4682B4">
-                <div class="fx60">Steel Blue</div>
-                <div class="box32 i-b ba b-rd" style="background:#4682B4;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="130" data-hex="#D2B48C">
-                <div class="fx60">Tan</div>
-                <div class="box32 i-b ba b-rd" style="background:#D2B48C;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="131" data-hex="#008080">
-                <div class="fx60">Teal</div>
-                <div class="box32 i-b ba b-rd" style="background:#008080;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="132" data-hex="#D8BFD8">
-                <div class="fx60">Thistle</div>
-                <div class="box32 i-b ba b-rd" style="background:#D8BFD8;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="133" data-hex="#FF6347">
-                <div class="fx60">Tomato</div>
-                <div class="box32 i-b ba b-rd" style="background:#FF6347;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="134" data-hex="#40E0D0">
-                <div class="fx60">Turquoise</div>
-                <div class="box32 i-b ba b-rd" style="background:#40E0D0;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="136" data-hex="#F5DEB3">
-                <div class="fx60">Wheat</div>
-                <div class="box32 i-b ba b-rd" style="background:#F5DEB3;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="138" data-hex="#F5F5F5">
-                <div class="fx60">White Smoke</div>
-                <div class="box32 i-b ba b-rd" style="background:#F5F5F5;" ></div>
-            </div>
-            <div class="radio multipo psr fx fx-ac pd10 bb" data-index="140" data-hex="#9ACD32">
-                <div class="fx60">Yellow Green</div>
-                <div class="box32 i-b ba b-rd" style="background:#9ACD32;" ></div>
-            </div>
-        </div>`;
+        var colors = [];
+        var dexs = this.dataset.availableColors;
+        if (dexs == 0) colors = COLORS;
+        else {
+            dexs.split(',').forEach(function(d) {
+                colors.push(COLORS.find(function(c) {return c.dex == d;}));
+            });
+        }
+        var h = "<div id='color-palette' class='pd010 b5 st-p'>\
+            <div id='select-color' class='fx fx-ac pd16 bb b' data-index='0'>\
+                <div class='fx60'>Select Color(s)</div>\
+                <div id='color-palette-submit' class='modalClose c-o b'>Done</div>\
+            </div>";
+        colors.forEach(function(c) {
+            h += "<div class='radio multipo psr fx fx-ac pd10 bb' data-index='"+c.dex+"' data-hex='"+c.hex+"'>\
+                <div class='fx60'>"+c.name+"</div>\
+                <div class='box32 i-b ba b-rd' style='background:"+c.hex+";'></div>\
+            </div>";
+        });
+        h += "</div>";
         $MM.show();
         $MF.html(h).zoom();
 
@@ -1047,11 +614,9 @@
         }
     }).on('click', '#color-palette .radio', function() {
         var $el = $(this).detach();
-        // setTimeout(function() {
-            var $es = $('#color-palette .radio.selected').last();
-            if (!$es[0]) $es = $('#select-color');
-            $el.insertAfter($es);
-        // }, 10);
+        var $es = $('#color-palette .radio.selected').last();
+        if (!$es[0]) $es = $('#select-color');
+        $el.insertAfter($es);
     }).on('click', '#color-palette-submit', function() {
         var o = $('#color-palette').find('.radio.selected'), s = '', h = '';
         if (o.length) {
@@ -1064,6 +629,58 @@
         }
         COLORPICKER.dataset.selectedOptions = s;
         COLORPICKER.innerHTML = h;
+    }).on('click', '.size-picker', function() {
+        SIZEPICKER = this;
+        var sizes = [];
+        var dexs = this.dataset.availableSizes;
+        if (dexs == 0) sizes = SIZES;
+        else {
+            dexs.split(',').forEach(function(d) {
+                sizes.push(SIZES.find(function(c) {return c.dex == d;}));
+            });
+        }
+        var h = "<div id='size-palette' class='pd010 b5 st-p'>\
+            <div id='select-size' class='fx fx-ac pd16 bb b' data-index='0'>\
+                <div class='fx60'>Select Size(s)</div>\
+                <div id='size-palette-submit' class='modalClose c-o b'>Done</div>\
+            </div>";
+        sizes.forEach(function(c) {
+            h += "<div class='radio multipo psr fx fx-ac pd10 bb' data-index='"+c.dex+"' data-value='"+c.val+"'>"+c.val+"</div>";
+        });
+        h += "</div>";
+        $MM.show();
+        $MF.html(h).zoom();
+
+        var selectedOptions = [];
+        var so = this.dataset.selectedOptions;
+        if (so) {
+            selectedOptions = so.split(',');
+            var $r = $('#size-palette').find('.radio');
+            $.each($r, function() {
+                if (selectedOptions.indexOf(this.dataset.index) > -1) {
+                    var $es = $('#size-palette .radio.selected').last();
+                    if (!$es[0]) $es = $('#select-size');
+                    $(this).addClass('selected').insertAfter($es);
+                }
+            });
+        }
+    }).on('click', '#size-palette .radio', function() {
+        var $el = $(this).detach();
+        var $es = $('#size-palette .radio.selected').last();
+        if (!$es[0]) $es = $('#select-size');
+        $el.insertAfter($es);
+    }).on('click', '#size-palette-submit', function() {
+        var o = $('#size-palette').find('.radio.selected'), s = '', h = '';
+        if (o.length) {
+            var os = [];
+            $.each(o, function() {
+                os.push(this.dataset.index);
+                h+="<div class='pd5 mg-rm i-b ba b4-r'>"+this.dataset.value+"</div>";
+            });
+            s = os.join(',');
+        }
+        SIZEPICKER.dataset.selectedOptions = s;
+        SIZEPICKER.innerHTML = h;
     }).on('click', '#add-item', function() {
         App.changeViewTo('#createView');
         $('.main-wrapper').remove();
@@ -1080,11 +697,9 @@
     }).on('click', '.view-closer', function() {
         App.closeCurrentView();
     }).on('click', '.terms-link', function() {
-        cordova.InAppBrowser.open(BASE_URL + '/legal/terms.html', '_blank', BROWSEROPTIONS);
+        window.open(BASE_URL + '/legal/terms.html', '_system');
     }).on('click', '.forgot-password', function() {
-        
         App.changeViewTo('#retrievalView');
-
     }).on('click', '.signup-option', function() {
 
         $(this).addClass('c-o').siblings().removeClass('c-o');
@@ -1190,6 +805,67 @@
                         if (p.state == 'success') {//verified successfully
                             toast('Your email address has been verified');
                             App.changeViewTo('#signupView');
+                        } else {
+                            toast(p.message);
+                        }
+                    },
+                    complete: function() {
+                        el.dataset.disabled = 'false';
+                        $('body').unspin();
+                    }
+                });
+                break;
+            case 'retrieve-form-email':
+                var Email = el.querySelector('input[name="email"]').value.toLowerCase();
+                if (!Email) return toast('Please type your email');
+                el.dataset.disabled = 'true';
+                $('body').spin();
+                $.ajax({
+                    url: MY_URL + "/send.php",
+                    data: {
+                        action: 'retrieveKey',
+                        email: Email
+                    },
+                    method: "POST",
+                    timeout: 30000,
+                    dataType: 'json',
+                    success: function(p) {
+                        if (p.state == 'success') {
+                            Store.setItem('retrievalEmail', Email);
+                            toast("We've sent you a reset key");
+                            App.changeViewTo('#resetTokenPrompt');
+                        } else {
+                            toast(p.message);
+                        }
+                    },
+                    error: function() {toast('No connection');},
+                    complete: function() {
+                        el.dataset.disabled = 'false';
+                        $('body').unspin();
+                    }
+                });
+                break;
+            case 'retrieve-form-code':
+                var Password = el.querySelector('input[name="password"]').value;
+                var Code = el.querySelector('input[name="token"]').value;
+                if (!Code) return;
+                el.dataset.disabled = 'true';
+                $('body').spin();
+                $.ajax({
+                    url: MY_URL + "/send.php",
+                    data: {
+                        action: 'passwordRetrieve',
+                        password: Password,
+                        code: Code,
+                        email: Store.getItem('retrievalEmail')
+                    },
+                    method: "POST",
+                    timeout: 30000,
+                    dataType: 'json',
+                    success: function(p) {
+                        if (p.state == 'success') {//changed successfully
+                            toast('Your password has been updated');
+                            App.changeViewTo('#loginView');
                         } else {
                             toast(p.message);
                         }
@@ -1410,30 +1086,22 @@
 
                     return;
                 }
-
                 el.dataset.disabled = 'true';
-
                 $('body').spin();
-                //
-                // return;
-                var fd = new FormData();
-                fd.append('action', 'profileUpdate');
-                fd.append('userkey', UUID);
-                fd.append('usertype', USERTYPE);
-                fd.append('fullname', Fullname);
-                fd.append('username', Username);
-                fd.append('birthday', Birthday);
-                fd.append('address', Address);
-                fd.append('phone', Phone);
-
                 $.ajax({
                     url: MY_URL + "/send.php",
-                    data: fd,
-                    method: "POST",
-                    cache: false,
-                    processData: false,
-                    contentType: false,
+                    data: {
+                        action: 'profileUpdate',
+                        userkey: UUID,
+                        usertype: USERTYPE,
+                        fullname: Fullname,
+                        username: Username,
+                        birthday: Birthday,
+                        address: Address,
+                        phone: Phone
+                    },
                     dataType: 'json',
+                    method: "POST",
                     timeout: 30000,
                     success: function(p) {
                         // console.log(p);
@@ -1442,16 +1110,13 @@
                             SQL.transaction(function(i) {
                                 i.executeSql("UPDATE on_user SET username=?, fullname=?, birthday=?, address=?, phone=? WHERE id=?", [Username, Fullname, Birthday, Address, Phone, 1]);
                             }, function(){}, function() {
-                                //
                                   FULLNAME = Fullname
                                 , USERNAME = Username
                                 , BIRTHDAY = Birthday
                                 , ADDRESS = Address
                                 , PHONE = Phone
                                 ;
-                                // App.closeCurrentView();
                             });
-
                         } else {
                             if (p.message.indexOf('username') > -1) {
                                 toast('Username not available');
@@ -1463,7 +1128,45 @@
                         $('body').unspin();
                     }
                 });
-                //
+                break;
+            case 'cash-withdrawal-form':
+                var AccountName = el.querySelector('input[name="account_name"]').value
+                  , Nuban = el.querySelector('input[name="nuban"]').value
+                  , Amount = parseInt(el.querySelector('input[name="amount"]').value)
+                  , BankName = el.querySelector('select[name="bank_id"]').options[el.querySelector('select[name="bank_id"]').selectedIndex].innerText
+                  ;
+                if (!AccountName || !Nuban || !Amount || !el.querySelector('select[name="bank_id"]').value) return toast('All fields are required');
+                if (Amount > MY_BALANCE) return toast('Withdrawal amount is higher than your balance');
+                el.dataset.disabled = 'true';
+                $('body').spin();
+                $.ajax({
+                    url: MY_URL + "/send.php",
+                    data: {
+                        action: 'withdrawCash',
+                        ownerID: UUID,
+                        amount: Amount,
+                        nuban: Nuban,
+                        account_name: AccountName,
+                        bank_name: BankName,
+                        institute: CAMPUSKEY
+                    },
+                    dataType: 'json',
+                    timeout: 30000,
+                    method: "POST",
+                    success: function(p) {
+                        if (p.state == 1) {
+                            App.closeCurrentView();
+                            checkWallet('landing');
+                            toast('Your withdrawal request has been submitted successfully');
+                        } else {
+                            toast('There was an error. Please try again later.');
+                        }
+                    },
+                    complete: function() {
+                        el.dataset.disabled = 'false';
+                        $('body').unspin();
+                    }
+                });
                 break;
             default:
                 // break;
@@ -1483,7 +1186,7 @@
     }).on('click', '#delivery-help', function() {
         var h = `<div class="pd20">
             <b>Delivery options:</b> -these are ways in which logistics of every item sold on our ecommerce platform will be handled.
-        To make the process really easy for sellers we provided 3 different options namely:-OnCampus express,OnCampus pick up and deliver ,OnCamus drop and deliver.
+        To make the process really easy for sellers we provided 3 different options as described below.
         <br>
         <br>
         1. <b>OnCampus express</b> -this stands for express delivery for customers because items registered in this category are stored in our warehouse,sellers wouldn’t have to worry about the item and its delivery
@@ -1499,15 +1202,17 @@
         $MM.show();
         $MF.html(h).zoom();
     }).on('click', '.add-more-photos', function() {
-        if ($(this).siblings('.product-image').length == 4) return toast("You can only add up to four (4) photos");
-        var h = `<div class="product-image main-wrapper fx40 h200 mg-l bg b4-r fx fx-ac fx-jc ov-h ba bg-im-ct psr" style="display:none;">
+        var limit = this.dataset.limit;
+        var className = this.dataset.className;
+        if ($(this).siblings('.'+className).length == limit) return toast("You can only add up to "+limit+" photos");
+        var h = `<div class="${className} xtra-img mg-t main-wrapper fx40 h200 mg-l bg b4-r fx fx-ac fx-jc ov-h ba bg-im-ct psr" style="display:none;">
             <img src="res/img/icon/upload.png">
             <img class="fw psa im-sh" src="">
             <input type="file" accept="image/*" name="images" class="images fw fh psa t0 l0 op0">
             <div class="wrapper-closer box32 f20 psa fx fx-ac Pink c-g b5 b bm-r mg-r mg-t t0 r0 fx-jc z4">&times;</div>
         </div>`;
         $(this).before(h);
-        $('.product-image').last().slideDown();
+        $('.'+className).last().slideDown();
     }).on('submit', '.create-form', function(evt) {
         evt.preventDefault();
         if (this.dataset.disabled == 'true') return;
@@ -1522,8 +1227,8 @@
                 var Images = el.querySelectorAll('input[name="images"]')
                   , Name = el.querySelector('input[name="name"]').value
                   , ProductCategory = el.querySelector('select[name="product_type"]').value
-                  , ProductSize = el.querySelector('select[name="product_size"]').value
-                  , ShoeSize = el.querySelector('select[name="shoe_size"]').value
+                  // , ProductSize = el.querySelector('select[name="product_size"]').value
+                  , AvailableSizes = el.querySelector('.size-picker').dataset.selectedOptions
                   , AvailableColors = el.querySelector('.color-picker').dataset.selectedOptions
                   , ProductDelivery = el.querySelector('select[name="product_delivery"]').value
                   , Price = parseInt(el.querySelector('input[name="price"]').value, 10) || 0
@@ -1546,8 +1251,7 @@
                 fd.append('ownerID', UUID);
                 fd.append('name', Name);
                 fd.append('productCategory', ProductCategory);
-                fd.append('productSize', ProductSize);
-                fd.append('shoeSize', ShoeSize);
+                fd.append('availableSizes', AvailableSizes);
                 fd.append('availableColors', AvailableColors);
                 fd.append('productDelivery', ProductDelivery);
                 fd.append('price', Price);
@@ -1586,7 +1290,7 @@
                             delivery: ProductDelivery
                         }
                         buildItems([p], CATEGORY, true);
-                        Views.pop();App.changeViewTo('#itemsView');//do not go back to item add view
+                        exitItemAddView();
                     },
                     error: function() { toast('Unable to connect'); },
                     complete: function() {
@@ -1641,13 +1345,13 @@
                         var p = {
                             itemID: d.success,
                             ownerID: UUID,
-                            food_type: FoodType,
+                            food_type: Number(FoodType),
                             name: Name,
                             price: Price,
                             discount: Discount
                         }
                         buildItems([p], CATEGORY, true);
-                        Views.pop();App.changeViewTo('#itemsView');//do not go back to item add view
+                        exitItemAddView();
                     },
                     error: function() { toast('Unable to connect'); },
                     complete: function() {
@@ -1685,7 +1389,7 @@
                         return;
                     }
                     // var entry = [TicketCatg, Price, Discount, Seats];
-                    var ticket = {ticket_type: TicketCatg, price: Price, discount: Discount, seats: Seats};
+                    var ticket = {ticket_type: TicketCatg, price: Price, discount: Discount, seats: Seats, sales: 0};
                     // console.log(entry);
                     AllTickets.push(ticket);
                 });
@@ -1711,7 +1415,7 @@
                 fd.append('name', Name);
                 fd.append('event_date', EventDate);
                 fd.append('venue', Venue);
-                fd.append('event_type', EventType);//tickets: pool,hangout,club...//[[new]] no mote//regular,VIP...
+                fd.append('event_type', EventType);//pool,hangout,club...
                 fd.append('image', Image[0]);
                 fd.append('all_tickets', JSON.stringify(AllTickets));//regular,VIP...//all in one JSON stringified object
 
@@ -1728,8 +1432,8 @@
                         if (d.error) return toast('Unable to add item');
                         toast('Item added successfully');
                         var p = {
-                            ownerID: UUID,
                             itemID: d.success,
+                            ownerID: UUID,
                             name: Name,
                             event_type: EventType,
                             event_date: EventDate,
@@ -1737,7 +1441,7 @@
                             tickets: AllTickets
                         }
                         buildItems([p], CATEGORY, true);
-                        Views.pop();App.changeViewTo('#itemsView');//do not go back to item add view
+                        exitItemAddView();
                     },
                     error: function() { toast('Unable to connect'); },
                     complete: function() {
@@ -1791,7 +1495,7 @@
                             price: Price
                         }
                         buildItems([p], CATEGORY, true);
-                        Views.pop();App.changeViewTo('#itemsView');//do not go back to item add view
+                        exitItemAddView();
                     },
                     error: function() { toast('Unable to connect'); },
                     complete: function() {
@@ -1849,7 +1553,7 @@
                             price: Price
                         }
                         buildItems([p], CATEGORY, true);
-                        Views.pop();App.changeViewTo('#itemsView');//do not go back to item add view
+                        exitItemAddView();
                     },
                     error: function() { toast('Unable to connect'); },
                     complete: function() {
@@ -1908,7 +1612,7 @@
                         if (d.error) return toast('Unable to add item');
                         toast('Item added successfully');
                         buildItems(items, CATEGORY, true);
-                        Views.pop();App.changeViewTo('#itemsView');//do not go back to item add view
+                        exitItemAddView();
                     },
                     error: function() { toast('Unable to connect'); },
                     complete: function() {
@@ -1963,7 +1667,7 @@
                         if (d.error) return toast('Unable to add item');
                         toast('Item added successfully');
                         buildItems(items, CATEGORY, true);
-                        Views.pop();App.changeViewTo('#itemsView');//do not go back to item add view
+                        exitItemAddView();
                     },
                     error: function() { toast('Unable to connect'); },
                     complete: function() {
@@ -1975,6 +1679,46 @@
             
             default:
         }
+    }).on('submit', '#gallery-add-form', function(e) {
+        e.preventDefault();
+        if (this.dataset.disabled == 'true') return;
+        var el = this;
+        var Images = el.querySelectorAll('input[name="images"]');
+        var fd = new FormData();
+        fd.append('action', 'addGalleryItems');
+        fd.append('ownerID', UUID);
+        var TotalImages = 0;
+        Images.forEach(function(el) {
+            if (el.files && el.files[0]) {
+                fd.append('image[]', el.files[0]);
+                TotalImages++;
+            }
+        });
+        if (TotalImages === 0) return;
+        fd.append('totalImages', TotalImages);
+        $('body').spin();
+        el.dataset.disabled = 'true';
+        $.ajax({
+            url: MY_URL + "/send.php",
+            data: fd,
+            method: "POST",
+            cache: false,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            timeout: 30000,
+            success: function(d) {
+                if (d.state && d.state == 1) {
+                    buildGalleryItems(d.links);
+                    App.closeCurrentView();
+                } else toast('There was an error');
+            },
+            error: function() { toast('Unable to connect'); },
+            complete: function() {
+                el.dataset.disabled = 'false';
+                $('body').unspin();
+            }
+        });
     }).on('click', '.wrapper-closer', function(e) {
         var $el = $(this).closest('.main-wrapper');
         $el.slideUp(function(){
@@ -2062,7 +1806,7 @@
     }).on('click', '.Modal', function() {
         $(this).hide();
         if (this.id == 'searchModal') {
-            $('#searchHeader').hide();
+            $SH.hide();
             showAllOrderEntries();
         }
     }).on('click', '.modalClose', function() {
@@ -2076,22 +1820,22 @@
         mDrawer.classList.add('sh-l');
         mModal.style.display = 'block';
     }).on('click', '#myItemsLink, .shop-link', function() {
-        App.changeViewTo('#itemsView');
+        $('#proceed-to-cart').hide();
         $('.items-container').hide();
+        App.changeViewTo('#itemsView');
 
         var catg, shopId, shopName, shopAddress;
-        if (this.id == 'myItemsLink') {//owner's item.
+        if (this.id == 'myItemsLink') {//owner's item
             catg = CATEGORY;
             shopId = UUID;
             shopName = USERNAME;
             shopAddress = ADDRESS;
-            $('#proceed-to-cart').hide();
         } else {//highlighted items
             catg = this.dataset.catg;
             shopId = this.dataset.shopId;
             shopName = this.dataset.shopName;
             shopAddress = this.dataset.shopAddress;
-            $('#proceed-to-cart').show().attr('data-catg', catg);
+            if (catg != 3) $('#proceed-to-cart').show().attr('data-catg', catg);
         }
 
         updateStoreInformation(shopId, shopName, shopAddress, catg);
@@ -2109,16 +1853,86 @@
             method: "GET",
             success: function(p) {
                 if (p.length > 0) {
-                    CURRENT_SHOP = shopId;
                     buildItems(p, catg, false);
                 } else {
-                    //
+                    // toast('No items was found');
                 }
             },
             complete: function() {$('body').unspin();}
         });
     }).on('click', '.item-remove', function(e) {
-        console.log('Will delete: ' + this.dataset.itemId);//[[***]]
+        h="<div class='pd16 st-p t-c b'>Confirm to remove this item?</div>\
+            <div class='fx bt modalClose'>\
+                <div id='item-remove-confirm' class='pd16z t-c fx50 b-rg b ac' data-item-id='"+this.dataset.itemId+"' data-catg='"+this.dataset.catg+"'>YES</div>\
+                <div class='pd16z t-c fx50 b ac'>CANCEL</div>\
+            </div>";
+        $MM.show();
+        $MF.html(h).zoom();
+    }).on('click', '#item-remove-confirm', function(e) {
+        var itemId = this.dataset.itemId;
+        var catg = this.dataset.catg;
+        if (catg != CATEGORY) return;
+        $('body').spin();
+        $.ajax({
+            url: MY_URL + "/send.php",
+            data: {
+                action: 'removeItem',
+                itemID: itemId,
+                catg: catg,
+                ownerID: UUID
+            },
+            dataType: 'json',
+            method: "POST",
+            timeout: 30000,
+            success: function(p) {
+                if (p.state && p.state == 1) {
+                    switch(catg) {
+                        case '1'://e-commerce
+                            $('.product-entry[data-item-id="'+itemId+'"]').remove();
+                            App.closeCurrentView();
+                            //remove from object
+                            var c = PRODUCTS.find(function(p) { return p.itemID == itemId; });
+                            delete c;
+                            break;
+                        case '2'://food
+                            $('.food-entry[data-item-id="'+itemId+'"]').remove();
+                            var d = ITEMS_DATA.find(function(a) {return a.itemID == itemId;});
+                            delete d;
+                            break;
+                        case '3'://ticket
+                            $('.event-entry[data-item-id="'+itemId+'"] .item-remove').text('Not selling').removeClass('item-remove');
+                            var d = ITEMS_DATA.find(function(a) {return a.itemID == itemId;});
+                            d.isselling = 0;
+                            break;
+                        case '4'://graphics
+                            $('.graphics-entry[data-item-id="'+itemId+'"]').remove();
+                            var d = ITEMS_DATA.find(function(a) {return a.itemID == itemId;});
+                            delete d;
+                            break;
+                        case '5'://makeup
+                            $('.makeup-entry[data-item-id="'+itemId+'"]').remove();
+                            var d = ITEMS_DATA.find(function(a) {return a.itemID == itemId;});
+                            delete d;
+                            break;
+                        case '6'://laundry
+                            $('.laundry-entry[data-item-id="'+itemId+'"]').remove();
+                            var d = ITEMS_DATA.find(function(a) {return a.itemID == itemId;});
+                            delete d;
+                            break;
+                        case '7'://gas
+                            $('.gas-entry[data-item-id="'+itemId+'"]').remove();
+                            var d = ITEMS_DATA.find(function(a) {return a.itemID == itemId;});
+                            delete d;
+                            break;
+                    }
+                } else {
+                    toast('There was an error');
+                }
+            },
+            complete: function() {
+               $('body').unspin();
+            }
+        });
     }).on('click', '.item-order-spinner', function(e) {
         var id = e.target.classList;
         var counter = this.querySelector('.item-count');
@@ -2128,6 +1942,44 @@
             counter.innerText = --count;
         } else if (id.contains('item-add')) {
             counter.innerText = ++count;
+        }
+    }).on('click', '#item-checkout', function(e) {
+        var itemId = this.dataset.itemId;
+        var c = PRODUCTS.find(function(p) { return p.itemID == itemId; });
+        if (c) {
+            var menu = document.querySelector('#productWrapper');
+            var tt = parseInt(menu.querySelector('input[name="item-count"]').value) || 0;
+            if (tt > 0) {
+                var sizes = menu.querySelector('.size-picker');
+                var colors = menu.querySelector('.color-picker');
+                var
+                selectedSizes = null, totalSizes = 0,
+                selectedColors = null, totalColors = 0;
+                if (sizes) {
+                    selectedSizes = sizes.dataset.selectedOptions;
+                    if (selectedSizes) {
+                        totalSizes = selectedSizes.split(',').filter(function(j) {return j;}).length;
+                        if (totalSizes == 0) return toast('Select your preferred size' + (tt > 1 ? 's' : ''));
+                        if (totalSizes > tt) return toast('Total sizes cannot be more than number of items');
+                    } else return toast('Select your preferred size' + (tt > 1 ? 's' : ''));
+                }
+                if (colors) {
+                    selectedColors = colors.dataset.selectedOptions;
+                    if (selectedColors) {
+                        totalColors = selectedColors.split(',').filter(function(j) {return j;}).length;
+                        if (totalColors == 0) return toast('Select your preferred colour' + (tt > 1 ? 's' : ''));
+                        if (totalColors > tt) return toast('Total colours cannot be more than number of items');
+                    } else return toast('Select your preferred colour' + (tt > 1 ? 's' : ''));
+                }
+                var invoice = [{id: itemId, nm: c.name, pr: parseFloat(c.price).toFixed(2), ds: parseFloat(c.discount).toFixed(2), tt: tt, sz: selectedSizes, cl: selectedColors, isproduct:true}];
+                CURRENT_ORDER = invoice;
+                App.changeViewTo('#invoiceView');
+                $('#invoice-content').html(buildInvoice(invoice, null));
+            } else {
+                toast('Please select number of items');
+            }
+        } else {
+            toast('This item is no longer available');
         }
     }).on('click', '#proceed-to-cart', function(e) {
         var catg = this.dataset.catg;
@@ -2142,7 +1994,7 @@
             case '5'://makeup
             case '7'://gas
                 items.forEach(function(item) {
-                    var tt = item.innerText; if (tt == 0) return;// console.log(tt);
+                    var tt = item.innerText; if (tt == 0) return;
                     var id = item.dataset.itemId;
                     var d = ITEMS_DATA.find(function(a) {return a.itemID == id;});
                     if (d) {
@@ -2150,21 +2002,9 @@
                     }
                 });
                 break;
-            case '3'://events
-                items.forEach(function(item) {
-                    var tt = item.innerText; if (tt == 0) return;// console.log(tt);
-                    var id = item.dataset.itemId;
-                    var ty = item.dataset.itemType;
-                    var d = ITEMS_DATA.find(function(a) {return a.itemID == id;});
-                    if (d) {
-                        var tk = d.tickets.find(function(b){return b.ticket_type==ty});
-                        invoice.push({id: id, nm: d.name+' ('+TICKETS[ty]+')', pr: parseFloat(tk.price).toFixed(2), ds: parseFloat(tk.discount).toFixed(2), tt: tt});
-                    }
-                });
-                break;
             case '6'://laundry
                 items.forEach(function(item) {
-                    var tt = item.innerText; if (tt == 0) return;// console.log(tt);
+                    var tt = item.innerText; if (tt == 0) return;
                     var id = item.dataset.itemId;
                     var d = ITEMS_DATA.find(function(a) {return a.itemID == id;});
                     if (d) {
@@ -2179,7 +2019,7 @@
             App.changeViewTo('#invoiceView');
             $('#invoice-content').html(buildInvoice(invoice, null));
         } else toast('No item was selected');
-    }).on('click', '#proceed-to-address', function(e) {//on invoice-view
+    }).on('click', '#accept-invoice', function(e) {
         App.changeViewTo('#dropoffView');
         var fm = document.querySelector('#dropoff-content');
         fm.querySelector('input[name="address"]').value = Store.getItem('delivery_address');
@@ -2207,7 +2047,11 @@
                 invoice: JSON.stringify(CURRENT_ORDER),
                 details: JSON.stringify(details),
                 voucher: voucherCode,
-                sellerID: ITEMS_DATA[0].ownerID,
+                // sellerID: ITEMS_DATA[0].ownerID,
+                isticket: ISTICKET,
+                //
+                category: CURRENT_CATG,
+                sellerID: CURRENT_SHOP,
                 buyerID: UUID
             },
             method: "POST",
@@ -2216,10 +2060,13 @@
             success: function(p) {
                 // console.log(p);
                 if (p.state == '0') {
-                    toast('Order create error. Please submit your order again.');
+                    toast(p.message);
                 } else {
                     Views = ['#home'];
                     App.changeViewTo('#successView');
+                    if (CURRENT_CATG == '3')
+                        $('#order-success-info').text('Check your orders and make payment');
+                    else $('#order-success-info').text('You will be contacted shortly');
                     Store.setItem('delivery_address', address);
                     Store.setItem('delivery_name', name);
                     Store.setItem('delivery_phone', phone);
@@ -2263,7 +2110,16 @@
         else return;
         $('body').spin();
     }).on('click', '.products-catg-entry', function(e) {
-        toast('Coming soon...');
+        var catg = this.dataset.catg;
+        App.switchTabTo('#catalogTab');
+        $('.item-filter[data-catg="'+catg+'"]').click();
+        $('.tab-locator').removeClass('c-o');
+        document.querySelector('.tab-locator[data-tab="#catalogTab"]').classList.add('c-o');
+    }).on('click', '.item-filter', function(e) {
+        $('.item-filter.c-o').removeClass('c-o');
+        this.classList.add('c-o');
+        $('#catalog-items-container').empty();
+        getProductFetchDetails();
     }).on('click', '#orders-link', function(e) {
         fetchMyOrders($('#ordersWrapper'), 'full');
     }).on('click', '.order-details-btn', function(e) {
@@ -2291,7 +2147,7 @@
                     $('.order-status[data-order-id="'+i+'"]').attr('data-status', '1').text('Completed');
                     var order = MY_ORDERS.find(function(e) {return e.orderID == i;});
                     order.delivery_status = 1;
-                    checkWallet();
+                    checkWallet('landing');
                     fetchProgress();
                     App.closeCurrentView();
                 } else toast('Please try again');
@@ -2370,15 +2226,21 @@
         // var OTP = $('#card-token-input').val();
         var OTP = '12345';
         validatePayment(OTP);
-    }).on('click', '#pending-orders-btn', function(e) {
-        fetchMyOrders($('#pendingOrders'), 'pending');
-        App.changeViewTo('#ordersPendingView');
+    }).on('click', '#transaction-history-btn', function(e) {
+        App.changeViewTo('#transactionsView');
+        $('body').spin();
+        checkWallet('transactions');
     }).on('click', '#completed-orders-btn', function(e) {
         fetchMyOrders($('#completedOrders'), 'completed');
         App.changeViewTo('#ordersCompletedView');
-    }).on('click', '.orders-filter', function(e) {
-        $('#searchModal').show();
-        $('#searchHeader').show(300);
+    }).on('click', '#pending-orders-btn', function(e) {
+        fetchMyOrders($('#pendingOrders'), 'pending');
+        App.changeViewTo('#ordersPendingView');
+    })/*.on('click', '#withdrawals-query-btn', function(e) {
+        fetchWithdrawals();
+    })*/.on('click', '.orders-filter', function(e) {
+        $SM.show();
+        $SH.show(300);
         var ip = document.querySelector('#search-input');
         ip.dataset.container = this.dataset.container;
         ip.value = '';
@@ -2444,8 +2306,92 @@
             },
             complete: function() {$('body').unspin();}
         });
+    }).on('click', '#catalog-fetch-link', function(e) {
+        getProductFetchDetails();
+    }).on('click', '.product-entry', function(e) {
+        var itemId = this.dataset.itemId;
+        var c = PRODUCTS.find(function(p) { return p.itemID == itemId; });
+        if (c) {
+            CURRENT_SHOP = c.ownerID;
+            CURRENT_CATG = '1';
+            var images = '';
+            if (c.images > 1) {
+                for (var i = 0; i < c.images; i++) images += "<img src='"+MY_URL+"/img/items/products/"+c.itemID+"_"+i+".jpg' class='thumbnail box96 ba bs-r mg-r "+(i==0?'active':'')+"'>";
+            }
+            var h = "<div class='fw fx fx-ac fx-jc bb'>\
+                <img src='"+MY_URL+"/img/items/products/"+c.itemID+"_0.jpg' id='featured-photo' class='fw'>\
+            </div>"+
+            (c.images > 1 ? "<div class='carousel pd16 f0 bb'>"+images+"</div>" : "")+
+            "<div class='pd20'>\
+                <div class='f24 b'>"+c.name+"</div>"+
+                (c.discount > 0 ? "<div class='c-g tx-lt'>&#8358;"+comma(c.price)+"</div>" : "")+
+                "<div class='f16 b'>&#8358;"+comma((c.price - c.discount).toFixed(2))+"</div>\
+                <div class='description pd16z c-g'>"+(c.description||'')+"</div>"+
+                (c.ownerID != UUID ? "<div class='fw fx fx-ac b5 pd516 b4-r ba'>\
+                    <div class='fx40'>PCS:</div>\
+                    <div class='fx60 h50 mg-lxx pd020'><input class='fw fh f16' type='number' name='item-count' value='1' min='1' placeholder='1'></div>\
+                </div>"+
+                (c.sizes != null ? "<div class='fw fx fx-ac pd516 b4-r ba triangle-down'>\
+                    <div class='fx40 b'>SIZE:</div>\
+                    <div class='size-picker picker psr fx fx-ac fx60 h50 mg-lxx pd020 ov-h ovx-a not-null' data-available-sizes='"+c.sizes+"' data-selected-options='' placeholder='Select size'></div>\
+                </div>" : "")+
+                (c.colors != null ? "<div class='fw fx fx-ac pd516 b4-r ba triangle-down'>\
+                    <div class='fx40 b'>COLOUR:</div>\
+                    <div class='color-picker picker psr fx fx-ac fx60 h50 mg-lxx pd020 ov-h ovx-a not-null' data-available-colors='"+c.colors+"' data-selected-options='' placeholder='Select colours'></div>\
+                </div>" : "")+
+                "<div id='item-checkout' class='fw Orange psf b0 l0 white pd16 t-c b f16' data-item-id='"+c.itemID+"'>BUY THIS ITEM</div>"
+                :"<div class='item-remove fw Orange psf b0 l0 white pd16 t-c b f16' data-item-id='"+c.itemID+"' data-catg='1'>DELETE THIS ITEM</div>")+
+            "</div>";
+            $('#productWrapper').html(h);
+            App.changeViewTo('#productView');
+        }
+    }).on('click', '.thumbnail', function(e) {
+        $('.thumbnail.active').removeClass('active');
+        this.classList.add('active');
+        $('#featured-photo').attr('src', this.src).hide().slideDown();
+    }).on('click', '.event-entry', function(e) {
+        var itemId = this.dataset.itemId;
+        var c = ITEMS_DATA.find(function(a) {return a.itemID == itemId;});
+        if (c) {
+            if (c.isselling == 0) return toast('This event is no more selling');
+            var h = "<div class='fw b f16 pd16 bb t-c'>BUY A TICKET</div>";
+            var user = c.ownerID == UUID;
+            c.tickets.forEach(function(v) {
+                h+="<div class='ticket-entry fw pd16 bb'>\
+                    <div class='fw fx fx-fs'>\
+                        <div class='fx60'>\
+                            <div class='f16 b'>"+TICKETS[v.ticket_type]+"</div>\
+                            <div class='fw fx fx-fe mg-t'>\
+                                <div class='fx50'>"
+                                    +(v.discount > 0 ? "<div class='tx-lt c-g f10'>&#8358;"+comma(v.price)+"</div>" : "")+
+                                    "<div class='f16'>&#8358;"+comma((v.price - v.discount).toFixed(2))+"</div>\
+                                </div>"+
+                                (user ? ""
+                                    :v.sales == v.seats ? "<div class='pd10 b4-r bg-fd carousel c-g'>SOLD OUT</div>"
+                                    : "<div class='buy-ticket pd10 b4-r Orange white' data-item-id='"+c.itemID+"' data-item-type='"+v.ticket_type+"'>BUY</div>")+
+                            "</div>\
+                        </div>\
+                    </div>\
+                </div>";
+            });
+            $MM.show();
+            $MF.html(h).zoom();
+        }
+    }).on('click', '.buy-ticket', function(e) {
+        var itemId = this.dataset.itemId;
+        var tType = this.dataset.itemType;
+        var d = ITEMS_DATA.find(function(a) {return a.itemID == itemId;});
+        if (d) {
+            var tk = d.tickets.find(function(b){return b.ticket_type==tType});
+            var invoice = [{id: itemId, nm: d.name+' ('+TICKETS[tType]+')', pr: parseFloat(tk.price).toFixed(2), ds: parseFloat(tk.discount).toFixed(2), tt: 1}];
+            CURRENT_ORDER = invoice;
+            ISTICKET = JSON.stringify({ticket_type: tType, event_id: itemId});
+            App.changeViewTo('#invoiceView');
+            $('#invoice-content').html(buildInvoice(invoice, null));
+        }
     }).on('click', '#withdraw-cash', function(e) {
-        toast('Connecting...');
+        $('body').spin();
+        checkWallet('query');
     }).on('click', '#notifications-btn', function(e) {
         this.dataset.total = '0';
         App.changeViewTo('#inboxView');
@@ -2453,25 +2399,23 @@
     }).on('click', '.msg-entry', function(e) {
         var key = this.dataset.key;
         var msg = MY_MAILS.find(function(m) {return m.k = key;});
-        $('#repliesWrapper').empty();
+        $('#repliesWrapper').empty().attr('placeholder','Loading replies...');
         App.changeViewTo('#messageView');
         buildMessage(msg);
-        // fetchMessageReplies(key);
+        fetchReplies(key);
     }).on('click', '.msg-reply', function(e) {
         App.changeViewTo('#replyView');
         $('#post-a-reply').attr('data-key', this.dataset.key);
-    }).on('click', '#post-a-reply', function(e) {//[[***]]
+    }).on('click', '#post-a-reply', function(e) {
         var reply = $('#reply-input').val().trim();
         if (!reply) return;
-        // console.log(reply);
         var el = this;
-        if (el.dataset.disabled == 'true') return;
-        el.dataset.disabled = 'true';
+        if (el.dataset.disabled == 'true') return; el.dataset.disabled = 'true';
         $('body').spin();
         $.ajax({
             url: MY_URL + "/send.php",
             data: {
-                action: 'submitAReply',
+                action: 'messageReply',
                 reply: reply,
                 messageKey: el.dataset.key,
                 senderID: UUID
@@ -2481,8 +2425,9 @@
             dataType: 'json',
             success: function(p) {
                 if (p.state == '1') {
-                    // buildReply();
+                    $('#repliesWrapper').prepend(buildReplies([{senderID: UUID, reply: reply, messageKey: el.dataset.key, time_: (Date.now()/1000)}], true));
                     App.closeCurrentView();
+                    setTimeout(function() { $('.reply-entry').first().slideDown(); }, 300);
                 } else {
                     toast(p.state);
                 }
@@ -2537,6 +2482,32 @@
                     App.closeCurrentView();
                 }
             }
+        });
+    }).on('click', '#add-gallery-items', function(e) {
+        App.changeViewTo('#galleryAddView');
+    }).on('click', '.gallery-viewer', function(e) {
+        var $ctn = $('#pictures-container');
+        $ctn.attr('placeholder', 'Loading gallery items...');
+        $('#add-gallery-items').hide();
+        App.changeViewTo('#galleryView');
+        $('body').spin();
+        $.ajax({
+            url: MY_URL + "/fetch.php",
+            data: {
+                action: 'fetchGalleryLinks',
+                ownerID: UUID
+            },
+            dataType: 'json',
+            timeout: 30000,
+            method: "GET",
+            success: function(p) {
+                if (p.gallery_links) buildGalleryItems(p.gallery_links);
+                else {
+                    $ctn.attr('placeholder', 'No gallery items have been added');
+                    if (USERTYPE == 1) $('#add-gallery-items').show();
+                }
+            },
+            complete: function(x) {$('body').unspin(); if (x.status === 0) toast('Network error');}
         });
     })
     ;
@@ -2866,7 +2837,7 @@
         });
         return h;
     }
-    function checkWallet() {
+    function checkWallet(type) {
         $.ajax({
             url: MY_URL + "/fetch.php",
             data: {
@@ -2877,8 +2848,20 @@
             dataType: 'json',
             method: "GET",
             success: function(p) {
-                $('#wallet-balance').text(comma(p.balance));
-            }
+                if (type == 'landing') {
+                    $('#amount-due').text(comma(parseFloat(p.balance).toFixed(2)));
+                } else if (type == 'transactions') {
+                    $('#total-sales').text(comma(p.credit));
+                    $('#total-withdrawal').text(comma(p.debit));
+                    $('#wallet-balance').text(comma(parseFloat(p.balance).toFixed(2)));
+                } else if (type == 'query') {
+                    MY_BALANCE = p.balance;
+                    MIN_WITHDRAWAL = p.minim;
+                    if (MY_BALANCE == 0 || MY_BALANCE < MIN_WITHDRAWAL) return toast('You have insufficient funds');
+                    App.changeViewTo('#withdrawalView');
+                }
+            },
+            complete: function() {if (type != 'landing') $('body').unspin();}
         });
     }
     function fetchProgress() {
@@ -2932,7 +2915,7 @@
     }
     function buildMails(p) {
         var h = '';
-        p.forEach(function(c) {//admins will close it. To reopen this ticket, reply this message
+        p.forEach(function(c) {
             h += "<div class='msg-entry fw pd10 psr b4-r mg-b16 ba sh-a ov-h' data-key='"+c.k+"'>\
                 <div class='mail-status psa t0 r0 white "+(c.isopen == 1 ? 'Orange' : 'bg-fd')+"' data-key='"+c.k+"' style='padding:2px 5px;'>"+(c.isopen == 1 ? 'open' : 'closed')+"</div>\
                 <div class='fw b f16'>"+c.title+"</div>\
@@ -2943,11 +2926,11 @@
         return h;
     }
     function buildMessage(c) {
-        var h = "<div class='fw pd10 psr b4-r ba sh-a ov-h'>\
+        var h = "<div class='fw psr b4-r ov-h'>\
                 <div class='psa t0 r0 white "+(c.isopen == 1 ? 'Orange' : 'bg-fd')+"' style='padding:2px 5px;'>"+(c.isopen == 1 ? 'open' : 'closed')+"</div>\
                 <div class='fw b f16'>"+c.title+"</div>\
                 <div class='f10 c-g'>"+checkTime(c.time_*1000)+"</div>\
-                <div class='fw pd10z'>"+c.message+"</div>\
+                <div class='fw pd10z pr-w'>"+c.message+"</div>\
                 <div class='fw fx c-g b5'>\
                     <div class='msg-reply mg-r' data-key='"+c.k+"'>Reply</div>\
                     <div class='"+(c.isopen == '1' ? 'msg-close' : '')+" mg-r' data-key='"+c.k+"'>"+(c.isopen == '1' ? 'Close' : "<span class='bg-fd'>Closed</span>")+"</div>\
@@ -2957,51 +2940,65 @@
             </div>";
         $('#messageWrapper').html(h);
     }
+    function fetchReplies(key) {
+        $.ajax({
+            url: MY_URL + "/fetch.php",
+            data: {
+                action: 'fetchReplies',
+                messageKey: key,
+                senderID: UUID
+            },
+            dataType: 'json',
+            timeout: 30000,
+            method: "GET",
+            success: function(p) {
+                if (p.length == 0) return $('#repliesWrapper').attr('placeholder','No replies');
+                $('#repliesWrapper').html(buildReplies(p, false));
+            },
+            complete: function() {$('body').unspin();}
+        });
+    }
+    function buildReplies(p, hide) {
+        var h = '';
+        p.forEach(function(c) {
+            h += "<div class='reply-entry pd10 ba1 b4-r mg-b' "+(hide ? "style='display:none;'" : '')+">\
+                <div class='fw b'>"+(c.senderID == UUID ? 'You' : 'Admin')+"</div>\
+                <div class='f10 c-g'>"+checkTime(c.time_*1000)+"</div>\
+                <div class='fw pd10z pr-w'>"+c.reply+"</div>\
+            </div>";
+        });
+        return h;
+    }
     function buildItems(p, catg, local) {
         var h = '';
         var user = p[0].ownerID == UUID;
-        ITEMS_DATA = p;
+        if (catg != 1) {
+            if (local) ITEMS_DATA.push(p[0]);
+            else ITEMS_DATA = p;
+        }
+        CURRENT_SHOP = p[0].ownerID;
+        CURRENT_CATG = catg;
 
-        if (catg == '1') {//e-commerce
-            p.forEach(function(c) {
-                h+="<div class='boxes2 product-entry i-b bg' data-product-id='"+c.itemID+"'>\
-                    <div class='fw'>\
-                        <div class='fw fx h50w bg-ac mg-b bs-r ba ov-h'>\
-                            <img class='fw im-sh' src='"+MY_URL+"/img/items/products/"+c.itemID+"_0.jpg'>\
-                        </div>\
-                        <div class='fw'>\
-                            <div class='f16 b'>"+c.name+"</div>"+
-                            (c.discount > 0 ? "<span class='tx-lt ltt c-g f10 mg-r'>&#8358;"+comma(c.price)+"</span>" : "")+
-                            "<span class='f16'>&#8358;"+comma((c.price - c.discount).toFixed(2))+"</span>\
-                        </div>"+
-                        (c.delivery == 1 ? 
-                        "<div class='fx f10'>\
-                            <div style='width:54px;'><img src='res/img/logo.png' class='fw'></div><i class='b'>Express</i>\
-                        </div>":
-                        ""
-                        )+
-                    "</div>\
-                </div>";
-            });
+        if (catg == '1') {//e-commerce, fetched by the owner
+            if (local) PRODUCTS.push(p[0]);
+            else PRODUCTS = p;
+            //
+            h+=buildProducts(p);
             var $v = $('#products-container');
             if (local) $v.append(h); else $v.html(h);
         } else if (catg == '2') {//food
             var h1="", h2="", h3="", h4="";
             p.forEach(function(c) {
-                var m="<div class='fw food-entry bg pd16 mg-tx sh-c' data-type='"+c.food_type+"'>\
+                var m="<div class='fw food-entry bg pd16 mg-tx sh-c' data-item-id='"+c.itemID+"'>\
                     <div class='fw fx fx-fs'>\
-                        <div class='w120 xh120 bg-ac bs-r ov-h'><img src='"+MY_URL+"/img/items/food/"+c.itemID+".jpg' class='fw bs-r'></div>\
+                        <div class='w120 xh120 bg-ac ba bs-r ov-h'><img src='"+MY_URL+"/img/items/food/"+c.itemID+".jpg' class='fw bs-r'></div>\
                         <div class='fx60 mg-lx'>\
-                            <div class='f16 b'>"+c.name+"</div>\
-                            <div class='fw fx fx-fe mg-t'>\
-                                <div class='fx50'>"
-                                    +(c.discount > 0 ? "<div class='tx-lt c-g f10'>&#8358;"+comma(c.price)+"</div>" : "")+
-                                    "<div class='f16'>&#8358;"+comma((c.price - c.discount).toFixed(2))+"</div>\
-                                </div>"+
-                                (user ? 
+                            <div class='fw fx fx-fs'>\
+                                <div class='fx60 f16 b mg-rx'>"+c.name+"</div>"+
+                                (user ?
                                 "<div class='fx fx-je c-g'>\
-                                    <!--<div class='item-edit f20 mg-rxx icon-edit' data-item-id='"+c.itemID+"'></div>-->\
-                                    <div class='item-remove f20 icon-logout' data-item-id='"+c.itemID+"'></div>\
+                                    <!--<div class='item-edit f16 mg-rxx icon-edit-1' data-item-id='"+c.itemID+"'></div>-->\
+                                    <div class='item-remove f16 icon-cancel' data-item-id='"+c.itemID+"' data-catg='2'></div>\
                                 </div>":
                                 "<div class='fx fx-jc item-order-spinner' data-item-id='"+c.itemID+"'>\
                                     <div class='fx fx-ac fx-jc Orange white b2-r box20 f20 item-subtract'>-</div>\
@@ -3010,14 +3007,18 @@
                                 </div>"
                                 )+
                             "</div>\
+                            <div class='fw mg-tm'>"
+                                +(c.discount > 0 ? "<div class='tx-lt c-g f10'>&#8358;"+comma(c.price)+"</div>" : "")+
+                                "<div class='f16 b5'>&#8358;"+comma((c.price - c.discount).toFixed(2))+"</div>\
+                            </div>\
                         </div>\
                     </div>\
                 </div>";
                 switch(c.food_type){
-                    case'1':case 1:h1+=m;break;
-                    case'2':case 2:h2+=m;break;
-                    case'3':case 3:h3+=m;break;
-                    case'4':case 4:h4+=m;break;
+                    case 1:h1+=m;break;
+                    case 2:h2+=m;break;
+                    case 3:h3+=m;break;
+                    case 4:h4+=m;break;
                 }
             });
             var $v = $('#meal-container');
@@ -3037,62 +3038,39 @@
             }
         } else if (catg == '3') {//ticket
             p.forEach(function(c) {
-                h+="<div class='fw event-entry psr'>\
-                        <div class='fw fx fx-ac pd1015 caption white psa t0 l0'>\
-                            <div class='fx60'>\
-                                <div class='f20 b'>"+c.name+"</div>\
-                                <div class='f10'>"+EVENTS[c.event_type]+"</div>\
-                                <div class='f10'>"+c.event_date+"</div>\
-                            </div>\
-                        </div>"+
-                        (user ? "<div class='item-delete psa pd5 Grey bs-r mg-t mg-r ba r0 ac' data-item-id='"+c.itemID+"' data-catg='3'>Remove Event</div>":"")+
-                        "<img class='fw fx sh-a' src='"+MY_URL+"/img/items/events/"+c.itemID+".jpg'>";
-                c.tickets.forEach(function(v) {
-                    h+="<div class='fw pd16 mg-bx sh-c'>\
-                        <div class='fw fx fx-fs'>\
-                            <div class='fx60'>\
-                                <div class='f16 b'>"+TICKETS[v.ticket_type]+"</div>\
-                                <div class='fw fx fx-fe mg-t'>\
-                                    <div class='fx50'>"
-                                        +(v.discount > 0 ? "<div class='tx-lt c-g f10'>&#8358;"+comma(v.price)+"</div>" : "")+
-                                        "<div class='f16'>&#8358;"+comma((v.price - v.discount).toFixed(2))+"</div>\
-                                    </div>"+
-                                    (user ? 
-                                    "":
-                                    "<div class='fx fx-jc item-order-spinner' data-item-id='"+c.itemID+"'>\
-                                        <div class='fx fx-ac fx-jc Orange white b2-r box20 f20 item-subtract'>-</div>\
-                                        <div class='fx fx-ac fx-jc w32 item-count t-c"
-                                            +"' data-item-id='"+c.itemID
-                                            +"' data-item-type='"+v.ticket_type
-                                            +"'>0</div>\
-                                        <div class='fx fx-ac fx-jc Orange white b2-r box20 f20 item-add'>+</div>\
-                                    </div>"
-                                    )+
-                                "</div>\
-                            </div>\
+                h+="<div class='fw event-entry psr mg-b16' data-item-id='"+c.itemID+"'>\
+                    <div class='fw fx fx-ac pd1015 Grey tx-hs psa t0 l0'>\
+                        <div class='fx60'>\
+                            <div class='f20 b'>"+c.name+"</div>\
+                            <div class='f10'>"+EVENTS[c.event_type]+"</div>\
+                            <div class='f10'>"+c.event_date+"</div>\
                         </div>\
-                    </div>";
-                });
-                h+='</div>';
+                    </div>"+
+                    (user ?
+                        c.isselling == 1 ?
+                            "<div class='item-remove psa pd5 Grey bs-r mg-t mg-r ba r0 ac b' data-item-id='"+c.itemID+"' data-catg='3'>Stop Selling</div>"
+                            :"<div class='psa pd5 Grey bs-r mg-t mg-r ba r0 b'>Not Selling</div>"
+                    : c.isselling == 1 ?
+                        "<div class='psa pd5 Grey bs-r mg-t mg-r ba r0 b'>Still Selling</div>"
+                        :"<div class='psa pd5 Grey bs-r mg-t mg-r ba r0 b'>No more Selling</div>")+
+                    "<img class='fw fx sh-a' src='"+MY_URL+"/img/items/events/"+c.itemID+".jpg'>\
+                </div>";
             });
             var $v = $('#events-container');
             if (local) $v.append(h); else $v.html(h);
         } else if (catg == '4') {//graphics
             p.forEach(function(c) {
                 c.name = GRAPHICS[c.graphics_type];
-                h+="<div class='fw graphics-entry bg pd16 mg-tx sh-c'>\
+                h+="<div class='fw graphics-entry bg pd16 mg-tx sh-c' data-item-id='"+c.itemID+"'>\
                     <div class='fw fx fx-fs'>\
-                        <div class='w120 xh120 bg-ac bs-r ov-h'><img src='"+MY_URL+"/img/items/graphics/"+c.itemID+".jpg' class='fw bs-r'></div>\
+                        <div class='w120 xh120 bg-ac ba bs-r ov-h'><img src='"+MY_URL+"/img/items/graphics/"+c.itemID+".jpg' class='fw bs-r'></div>\
                         <div class='fx60 mg-lx'>\
-                            <div class='f16 b'>"+GRAPHICS[c.graphics_type]+"</div>\
-                            <div class='fw fx fx-fe'>\
-                                <div class='fx50'>\
-                                    <div class='f16'>&#8358;"+comma(parseFloat(c.price).toFixed(2))+"</div>\
-                                </div>"+
+                            <div class='fw fx fx-fs'>\
+                                <div class='fx60 f16 b mg-rx'>"+GRAPHICS[c.graphics_type]+"</div>"+
                                 (user ? 
                                 "<div class='fx fx-je c-g'>\
-                                    <!--<div class='item-edit f20 mg-rxx icon-edit' data-item-id='"+c.itemID+"'></div>-->\
-                                    <div class='item-remove f20 icon-logout' data-item-id='"+c.itemID+"'></div>\
+                                    <!--<div class='item-edit f20 mg-rxx icon-edit-1' data-item-id='"+c.itemID+"'></div>-->\
+                                    <div class='item-remove f16 icon-cancel' data-item-id='"+c.itemID+"' data-catg='4'></div>\
                                 </div>":
                                 "<div class='fx fx-jc item-order-spinner' data-item-id='"+c.itemID+"'>\
                                     <div class='fx fx-ac fx-jc Orange white b2-r box20 f20 item-subtract'>-</div>\
@@ -3101,6 +3079,9 @@
                                 </div>"
                                 )+
                             "</div>\
+                            <div class='fw mg-tm'>\
+                                <div class='f16'>&#8358;"+comma(parseFloat(c.price).toFixed(2))+"</div>\
+                            </div>\
                         </div>\
                     </div>\
                 </div>";
@@ -3109,22 +3090,19 @@
             if (local) $v.append(h); else $v.html(h);
         } else if (catg == '5') {//make up
             p.forEach(function(c) {
-                h+="<div class='fw makeup-entry bg pd16 mg-tx sh-c'>\
+                h+="<div class='fw makeup-entry bg pd16 mg-tx sh-c' data-item-id='"+c.itemID+"'>\
                     <div class='fw fx fx-fs'>\
-                        <div class='w120 xh120 bg-ac bs-r ov-h'><img src='"+MY_URL+"/img/items/makeup/"+c.itemID+".jpg' class='fw bs-r'></div>\
+                        <div class='w120 xh120 bg-ac ba bs-r ov-h'><img src='"+MY_URL+"/img/items/makeup/"+c.itemID+".jpg' class='fw bs-r'></div>\
                         <div class='fx60 mg-lx'>\
-                            <div>\
-                                <div class='f16 b'>"+MAKEUPS[c.makeup_type]+"</div>\
-                                <div class='b5'>"+c.name+"</div>\
-                            </div>\
-                            <div class='fw fx fx-fe mg-t'>\
-                                <div class='fx50'>\
-                                    <div class='f16'>&#8358;"+comma(c.price)+"</div>\
+                            <div class='fw fx fx-fs'>\
+                                <div class='fx60 mg-r'>\
+                                    <div class='f16 b'>"+MAKEUPS[c.makeup_type]+"</div>\
+                                    <div class='b5'>"+c.name+"</div>\
                                 </div>"+
                                 (user ? 
                                 "<div class='fx fx-je c-g'>\
-                                    <!--<div class='item-edit f20 mg-rxx icon-edit' data-item-id='"+c.itemID+"'></div>-->\
-                                    <div class='item-remove f20 icon-logout' data-item-id='"+c.itemID+"'></div>\
+                                    <!--<div class='item-edit f20 mg-rxx icon-edit-1' data-item-id='"+c.itemID+"'></div>-->\
+                                    <div class='item-remove f16 icon-cancel' data-item-id='"+c.itemID+"' data-catg='5'></div>\
                                 </div>":
                                 "<div class='fx fx-jc item-order-spinner' data-item-id='"+c.itemID+"'>\
                                     <div class='fx fx-ac fx-jc Orange white b2-r box20 f20 item-subtract'>-</div>\
@@ -3133,6 +3111,9 @@
                                 </div>"
                                 )+
                             "</div>\
+                            <div class='fw mg-tm'>\
+                                <div class='f16'>&#8358;"+comma(c.price)+"</div>\
+                            </div>\
                         </div>\
                     </div>\
                 </div>";
@@ -3142,13 +3123,13 @@
         } else if (catg == '6') {//laundry
             p.forEach(function(c) {
                 c.name = LAUNDRIES[c.itemID];
-                h+="<div class='fw laundry-entry bg pd16 mg-tx sh-c'>\
-                    <div class='fw fx'>\
+                h+="<div class='fw laundry-entry bg pd16 mg-tx sh-c' data-item-id='"+c.itemID+"'>\
+                    <div class='fw fx fx-js'>\
                         <div class='fx60 f16 b'>"+LAUNDRIES[c.itemID]+"</div>\
-                        <div class='fx fx-fe mg-t'>"+
+                        <div class='fx fx-fe'>"+
                             (user ? 
                             "<div class='fx fx-je c-g'>\
-                                <div class='item-remove f20 icon-logout' data-item-id='"+c.itemID+"'></div>\
+                                <div class='item-remove f16 icon-cancel' data-item-id='"+c.itemID+"' data-catg='6'></div>\
                             </div>":
                             "<div class='fx fx-jc item-order-spinner' data-item-id='"+c.itemID+"'>\
                                 <div class='fx fx-ac fx-jc Orange white b2-r box20 f20 item-subtract'>-</div>\
@@ -3158,10 +3139,10 @@
                             )+
                         "</div>\
                     </div>\
-                    <div class='fw b5 laundry-type' data-item-id='"+c.itemID+"'>"+
-                        (c.full_laundry > 0 ? "<div class='radio"+(user ? '' : ' singo selected')+" psr mg-bx' data-name='full_laundry'>&#8358;"+c.full_laundry+" (Full laundry)</div>" : "")+
-                        (c.wash_only > 0 ? "<div class='radio"+(user ? '' : ' singo')+" psr mg-bx"+(c.full_laundry == 0 && !user ? ' selected' : '')+"' data-name='wash_only'>&#8358;"+c.wash_only+" (Wash only)</div>" : "")+
-                        (c.iron_only > 0 ? "<div class='radio"+(user ? '' : ' singo')+" psr mg-bx"+(c.full_laundry == 0 && c.wash_only == 0 && !user ? 'selected' : '')+"' data-name='iron_only'>&#8358;"+c.iron_only+" (Iron only)</div>" : "")+
+                    <div class='fw b5 mg-t laundry-type' data-item-id='"+c.itemID+"'>"+
+                        (c.full_laundry > 0 ? "<div class='"+(user ? '' : 'radio singo selected')+" psr mg-bx' data-name='full_laundry'>&#8358;"+c.full_laundry+" (Full laundry)</div>" : "")+
+                        (c.wash_only > 0 ? "<div class='"+(user ? '' : 'radio singo')+" psr mg-bx"+(c.full_laundry == 0 && !user ? ' selected' : '')+"' data-name='wash_only'>&#8358;"+c.wash_only+" (Wash only)</div>" : "")+
+                        (c.iron_only > 0 ? "<div class='"+(user ? '' : 'radio singo')+" psr mg-bx"+(c.full_laundry == 0 && c.wash_only == 0 && !user ? 'selected' : '')+"' data-name='iron_only'>&#8358;"+c.iron_only+" (Iron only)</div>" : "")+
                     "</div>\
                 </div>";
             });
@@ -3170,16 +3151,13 @@
         } else if (catg == '7') {//gas
             p.forEach(function(c) {
                 c.name = GASES[c.itemID];
-                h+="<div class='fw gas-entry bg pd16 mg-tx sh-c'>\
-                    <div class='fw fx'>\
-                        <div class='fx60'>\
-                            <div class='f16 b'>"+GASES[c.itemID]+"</div>\
-                            <div class='b5'>&#8358;"+comma(c.price)+"</div>\
-                        </div>\
-                        <div class='fx fx-fe mg-t'>"+
+                h+="<div class='fw gas-entry bg pd16 mg-tx sh-c' data-item-id='"+c.itemID+"'>\
+                    <div class='fw'>\
+                        <div class='fx fx'>\
+                            <div class='fx60 f16 b'>"+GASES[c.itemID]+"</div>"+
                             (user ? 
                             "<div class='fx fx-je c-g'>\
-                                <div class='item-remove f20 icon-logout' data-item-id='"+c.itemID+"'></div>\
+                                <div class='item-remove f16 icon-cancel' data-item-id='"+c.itemID+"' data-catg='7'></div>\
                             </div>":
                             "<div class='fx fx-jc item-order-spinner' data-item-id='"+c.itemID+"'>\
                                 <div class='fx fx-ac fx-jc Orange white b2-r box20 f20 item-subtract'>-</div>\
@@ -3188,6 +3166,9 @@
                             </div>"
                             )+
                         "</div>\
+                        <div class='fw mg-t'>\
+                            <div class='b5'>&#8358;"+comma(c.price)+"</div>\
+                        </div>\
                     </div>\
                 </div>";
             });
@@ -3195,22 +3176,111 @@
             if (local) $v.append(h); else $v.html(h);
         }
     }
+    function exitItemAddView() {
+        Views.pop();
+        Views.pop();
+        App.changeViewTo('#itemsView');
+    }
+    function getProductFetchDetails() {
+        var $entries = $('#catalog-items-container .product-entry');
+        var catg = $('.item-filter.c-o').attr('data-catg');
+        if ($entries.length == 0) {
+            $('body').spin();
+            fetchProducts('top', 1, catg);
+        } else {
+            var cue = $entries.first().attr('data-item-key');
+            fetchProducts('more', cue, catg);
+        }
+    }
+    function fetchProducts(type, cue, catg) {
+        var $cn = $('#catalog-items-container');
+        $cn.attr("placeholder","Fetching products...");
+        $.ajax({
+            url: MY_URL + "/fetch.php",
+            data: {
+                action: 'fetchProducts',
+                campus: CAMPUSKEY,
+                type: type,
+                catg: catg,
+                cue: cue
+            },
+            dataType: 'json',
+            timeout: 30000,
+            method: "GET",
+            success: function(p) {
+                if (p.length > 0) {
+                    var h = buildProducts(p);
+                    if (type == 'top') {
+                        $cn.html(h);
+                        PRODUCTS = p;
+                    } else if (type == 'more') {
+                        $cn.prepend(h);
+                        p.forEach(function(i) { PRODUCTS.push(i); });
+                    } else if (type == 'less') {
+                        $cn.append(h);
+                        p.forEach(function(i) { PRODUCTS.push(i); });
+                    }
+                } else {
+                    $cn.attr("placeholder","We couldn't find a matching product");
+                }
+            },
+            complete: function() {$('body').unspin();}
+        });
+    }
+    function buildProducts(p) {
+        var h = '';
+        p.forEach(function(c) {
+            h+="<div class='boxes2 product-entry i-b bg ac' data-item-id='"+c.itemID+"' data-item-key='"+c.pk+"'>\
+                    <div class='fw fx h50w bg-ac ba mg-b bs-r ba ov-h'>\
+                        <img class='fw im-sh' src='"+MY_URL+"/img/items/products/"+c.itemID+"_0.jpg'>\
+                    </div>\
+                    <div class='fw'>\
+                        <div class='f16 b'>"+c.name+"</div>"+
+                        (c.discount > 0 ? "<span class='tx-lt ltt c-g f10 mg-r'>&#8358;"+comma(c.price)+"</span>" : "")+
+                        "<span class='f16'>&#8358;"+comma((c.price - c.discount).toFixed(2))+"</span>\
+                    </div>"+
+                    (c.delivery == 1 ?
+                    "<div class='fx f10'>\
+                        <div style='width:54px;'><img src='res/img/logo.png' class='fw'></div><i class='b'>Express</i>\
+                    </div>":
+                    ""
+                    )+
+                "</div>";
+        });
+        return h;
+    }
     function buildInvoice(invoice, order) {
         var h = '';
         var total = 0;
         invoice.forEach(function(c) {
             var price = (c.pr - c.ds) * c.tt;
             total += price;
-            h+="<div class='fw fx pd516'>\
+            h+="<div class='fw fx f16 pd516'>\
                     <span class='b c-o mg-r'>"+c.tt+"x</span>\
                     <span class='b5 fx60 mg-r'>"+c.nm+"</span>\
                     <span class='b'>&#8358;"+comma(price)+"</span>\
                 </div>";
+            if (c.isproduct) {
+                h+="<div class='pd16'>";
+                if(c.sz){
+                    var sizes = [];
+                    c.sz.split(',').forEach(function(d) { sizes.push(SIZES.find(function(c) {return c.dex == d;})); });
+                    sizes.forEach(function(s) { h += "<div class='pd5 mg-rm mg-bm i-b ba1 b5 b4-r'>"+s.val+"</div>"; });
+                }
+                if(c.cl){
+                    var colors = [];
+                    c.cl.split(',').forEach(function(d) { colors.push(COLORS.find(function(c) {return c.dex == d;})); });
+                    colors.forEach(function(l) {
+                        h += "<div class='pd5 mg-rm mg-bm i-b ba b5 b4-r'><div class='i-b b-rd ba1 mg-rm' style='background-color:"+l.hex+";vertical-align:bottom;width:18px;height:18px;'></div>"+l.name+"</div>";
+                    });
+                }
+                h+="</div><div class='pd016'><img src='"+MY_URL+"/img/items/products/"+c.id+"_0.jpg' class='invoice-item-thumb box120 ba bs-r' data-item-id='"+c.id+"'></div>";
+            }
         });
         var delivery = order ? order.delivery_charge : 0;
         ORDER_TOTAL = Math.ceil(total+50+parseInt(delivery));
-        h+="<div class='fw pd30'>"+(!order ? "<input type='text' name='voucherCode' class='fw pd16 bg-ac t-c b4-r ba' placeholder='Enter Voucher Code'>" : "")+"</div>\
-            <div class='fw fx b5 c-g pd516'><span class='fx60'>Sub Total</span><span class=''>&#8358;"+comma(total)+"</span></div>\
+        h+=(!order ? "<div class='fw pd30'><input type='text' name='voucherCode' class='fw pd16 bg-ac t-c b4-r ba' placeholder='Enter Voucher Code'></div>" : "<div class='fw pd16'></div>")+
+            "<div class='fw fx b5 c-g pd516'><span class='fx60'>Sub Total</span><span class=''>&#8358;"+comma(total)+"</span></div>\
             <div class='fw fx b5 c-g pd516'><span class='fx60'>Service Charge</span><span class=''>&#8358;50</span></div>"+
             (delivery > 0 ? "<div class='fw fx b5 c-g pd516'><span class='fx60'>Delivery Charge</span><span class=''>&#8358;"+delivery+"</span></div>" : "")+
             "<div class='fw fx b pd516'><span class='fx60'>Total</span><span class=''>&#8358;"+comma(ORDER_TOTAL)+"</span></div>";
@@ -3320,7 +3390,7 @@
             method: "POST",
             success: function(p) {
                 if (p.status == 'failure') return toast('Temporary server error. Please try again.');
-                updateOrderPaymentStatus(p);
+                updatePaymentStatus(p);
             },
             complete: function() {$('body').unspin();}
         });
@@ -3347,7 +3417,7 @@
             $('#card-token-input').focus();
         }
     }
-    function updateOrderPaymentStatus(body) {
+    function updatePaymentStatus(body) {
         // console.log(body.data.data.responsecode);
         if (body.state == 1) {
             toast('Your payment was successful');
@@ -3372,6 +3442,16 @@
             </div>";
         });
         return h;
+    }
+    function buildGalleryItems(gallery_links) {
+        var h = '';
+        var g = gallery_links.split(',');
+        g.forEach(function(imageLink) {
+            h += "<div class='fw mg-b16'><img src='"+MY_URL+'/img/gallery/'+imageLink+'.jpg'+"' class='fw'></div>";
+        });
+        $('#pictures-container').html(h);
+        if (g.length == 6) $('#add-gallery-items').hide();
+        else if (USERTYPE == 1) $('#add-gallery-items').show();
     }
     function localizeUserDetails(p, action) {
         SQL.transaction(function(i) {
@@ -3402,7 +3482,7 @@
         img.onload = function() {
             $('#shop-banner').css('backgroundImage', 'url('+img.src+')');
         }
-        img.src = MY_URL+'/img/users/'+shopId+'.jpg?id=1';
+        img.src = MY_URL+'/img/users/'+shopId+'.jpg';
         
         $('#display-name').text(shopName);
         $('#user-address').text(shopAddress);
@@ -3434,6 +3514,7 @@
           , minute=date.getMinutes()
           , M = 'AM'
           ;
+        if(hour==0)hour=12;
         if(hour>12){
             hour=hour-12;
             M='PM';

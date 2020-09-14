@@ -50,7 +50,7 @@
 
 
   	<div id="emailRegView" class="bg" data-function="View">
-  		<div class="hr h60 fw bg sh-b fx fx-ac psa pd030 t0 l0 z1 Orange white">
+  		<div class="hr h60 fw sh-b fx fx-ac psa pd030 t0 l0 z1 Orange white">
   			<div class="b f16">Sign Up With Email</div>
   		</div>
   		<div class="fw fh fx fx-ac fx-jc">
@@ -66,14 +66,14 @@
 
 
   	<div id="tokenPrompt" class="Grey" data-function="View">
-  		<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  		<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="b f16">Email Verification</div>
   		</div>
   		<div class="fw fh fx fx-ac fx-jc">
 	  		<form id="signup-form-code" class="start-form fw f16 pd030" autocomplete="off">
   				<div class="sh-a b4-r ba ov-h">
-	  				<div class="b5 pd20 bb">Enter the verification code that was sent to your email.</div>
+	  				<div class="b5 pd20 bb">Enter the verification code that was sent to your email</div>
                     <input type="text" name="token" class="pd20 fw bb" placeholder="Enter Your Verification Code">
                     <input type="submit" name="submit" class="pd20 b f16 fw Orange white" value="SUBMIT">
 	  			</div>
@@ -83,15 +83,15 @@
 
 
   	<div id="signupView" class="bg" data-function="View">
-			<div class="h84 fw bg psf z4 t0 l0 b sh-b">
-				<div class="fw t-c pd10 f20">Sign up</div>
-				<div class="fw fx f14 t-c c-g">
-  				<div class="signup-option fx50 pd10 c-o" data-index="0">BUYER</div>
-  				<div class="signup-option fx50 pd10" data-index="1">SELLER</div>
-  			</div>
+		<div class="fw bg psf z4 t0 l0 b sh-b" style="height: 84px;">
+			<div class="fw t-c pd10 f20">Sign up</div>
+			<div class="fw fx f14 t-c c-g">
+				<div class="signup-option fx50 pd10 c-o" data-index="0">BUYER</div>
+				<div class="signup-option fx50 pd10" data-index="1">SELLER</div>
 			</div>
+		</div>
 
-  		<div class="fw fh pd84t ovx-h ovy-a">
+  		<div class="fw fh ovx-h ovy-a" style="padding-top: 84px;">
   			<div class="fw pd12 b5 t-c white Orange" style="font-size: 12px;">YOU ARE REGISTERING AS A <span id="reg-type" style="font-weight: 900;">BUYER</span></div>
 	  		<div class="fw fx fx-jc pd16">
 	  			<img src="res/img/logo.png" class="w80p">
@@ -161,7 +161,6 @@
 				<div class="pd20">Already have an account? <span class="view-locator ac c-o" data-view="#loginView">SIGN IN</span></div>
 			</div><!-- end footer -->
 	  	</div>
-
   	</div><!-- end signup view -->
   	
 
@@ -193,15 +192,44 @@
   	</div><!-- end login view -->
 
 
-  	<div id="retrievalView" class="Grey" data-function="View">
-  		<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  	<div id="retrievalView" class="bg" data-function="View">
+  		<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="b f16">Retrieve Password</div>
   		</div>
   		<div class="fw fh fx fx-ac fx-jc">
-	  		<!--  -->
+	  		<form id="retrieve-form-email" class="start-form fw f16 pd030 mg-b16" autocomplete="off">
+  				<div class="sh-a b4-r ba ov-h">
+		  			<div class="b5 pd20 bb">Enter your registered email address</div>
+	  				<input type="email" name="email" class="pd20 fw bb" placeholder="Enter Your Email Address">
+	  				<input type="submit" name="submit" class="pd20 b f16 fw Orange white" value="SUBMIT">
+	  			</div>
+  			</form>
+  			<div class="fw pd1015 t-c f10 psa mg-b b0 l0">Got a reset key? <span class="view-locator b ac c-o" data-view="#resetTokenPrompt">PROCEED</span></div>
   		</div>
   	</div>
+
+
+  	<div id="resetTokenPrompt" class="bg" data-function="View">
+  		<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
+  			<div class="b f16">Reset Key</div>
+  		</div>
+  		<div class="fw fh fx fx-ac fx-jc">
+	  		<form id="retrieve-form-code" class="start-form fw f16 pd030" autocomplete="off">
+  				<div class="sh-a b4-r ba ov-h">
+	  				<div class="b5 pd20 bb">Create a new password and enter the reset key that was sent to your email</div>
+                    <div class="psr">
+                    	<input type="password" name="password" class="pd20 fw bb" placeholder="New Password">
+                    	<span class="password-toggle pd20 psa r0 b0 icon-eye"></span>
+                    </div>
+                    <input type="text" name="token" class="pd20 fw" placeholder="Enter Your Reset Key">
+                    <input type="submit" name="submit" class="pd20 b f16 fw Orange white" value="SUBMIT">
+	  			</div>
+  			</form>
+  		</div>
+  	</div>
+
 
   	<div id="channelPrompt" class="Grey" data-function="View">
 		<div class="fw fh fx fx-jc cd pd20 ovx-h ovy-a" style="background-image:url(res/img/icon/fashion.jpg);background-size: cover;background-repeat: no-repeat;">
@@ -229,7 +257,7 @@
   		<!-- <div id="landing-page-wrapper" class="tabs-wrapper fh ov-h"> -->
 
 			<div id="timeline" class="active-tab" data-function="Tab">
-	  		<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1">
+	  		<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1">
 	  			<div id="menu-button" class="psa l0 t0 fx fx-ac fx-jc c-o f24 icon-menu box60"></div>
 		  		<div class="fw h60 fx fx-jc pd16">
 		  			<img src="res/img/logo.png" class="w50p">
@@ -263,26 +291,26 @@
 		  			<div class="bg bt bb mg-t">
 			  			<div class="fw pd1015 b bb">Buy and sell in your institute</div>
 			  			<div id="carousel-shop-by-categories" class="carousel pd16 f0 lh0">
-			  				<div class="w42v-c psr i-b ov-h sh-a mg-r ba bs-r products-catg-entry bg-im-cv" style="background-image: url(res/img/icon/appliances.jpg);">
+			  				<div class="w42v-c psr i-b ov-h sh-a mg-r ba bs-r products-catg-entry bg-im-cv" style="background-image: url(res/img/icon/appliances.jpg);" data-catg="8">
 		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el Pink">HOSTEL APPLIANCES</div>
 			  				</div>
-			  				<div class="w42v-c psr i-b ov-h sh-a mg-r ba bs-r products-catg-entry bg-im-cv" style="background-image: url(res/img/icon/electronics.jpg);">
+			  				<div class="w42v-c psr i-b ov-h sh-a mg-r ba bs-r products-catg-entry bg-im-cv" style="background-image: url(res/img/icon/electronics.jpg);" data-catg="5">
 		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el Pink">ELECTRONICS</div>
 			  				</div>
-			  				<div class="w42v-c psr i-b ov-h sh-a mg-r ba bs-r products-catg-entry bg-im-cv" style="background-image: url(res/img/icon/phones.png);">
+			  				<div class="w42v-c psr i-b ov-h sh-a mg-r ba bs-r products-catg-entry bg-im-cv" style="background-image: url(res/img/icon/phones.png);" data-catg="10">
 		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el Pink">MOBILE PHONES</div>
 			  				</div>
-			  				<div class="w42v-c psr i-b ov-h sh-a mg-r ba bs-r products-catg-entry bg-im-cv" style="background-image: url(res/img/icon/fashion.jpg);">
+			  				<div class="w42v-c psr i-b ov-h sh-a mg-r ba bs-r products-catg-entry bg-im-cv" style="background-image: url(res/img/icon/fashion.jpg);" data-catg="3,4">
 		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el Pink">FASHION PRODUCTS</div>
 			  				</div>
-			  				<div class="w42v-c psr i-b ov-h sh-a mg-r ba bs-r products-catg-entry bg-im-cv" style="background-image: url(res/img/icon/more.jpg);">
+			  				<div class="w42v-c psr i-b ov-h sh-a mg-r ba bs-r products-catg-entry bg-im-cv" style="background-image: url(res/img/icon/more.jpg);" data-catg="0">
 		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el Pink">MORE</div>
 			  				</div>
 			  			</div>
 			  		</div>
 
 			  		<div class="bg bt bb mg-t">
-						<div class="fw pd1015 b bb">Buy Event Tickets</div>
+						<div class="fw fx pd1015 b bb"><div class="fx60 fx fx-ac">Buy Event Tickets</div> <div class="fx fx-ac ac ba b4-r pd5 more-services" data-catg="3" data-name="Events">Browse More...</div></div>
 						<div id="carousel-buy-ticket" class="carousel pd16 f0 lh0">
 							<div class='w85p-c i-b ov-h mg-r ba psr bs-r'>
 			                    <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'></div>
@@ -296,7 +324,7 @@
 			  		</div>
 						
 					<div class="bg bt bb mg-t">
-						<div class="fw pd1015 b bb">Restaurants around you</div>
+						<div class="fw fx pd1015 b bb"><div class="fx60 fx fx-ac">Restaurants around you</div> <div class="fx fx-ac ac ba b4-r pd5 more-services" data-catg="2" data-name="Restaurants">Browse More...</div></div>
 						<div id="carousel-buy-food" class="carousel pd16 f0 lh0">
 							<div class='w85p-c i-b ov-h mg-r ba psr bs-r'>
 			                    <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'></div>
@@ -312,20 +340,20 @@
 
 			  	<div class="forSeller fh" data-role="screen">
 			  		<div class="fw fh pd30 fx fx-ac fx-jc cd">
-			  			<div class="w80p pd20 b4-r sh-a white psr Orange">
-			  				<div class="fw f24 psa">&#8358;</div>
-			  				<div id="wallet-balance" class="fw t-c pd16 b f24">0.00</div>
-			  				<div class="fw t-c f16">AMOUNT DUE</div>
+			  			<div id="transaction-history-btn" class="w80p pd20 b4-r sh-a white psr Orange">
+			  				<div class="f24 psa">&#8358;</div>
+			  				<div id="amount-due" class="fw t-c pd16 b f24">0.00</div>
+			  				<div class="fw t-c b5">AMOUNT DUE</div>
 			  			</div>
 
 			  			<div id="completed-orders-btn" class="w80p pd20 b4-r sh-a bg mg-txx">
 			  				<div id="completed-orders" class="fw t-c pd16 b f24">0</div>
-			  				<div class="fw t-c f16">COMPLETED ORDERS</div>
+			  				<div class="fw t-c b5">COMPLETED ORDERS</div>
 			  			</div>
 			  			
 			  			<div id="pending-orders-btn" class="w80p pd20 b4-r sh-a bg mg-txx">
 			  				<div id="pending-orders" class="fw t-c pd16 b f24">0</div>
-			  				<div class="fw t-c f16">PENDING ORDERS</div>
+			  				<div class="fw t-c b5">PENDING ORDERS</div>
 			  			</div>
 			  		</div>
 			  	</div>
@@ -341,39 +369,29 @@
 	  		</div>
 		</div>
 
-		<div id="catalogScreen" data-function="Tab">
+		<div id="catalogTab" data-function="Tab">
 	  		<div class="h60 fw bg Orange white bb sh-b-1 fx fx-ac psa t0 l0 z1">
-		  		<div class="fx60 f16 b pd16">Catalogue</div>
-		  		<!-- <div class="orders-filter fx fx-ac fx-jc white box60" data-container="#"><div class="f20 icon-search"></div></div> -->
+		  		<div class="fx60 f16 b pd16">Products Catalogue</div>
 	  		</div>
-			<div class="fw fh pd60t pd100b bg ovx-h ovy-a psa t0 l0 not-null" placeholder="E-Commerce feature will be available soon..."></div>
-			<!-- <div class="boxes-container fw pd20">
-				<div class="boxes-2 ba b4-r">
-					<div class="h100 fx fx-ac fx-jc">
-					</div>
-					<div class="fw f12 b t-c c-g pd12z tx-el">PHONES</div>
-				</div><div class="boxes-2 ba b4-r">
-					<div class="h100 fx fx-ac fx-jc">
-					</div>
-					<div class="fw f12 b t-c c-g pd12z tx-el">APPLIANCES</div>
-				</div><div class="boxes-2 ba b4-r">
-					<div class="h100 fx fx-ac fx-jc">
-					</div>
-					<div class="fw f12 b t-c c-g pd12z tx-el">VEHICLE</div>
-				</div><div class="boxes-2 ba b4-r">
-					<div class="h100 fx fx-ac fx-jc">
-					</div>
-					<div class="fw f12 b t-c c-g pd12z tx-el">FOOD</div>
-				</div><div class="boxes-2 ba b4-r">
-					<div class="h100 fx fx-ac fx-jc">
-					</div>
-					<div class="fw f12 b t-c c-g pd12z tx-el">ELECTRONICS</div>
-				</div><div class="boxes-2 ba b4-r">
-					<div class="h100 fx fx-ac fx-jc">
-					</div>
-					<div class="fw f12 b t-c c-g pd12z tx-el">LAUNDRY</div>
+			<div class="fw fh psa pd60t bg ovx-h ovy-a" style="padding-bottom: 56px;">
+				<div class="carousel h60 fw bb pd10">
+					<div class="item-filter b pd10 ba b4-r mg-r i-b c-o" data-catg="0">All</div>
+					<div class="item-filter b pd10 ba b4-r mg-r i-b" data-catg="1">Groceries</div>
+					<div class="item-filter b pd10 ba b4-r mg-r i-b" data-catg="2">Books</div>
+					<div class="item-filter b pd10 ba b4-r mg-r i-b" data-catg="3">Men's Fashion</div>
+					<div class="item-filter b pd10 ba b4-r mg-r i-b" data-catg="4">Women's Fashion</div>
+					<div class="item-filter b pd10 ba b4-r mg-r i-b" data-catg="5">Electronics</div>
+					<div class="item-filter b pd10 ba b4-r mg-r i-b" data-catg="6">Cosmetics</div>
+					<div class="item-filter b pd10 ba b4-r mg-r i-b" data-catg="7">Household Items</div>
+					<div class="item-filter b pd10 ba b4-r mg-r i-b" data-catg="8">Kitchen Appliances</div>
+					<div class="item-filter b pd10 ba b4-r mg-r i-b" data-catg="9">Video Games</div>
+					<div class="item-filter b pd10 ba b4-r mg-r i-b" data-catg="10">Phones and Computers</div>
+					<div class="item-filter b pd10 ba b4-r mg-r i-b" data-catg="11">Hair Products</div>
+					<div class="item-filter b pd10 ba b4-r mg-r i-b" data-catg="12">Accessories</div>
+					<div class="item-filter b pd10 ba b4-r mg-r i-b" data-catg="13">Others</div>
 				</div>
-			</div> -->
+				<div id="catalog-items-container" class="fw pd20 ovx-h ovy-a not-null" placeholder="Fetching products..." style="height: calc(100% - 60px);"></div>
+			</div>
 		</div>
 
 		<div id="ordersTab" data-function="Tab"><!-- checkout -->
@@ -388,7 +406,7 @@
 		<!-- </div> -->
 	  	<div class="fw psf fx fx-ac b0 l0 bg h56 bt sh-b z1 c-g">
 			<div class="tab-locator fx15 fx fx-jc c-o" data-tab="#timeline"><div class="f24 icon-home"></div></div>
-			<div class="tab-locator fx15 fx fx-jc forBuyer" data-tab="#catalogScreen"><div class="f24 icon-search"></div></div>
+			<div class="tab-locator fx15 fx fx-jc forBuyer" data-tab="#catalogTab" id="catalog-fetch-link"><div class="f24 icon-search"></div></div>
 			<div class="tab-locator fx15 fx fx-jc forSeller" data-tab="#reviewsTab" id="reviews-link"><div class="f24 icon-mail-alt"></div></div>
 			<div class="tab-locator fx15 fx fx-jc" data-tab="#ordersTab" id="orders-link"><div class="f24 icon-basket"></div></div>
 		</div>
@@ -429,7 +447,7 @@
   	</div>
 
 	<div id="createView" class="Grey" data-function="View">
-  		<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  		<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="b f16">Add an Item</div>
   		</div>
@@ -438,12 +456,12 @@
 
 	  		<form id="product-add-form" class="create-form fw pd16" data-catg="1" autocomplete="off">
 	  			<div class="fw psr fx fx-jc fx-ww mg-b16">
-	  				<div class="product-image fx40 h200 bg b4-r fx fx-ac fx-jc ov-h ba bg-im-ct psr">
+	  				<div class="product-image xtra-img fx40 h200 bg b4-r fx fx-ac fx-jc ov-h ba bg-im-ct psr">
 	  					<img src="res/img/icon/upload.png">
-	  					<img class="fw psa im-sh" src="">
+	  					<img class="fw psa im-sh bg" src="">
 		  				<input type="file" accept="image/*" name="images" class="images fw fh psa t0 l0 op0">
 	  				</div>
-	  				<div class="add-more-photos psa t0 l0 mg-t mg-l pd5 f10 ba b4-r Pink b5">+ Add more photos</div>
+	  				<div class="add-more-photos psa t0 l0 mg-t mg-l pd5 ba b4-r Pink b5" data-limit="4" data-class-name="product-image">+ Add more photos</div>
 	  			</div>
 	  			<input type="text" name="name" class="fw pd20 bg mg-b16 b4-r ba" placeholder="Name">
 	  			<div class="triangle-down mg-b16"><select name="product_type" class="fw pd20 bg b4-r ba">
@@ -462,49 +480,18 @@
 	  				<option value="12">Accessories</option>
 	  				<option value="13">Others</option>
 	  			</select></div>
-	  			<div class="triangle-down mg-b16"><select name="product_size" class="fw pd20 bg b4-r ba">
-	  				<option value="">Select Item Size</option>
-	  				<option value="1">Small</option>
-	  				<option value="2">Medium</option>
-	  				<option value="3">Big</option>
-	  				<option value="4">Large</option>
-	  				<option value="5">XL</option>
-	  				<option value="6">XXL</option>
-	  				<option value="7">XXXL</option>
-	  			</select></div>
-	  			<div class="triangle-down mg-b16"><select name="shoe_size" class="fw pd20 bg b4-r ba">
-	  				<option value="">Select Shoe Size</option>
-	  				<option value="30">30</option>
-	  				<option value="31">31</option>
-	  				<option value="32">32</option>
-	  				<option value="33">33</option>
-	  				<option value="34">34</option>
-	  				<option value="35">35</option>
-	  				<option value="36">36</option>
-	  				<option value="37">37</option>
-	  				<option value="38">38</option>
-	  				<option value="39">39</option>
-	  				<option value="40">40</option>
-	  				<option value="41">41</option>
-	  				<option value="42">42</option>
-	  				<option value="43">43</option>
-	  				<option value="44">44</option>
-	  				<option value="45">45</option>
-	  				<option value="46">46</option>
-	  				<option value="47">47</option>
-	  				<option value="48">48</option>
-	  				<option value="49">49</option>
-	  				<option value="50">50</option>
-	  			</select></div>
 	  			<div class="fw bg b4-r ba triangle-down mg-b16">
-	  				<div class="color-picker fw fx fx-ac ov-h mg-r h60 pd20 psr not-null" data-selected-options="" placeholder="Select Available Colour(s)" style="overflow-x: auto;"></div>
+	  				<div class="size-picker picker fw fx fx-ac ov-h ovx-a mg-r h60 pd20 psr not-null" data-available-sizes="0" data-selected-options="" placeholder="Select Available Size(s)"></div>
+		  		</div>
+	  			<div class="fw bg b4-r ba triangle-down mg-b16">
+	  				<div class="color-picker picker fw fx fx-ac ov-h ovx-a mg-r h60 pd20 psr not-null" data-available-colors="0" data-selected-options="" placeholder="Select Available Colour(s)"></div>
 		  		</div>
 	  			<div class="triangle-down mg-b16"><select name="product_delivery" class="fw pd20 bg b4-r ba">
 	  				<option value="">Select Delivery Option</option>
 	  				<option value="1">OnCampus Express</option>
 	  				<option value="2">Pick Up and Deliver</option>
 	  				<option value="3">Drop and Deliver</option>
-	  			</select><div id="delivery-help" class="box32 psa fx fx-ac Pink b ba bm-r mg-r fx-jc z4" style="right: 40px;">?</div></div>
+	  			</select><div id="delivery-help" class="box32 psa fx fx-ac Pink b ba bm-r mg-r fx-jc" style="right: 40px;">?</div></div>
 	  			<input type="number" name="price" class="fw pd20 bg mg-b16 b4-r ba" placeholder="Price">
 	  			<input type="number" name="discount" class="fw pd20 bg mg-b16 b4-r ba" placeholder="Add discount">
 	  			<textarea name="description" class="fw fx pd20 bg b4-r ba h200" placeholder="Product description"></textarea>
@@ -516,7 +503,7 @@
 		  			<div class="fw psr fx fx-jc mg-b16">
 		  				<div class="fw h200 bg b4-r fx fx-ac fx-jc ov-h ba bg-im-ct psr">
 		  					<img src="res/img/icon/upload.png">
-		  					<img class="fw psa im-sh" src="">
+		  					<img class="fw psa im-sh bg" src="">
 			  				<input type="file" accept="image/*" name="images" class="images fw fh psa t0 l0 op0">
 		  				</div>
 		  			</div>
@@ -527,7 +514,7 @@
 		  				<option value="3">Drinks</option>
 		  				<option value="4">Special</option>
 		  			</select></div>
-					<input type="text" name="name" required class="fw pd20 bg mg-b16 b4-r ba" placeholder="Name of Meal">
+					<input type="text" name="name" required class="fw pd20 bg mg-b16 b4-r ba" placeholder="Name of Item">
 					<input type="number" name="price" required class="fw pd20 bg mg-b16 b4-r ba" placeholder="Price">
 					<input type="number" name="discount" class="fw pd20 bg b4-r ba" placeholder="Add Discount">
 				</div>
@@ -537,7 +524,7 @@
 			<form id="event-add-form" class="create-form fw pd16" data-catg="3" autocomplete="off">
   				<div class="fw h200 bg bs-r fx fx-ac fx-jc ov-h ba psr mg-b16">
   					<img src="res/img/icon/upload.png">
-  					<img class="fw psa im-sh" src="">
+  					<img class="fw psa im-sh bg" src="">
 	  				<input type="file" accept="image/*" name="images" class="images fw fh psa t0 l0 op0">
   				</div>
 	  			<div class="triangle-down"><select name="event_type" class="fw pd20 bg mg-b16 b4-r ba">
@@ -607,7 +594,7 @@
 		  			<div class="fw psr fx fx-jc mg-b16">
 		  				<div class="fw h200 bg b4-r fx fx-ac fx-jc ov-h ba bg-im-ct psr">
 		  					<img src="res/img/icon/upload.png">
-		  					<img class="fw psa im-sh" src="">
+		  					<img class="fw psa im-sh bg" src="">
 			  				<input type="file" accept="image/*" name="images" class="images fw fh psa t0 l0 op0">
 		  				</div>
 		  			</div>
@@ -631,7 +618,7 @@
 		  			<div class="fw psr fx fx-jc mg-b16">
 		  				<div class="fw h200 bg b4-r fx fx-ac fx-jc ov-h ba bg-im-ct psr">
 		  					<img src="res/img/icon/upload.png">
-		  					<img class="fw psa im-sh" src="">
+		  					<img class="fw psa im-sh bg" src="">
 			  				<input type="file" accept="image/*" name="images" class="images fw fh psa t0 l0 op0">
 		  				</div>
 		  			</div>
@@ -711,23 +698,23 @@
 
 
   	<div id="itemsView" class="Grey" data-function="View">
-  		<div id="shop-banner" class="hr h35v banner ov-h fw bg-im-cv bg psr sh-a fx cd">
+  		<div id="shop-banner" class="hr banner ov-h fw bg-im-cv bg psr sh-a fx cd">
 	        <div class="fh z1">
 	          <div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 white tx-sh icon-left box60"></div>
 	          <div class="fw psr pd016 white tx-sh">
 	            <div id="display-name" class="fw tx-el b f20"></div>
 	            <div id="user-address" class="fw h36_4 ovx-h ovy-a"></div>
 	          </div>
-              <div class="forSeller psa t0 r0 fx fx-ac fx-jc tx-sh bg-fd b-rd white box60 mg-r mg-t cd t-c" id="add-item">+<span class="f10">Add an<br>Item</span></div>
-	          <div id="store-review" class="forBuyer psa t0 r0 fx fx-ac fx-jc tx-sh bg-fd b-rd white box60 mg-r mg-t cd t-c icon-edit"><span class="f10">Drop a<br>review</span></div>
+              <div class="forSeller psa t0 r0 fx fx-ac fx-jc tx-sh bg-fd ba b-rd white box60 mg-r mg-t cd t-c" id="add-item">+<span class="f10">Add an<br>Item</span></div>
+	          <div id="store-review" class="forBuyer psa t0 r0 fx fx-ac fx-jc tx-sh bg-fd ba b-rd white box60 mg-r mg-t cd t-c icon-edit-1"><span class="f10">Drop a<br>review</span></div>
 	        </div>
 	    </div>
 	    <!--  -->
-  		<div class="fw fh ov-h items-container content-area" data-catg="1"><!-- e-commerce -->
+  		<div class="fw ov-h items-container content-area" data-catg="1"><!-- e-commerce -->
   			<div id="products-container" class="fw fh psr bg z3 pd20 ovx-h ovy-a not-null" placeholder="No items was found"></div>
   		</div>
 
-	    <div class="fw fh ov-h items-container content-area" data-catg="2"><!-- food -->
+	    <div class="fw ov-h items-container content-area" data-catg="2"><!-- food -->
 		    <div class="fw fh psr bg z3 Pink pd60b">
 		        <div class="fw fx bg bb h50 sh-b t-c">
 		          <div class="meal-type menu-btn psr pd16z fx15 active" data-index="0">Meal</div>
@@ -751,29 +738,61 @@
 	    </div>
 
 	    <div class="fw items-container content-area" data-catg="4"><!-- Graphics -->
-	    	<div class="fw fx fx-ac fx-jc h50 b bb sh-b">View gallery</div>
+	    	<div class="fw fx fx-ac fx-jc h50 b bb sh-b bg gallery-viewer" data-category="4"><span class="mg-rm icon-picture c-o"></span>View gallery</div>
             <div id="graphics-container" class="fw fh ovx-h ovy-a pd75b psr not-null" placeholder="No items was found"></div>
 	    </div>
 
-	    <div class="fw ov-h items-container content-area" data-catg="5"><!-- Make Up -->
-	    	<div class="fw fx fx-ac fx-jc h50 b bb sh-b">View gallery</div>
+	    <div class="fw items-container content-area ov-h" data-catg="5"><!-- Make Up -->
+	    	<div class="fw fx fx-ac fx-jc h50 b bb sh-b bg gallery-viewer" data-category="5"><span class="mg-rm icon-picture c-o"></span>View gallery</div>
 	    	<div id="makeup-container" class="fw fh-50 ovx-h ovy-a pd75b psr not-null" placeholder="No items was found"></div>
 	    </div>
 
-	    <div class="fw ov-h items-container content-area" data-catg="6"><!-- Dry Cleaning -->
+	    <div class="fw items-container content-area ov-h" data-catg="6"><!-- Dry Cleaning -->
 	    	<div id="laundry-container" class="fw fh ovx-h ovy-a pd75b psr not-null" placeholder="No items was found"></div>
 	    </div>
 
-	    <div class="fw ov-h items-container content-area" data-catg="7"><!-- Gas Delivery -->
+	    <div class="fw items-container content-area ov-h" data-catg="7"><!-- Gas Delivery -->
 	    	<div id="gas-container" class="fw fh ovx-h ovy-a pd75b psr not-null" placeholder="No items was found"></div>
 	    </div>
 
         <div id="proceed-to-cart" class="forBuyer go-to-cart fw h56 psf z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink" style="display: none;">Proceed to cart</div>
   	</div>
 
+	<div id="galleryAddView" class="bg" data-function="View">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  			<div class="view-closer psr z3 t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
+  			<div class="fx20 b f16">Add Gallery Items</div>
+  		</div>
+  		<div class="fw fh ovx-h ovy-a pd60t pd75b">
+  			<div class="fw t-c bb pd16 f16 b">Add photos to your gallery</div>
+  			<div class="fw t-c bb pd16">You can add up to 6 photos that would be displayed to your customers.</div>
+  			<form id="gallery-add-form" class="fw pd16" autocomplete="off">
+	  			<div class="fw psr fx fx-jc fx-ww mg-b16">
+	  				<div class="gallery-image xtra-img fx40 h200 bg b4-r fx fx-ac fx-jc ov-h ba bg-im-ct psr">
+	  					<img src="res/img/icon/upload.png">
+	  					<img class="fw psa im-sh bg" src="">
+		  				<input type="file" accept="image/*" name="images" class="images fw fh psa t0 l0 op0">
+	  				</div>
+	  				<div class="add-more-photos psa t0 l0 mg-t mg-l pd5 ba b4-r Pink b5" data-limit="6" data-class-name="gallery-image">+ Add more photos</div>
+	  			</div>
+	  			<input type="submit" name="gallery-submit" class="fw psa b0 l0 b h56 pd020 fx fx-ac Orange white hideWhenShrink" value="SAVE & CONTINUE">
+	  		</form>
+  		</div>
+  	</div>
+
+	<div id="galleryView" class="bg" data-function="View">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  			<div class="view-closer psr z3 t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
+  			<div class="fx20 b f16">Gallery</div>
+  			<div id="add-gallery-items" class="forSeller ba b4-r white b fx fx-ac mg-rx" style="padding: 6px 12px; display: none;">+ Add photos</div>
+  		</div>
+  		<div class="fw fh ovx-h ovy-a pd60t">
+  			<div id="pictures-container" class="fw bg-mod not-null" placeholder="Loading gallery items..."></div>
+  		</div>
+  	</div>
 
 	<div id="servicesView" class="bg" data-function="View">
-	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr z3 t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div id="current-service" class="fw psa t-c b f16"></div>
   		</div>
@@ -783,18 +802,18 @@
   	</div>
 
 	<div id="invoiceView" class="bg" data-function="View">
-	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="b f16">Cart</div>
   		</div>
   		<div class="fw fh ovx-h ovy-a pd60t">
   			<div id="invoice-content" class="fw pd10"></div>
   		</div>
-  		<div id="proceed-to-address" class="fw h56 psf z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Proceed to checkout</div>
+  		<div id="accept-invoice" class="fw h56 psf z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Proceed to checkout</div>
   	</div>
 
   	<div id="dropoffView" class="bg" data-function="View">
-	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="b f16">Add dropoff details</div>
   		</div>
@@ -808,7 +827,8 @@
   				<input type='text' name='address' class='fw pd20 mg-b16 bg-ac b4-r ba' placeholder='Enter your delivery address'>
   				<input type='text' name='name' class='fw pd20 mg-b16 bg-ac b4-r ba' placeholder='Enter your full name'>
   				<input type='text' name='phone' class='fw pd20 mg-b16 bg-ac b4-r ba' placeholder='Enter your phone number'>
-  				<textarea name="deliveryInstruction" class="fw pd20 mg-b16 bg-ac b4-r ba h60" placeholder="Add delivery instructions (Optional)"></textarea>
+  				<textarea name="deliveryInstruction" class="fw pd20 mg-b16 bg-ac b4-r ba h200" placeholder="Add delivery instructions (Optional)"></textarea>
+
   			</div>
   		</div>
   		<div id="submit-for-review" class="fw h56 psf z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Submit for review</div>
@@ -819,7 +839,7 @@
   			<div class="white t-c pd60b">
   				<div class="fx fx-ac fx-jc b b-rd Grey icon-check view-closer" style="width: 150px; height: 150px; font-size: 96px; margin: 0 auto;"></div>
   				<div class="mg-tx b f24">Order Successful!</div>
-  				<div>You will be contacted shortly</div>
+  				<div id="order-success-info"></div>
   				<div>Thank you for choosing <b>OnCampus!</b></div>
   			</div>
   		</div>
@@ -828,11 +848,11 @@
 
   	<!--  -->
   	<div id="cardView" class="bg" data-function="View">
-	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="b f16">Add Card details</div>
   		</div>
-  		<div class="fw fh ovx-h bg-ac ovy-a pd60t">
+  		<div class="fw fh ovx-h ovy-a pd60t">
   			<div id="card-content" class="fw pd20">
   				<div class='fw h60 fx fx-ac pd20 mg-b16 bg b4-r ba'>
   					<span class="mg-rx">Accepted Cards</span>
@@ -864,11 +884,11 @@
   	</div>
 
   	<div id="PINView" class="bg" data-function="View">
-	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="b f16">Enter Your PIN</div>
   		</div>
-  		<div class="fw fh ovx-h bg-ac ovy-a pd60t">
+  		<div class="fw fh ovx-h ovy-a pd60t">
   			<div class="fw pd20">
 	  			<div class='fw fx mg-b16 bg b4-r ba'>
 	  				<div class="pd10">
@@ -896,11 +916,11 @@
   	</div>
 
   	<div id="OTPView" class="bg" data-function="View">
-	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="b f16">Enter Your Token</div>
   		</div>
-  		<div class="fw fh ovx-h bg-ac ovy-a pd60t">
+  		<div class="fw fh ovx-h ovy-a pd60t">
   			<div class="fw pd20">
 	  			<div id="token-instruction" class='fw fx pd20 t-c mg-b16 bg-ac c-g b4-r ba t-c'></div>
 	  			<div class='fw fx bg b4-r ba'>
@@ -913,8 +933,49 @@
   		<div id="submit-card-token" class="fw h56 psf z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Pay</div>
   	</div>
 
+	<div id="withdrawalView" class="bg" data-function="View">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
+  			<div class="b f16">Enter Your Account Details</div>
+  		</div>
+  		<div class="fw fh ovx-h ovy-a pd60t">
+  			<div class="fw pd20">
+  				<form id="cash-withdrawal-form" class="start-form fw pd16" autocomplete="off">
+	  				<input type="number" name="amount" class="fw pd20 bg mg-b16 b4-r ba" placeholder="Amount To Withdraw">
+	  				<input type="text" name="account_name" class="fw pd20 bg mg-b16 b4-r ba" placeholder="Account Name">
+	  				<input type="number" name="nuban" class="fw pd20 bg mg-b16 b4-r ba" placeholder="Account Number">
+	  				<div class="triangle-down"><select name="bank_id" class="pd20 fw b4-r ba c-g">
+	  					<option value="">Select Bank Name</option>
+	  					<option value="1">ENTERPRISE BANK LIMITED</option>
+	  					<option value="2">HERITAGE BANK</option>
+	  					<option value="3">KEYSTONE BANK PLC</option>
+	  					<option value="4">SKYE BANK PLC</option>
+	  					<option value="5">STANDARD CHARTERED BANK NIGERIA LIMITED</option>
+	  					<option value="6">JAIZ BANK PLC</option>
+	  					<option value="7">PROVIDUS BANK</option>
+	  					<option value="8">SUN TRUST BANK</option>
+	  					<option value="9">ACCESS BANK NIGERIA</option>
+	  					<option value="10">ECOBANK NIGERIA PLC</option>
+	  					<option value="11">FIDELITY BANK PLC</option>
+	  					<option value="12">FIRST BANK PLC</option>
+	  					<option value="13">FIRST CITY MONUMENT BANK PLC</option>
+	  					<option value="14">GTBANK PLC</option>
+	  					<option value="15">STANBIC IBTC BANK PLC</option>
+	  					<option value="16">STERLING BANK PLC</option>
+	  					<option value="17">UNION BANK OF NIGERIA PLC</option>
+	  					<option value="18">UNITED BANK FOR AFRICA PLC</option>
+	  					<option value="19">UNITY BANK PLC</option>
+	  					<option value="20">WEMA BANK PLC</option>
+	  					<option value="21">ZENITH BANK PLC</option>
+	  				</select></div>
+	  				<input type="submit" name="withdrawal-submit" class="fw psa b0 l0 b h56 f16 pd020 fx fx-ac Orange white hideWhenShrink" value="Submit">
+	  			</form>
+  			</div>
+  		</div>
+  	</div>
+
 	<div id="reviewView" class="bg" data-function="View">
-	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="b f16">Review store</div>
   		</div>
@@ -927,7 +988,7 @@
   	</div>
 
   	<div id="profileEditor" class="Grey" data-function="View">
-		<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+		<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="b f16">Profile Update</div>
   		</div>
@@ -965,47 +1026,18 @@
   	</div>
 
 
-  	<!--  -->
-  	<div id="productView" class="Grey" data-function="View"><!-- 
-	  	<div class="fw fh pd100b bg ovx-h ovy-a psa t0 l0">
-	  		<div class="h60 fw bg bb sh-b-1 fx fx-ac psa t0 l0 z1">
-	  			<div class="view-closer psa l0">
-		  			<img src="res/img/icon/left.png" class="pd20">
-	  			</div>
-		  		<div class="fw f24 b fx fx-jc pd16">
-		  			Item Selection
-		  		</div>
-	  		</div>
-
-				<div class="fw fh pd60t pd100b bg ovx-h ovy-a psa t0 l0">
-					<div class="fw">
-						<img src="res/img/handbag.png" class="fw">
-					</div>
-					<div class="pd20">
-						<div class="c-g">
-							<div class="f24 b">Office Bag</div>
-							<div class="f16">&#8358;23,000.00</div>
-						</div>
-						<div class="h20 fw"></div>
-						<div class="f12 c-g">This is where you'd add the item's description if any. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo...</div>
-						<div class="h20 fw"></div>
-						<div class="fw fx-il">
-							<div class="fx40 fx fx-ac b5 pd20 b4-r ba">
-								<div class="fx40">PCS:</div><input type="number" name="item-quantity" value="1" min="1" class="mg-lxx f24 box40" placeholder="1">
-							</div>
-							<div class="fx40 fx fx-ac b5 pd20 b4-r ba mg-l">
-								<div class="fx40">COLOR:</div><input type="color" name="item-color" class="mg-lxx f24 box40">
-							</div>
-						</div>
-						<div class="h20 fw"></div>
-						<div class="Orange white pd12 b4-r t-c b f16">ADD TO CART</div>
-					</div>
-				</div>
-			</div>
-  	 --></div>
+  	<div id="productView" class="Grey" data-function="View">
+  		<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
+  			<div class="b f16">Item Details</div>
+  		</div>
+		<div class="fw fh pd60t bg ovx-h ovy-a psa t0 l0">
+			<div id="productWrapper" class="pd60b"></div>
+		</div>
+  	</div>
 
 	<div id="orderDetailsView" class="bg" data-function="View">
-	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="b f16">Order Details</div>
   		</div>
@@ -1014,8 +1046,34 @@
   		</div>
   	</div>
 
+  	<div id="transactionsView" class="bg" data-function="View">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
+  			<div class="fx60 b f16">Transactions</div>
+  		</div>
+  		<div class="fw fh ovx-h ovy-a pd60t pd75b bg-ac">
+  			<div class="fw fh pd30 fx fx-ac fx-jc cd">
+  				<div class="w80p pd20 b4-r sh-a white psr Orange">
+  					<div class="f24 psa">&#8358;</div>
+  					<div id="total-sales" class="fw t-c pd16 b f24">0.00</div>
+  					<div class="fw t-c b5">TOTAL SALES</div>
+  				</div>
+  				<div id="withdrawals-query-btn" class="w80p pd20 bg b4-r sh-a ba psr mg-txx">
+  					<div class="f24 psa">&#8358;</div>
+  					<div id="total-withdrawal" class="fw t-c pd16 b f24">0.00</div>
+  					<div class="fw t-c b5">TOTAL WITHDRAWALS</div>
+  				</div>
+  				<div class="w80p pd20 bg b4-r sh-a ba psr mg-txx">
+  					<div class="f24 psa">&#8358;</div>
+  					<div id="wallet-balance" class="fw t-c pd16 b f24">0.00</div>
+  					<div class="fw t-c b5">WALLET BALANCE</div>
+  				</div>
+			</div>
+  		</div>
+  	</div>
+
   	<div id="ordersCompletedView" class="bg" data-function="View">
-	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="fx60 b f16">Completed Orders</div>
   			<div class="orders-filter fx fx-ac fx-jc white box60" data-container="#completedOrders"><div class="f20 icon-search"></div></div>
@@ -1026,7 +1084,7 @@
   	</div>
 
   	<div id="ordersPendingView" class="bg" data-function="View">
-	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="fx60 b f16">Pending Orders</div>
   			<div class="orders-filter fx fx-ac fx-jc white box60" data-container="#pendingOrders"><div class="f20 icon-search"></div></div>
@@ -1036,8 +1094,18 @@
   		</div>
   	</div>
 
+  	<!-- <div id="withrawalsView" class="bg" data-function="View">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
+  			<div class="fx60 b f16">Withdrawal History</div>
+  		</div>
+  		<div class="fw fh ovx-h ovy-a pd60t">
+  			<div id="withdrawalHistory" class="fw pd10 not-null" placeholder="Your withdrawals will show here"></div>
+  		</div>
+  	</div> -->
+
   	<div id="inboxView" class="bg" data-function="View">
-	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="fx60 b f16">Inbox</div>
   		</div>
@@ -1047,18 +1115,21 @@
   	</div>
 
   	<div id="messageView" class="bg" data-function="View">
-	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="fx60 b f16">Message</div>
   		</div>
   		<div class="fw fh ovx-h ovy-a pd60t">
-  			<div id="messageWrapper" class="fw pd16 mg-b16 not-null" placeholder="Loading message..."></div>
-  			<div id="repliesWrapper" class="fw pd16 psr not-null" placeholder="Loading replies..."></div>
+  			<div id="messageWrapper" class="fw pd16 not-null" placeholder="Loading message..."></div>
+  			<div class="fw pd016">
+  				<div class="pd10z b bb mg-b">Message Replies</div>
+	  			<div id="repliesWrapper" class="fw psr not-null" placeholder="Loading replies..."></div>
+	  		</div>
   		</div>
   	</div>
 
   	<div id="replyView" class="bg" data-function="View">
-	  	<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="b f16">Post a Reply</div>
   		</div>
@@ -1077,7 +1148,7 @@
   	</div>
 
   	<div id="searchModal" class="Modal bg-tr">
-  		<div class="hr h60 fw bg sh-b fx fx-ac psa t0 l0 z1 Orange white bb pd012 st-p">
+  		<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white bb pd012 st-p">
   			<div id="searchHeader" class="fw fx pd1015 bg-fd b4-r" style="display: none;">
   				<div class="icon-search white mg-rx"></div>
   				<input id="search-input" type="text" class="fx60 white" placeholder="Enter Order ID">
