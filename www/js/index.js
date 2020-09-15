@@ -4,15 +4,16 @@
  //||
  /*
  * TODO
- * password retrieval
- * catalog infinite scroll
+ * group items by a particular seller in a single order
  *
  * SERVER
+ * use number in stock for products
  * increase upload limit on server
  * check for existing review on server and update if found
  *
  *
  * UPDATE
+ * catalog infinite scroll
  * items edit
  * withdrawals history
  * gallery items delete and add-more
@@ -92,15 +93,15 @@
 
 
 
-    , CURRENT_SHOP = null
-    , CURRENT_CATG = null
     , CURRENT_ORDER = {}
-    , ISTICKET = null
+    , ORDER_TYPE = '0'
+    , ORDER_INFO = null
     , ORDER_TOTAL = 0
-    , CURRENT_ORDER_ID = null
-    // , CURRENT_SELLER_ID = null
+    , ORDER_ID = null//for payment
     , PAYLOAD = null
     , TRN_REF = null
+
+    , SELECTED_PRODUCTS = []
 
     , MY_ORDERS = []
 
@@ -342,15 +343,14 @@
     }
 
     function onDeviceReady() {
-        StatusBar.backgroundColorByHexString('#FE5215');
         document.addEventListener('backbutton', onBackButton, false);
-        //online
-        //resume
+        document.addEventListener('online', onOnline, false);//[[***]]
+        document.addEventListener('resume', onResume, false);//[[***]]
+        StatusBar.backgroundColorByHexString('#FE5215');
     }
     
     function onBackButton() {
-
-        if ($('#menuModal').is(':visible')) return $('#menuModal').hide();
+        if ($MM.is(':visible')) return $MM.hide();
         if ($SM.is(':visible')) {
             $SH.hide();
             $SM.hide();
@@ -358,9 +358,7 @@
             return;
         }
         if ($('#side-nav-modal').is(':visible')) return navEnd.call(mNav);
-        //
         var activeView = document.querySelector('.active-view').id;
-        //
         switch (activeView) {
             case 'home':
                 var activeTab = document.querySelector('.active-tab').id;
@@ -382,7 +380,12 @@
                 App.closeCurrentView();
         }
     }
-
+    function onOnline() {
+        preparePage(true);
+    }
+    function onResume() {
+        preparePage(true);
+    }
     $.fn.extend({
         spin: function(e) {
             if (e) this.html(e);
@@ -441,7 +444,10 @@
                         ;
                         loadUserPicture();
                         if (r.channel == 0) showChannelScreen();
-                        else preparePage(true);
+                        else {
+                            App.changeViewTo('#home');
+                            preparePage(true);
+                        }
                     }//else App.changeViewTo('#emailRegView');
                 });
             });
@@ -460,7 +466,6 @@
         App.changeViewTo('#channelPrompt');
     }
     function preparePage(existing) {
-        App.changeViewTo('#home');
         if (existing) checkMail();
         if (USERTYPE == 0) {//buyer
             $('.forSeller').addClass('hd');
@@ -541,39 +546,6 @@
     }).on('click', '.option', function() {
         var idx = this.dataset.index;
         ACTIVESELECT.selectedIndex = idx;
-        if (ACTIVESELECT.id == 'channel-select') {
-            if (idx == 0) return;
-            $.ajax({
-                url: MY_URL + "/send.php",
-                data: {
-                    action: 'adsChannel',
-                    me: UUID,
-                    channel: idx
-                },
-                timeout: 30000,
-                dataType: 'json',
-                method: "POST",
-                success: function(p) {
-                    if (p == 1) {
-                        toast('Thanks for your feedback');
-                        preparePage(false);
-                        SQL.transaction(function(i) {
-                            i.executeSql("UPDATE on_user SET channel=? WHERE id=?", [idx, 1]);
-                        });
-                    } else if (p == 0) {
-                        toast('Network error. Try again');
-                        ACTIVESELECT.selectedIndex = 0;
-                    }
-                },
-                complete: function(x) {
-                    if (x.status == 0) {
-                        toast('Network error. Try again');
-                        ACTIVESELECT.selectedIndex = 0;
-                        $('body').unspin();
-                    }
-                }
-            });
-        }
     }).on('click', '.color-picker', function() {
         COLORPICKER = this;
         var colors = [];
@@ -701,23 +673,16 @@
     }).on('click', '.forgot-password', function() {
         App.changeViewTo('#retrievalView');
     }).on('click', '.signup-option', function() {
-
-        $(this).addClass('c-o').siblings().removeClass('c-o');
-        $('#reg-type').text(this.innerText);
         var ix = this.dataset.index;
         $('form[data-index="'+ix+'"]').show().siblings('form').hide();
-
     }).on('change', '.images', function(e) {
-
         var that = this;
         if (this.files && this.files[0]) {
             var reader = new FileReader();
             reader.onloadend = function(e) {
                 that.previousElementSibling.src = this.result;
-                // that.previousElementSibling.classList.add('fw');
             }
             reader.readAsDataURL(this.files[0]);
-            //
             if (this.id == 'profile-picture') {
                 var fd = new FormData();
                 fd.append('action', 'updateDisplayPix');
@@ -743,10 +708,7 @@
             }
         } else {
             that.previousElementSibling.src = '';
-            // that.previousElementSibling.classList.remove('fw');
-            // console.log('No file');
         }
-
     }).on('submit', '.start-form', function(evt) {
         evt.preventDefault();
         if (this.dataset.disabled == 'true') return;
@@ -772,7 +734,7 @@
                     dataType: 'json',
                     success: function(p) {
                         if (p.state == 'success') {
-                            Store.setItem('userEmail', Email);
+                            document.querySelector('#signup-form-code input[name="email"]').value = Email;
                             toast("We've sent you a verification code");
                             App.changeViewTo('#tokenPrompt');
                         } else {
@@ -787,6 +749,7 @@
                 });
                 break;
             case 'signup-form-code':
+                var Email = el.querySelector('input[name="email"]').value.toLowerCase();
                 var Code = el.querySelector('input[name="token"]').value;
                 if (!Code) return;
                 el.dataset.disabled = 'true';
@@ -796,15 +759,16 @@
                     data: {
                         action: 'codeVerification',
                         code: Code,
-                        email: Store.getItem('userEmail')
+                        email: Email
                     },
                     method: "POST",
                     timeout: 30000,
                     dataType: 'json',
                     success: function(p) {
                         if (p.state == 'success') {//verified successfully
+                            Store.setItem('userEmail', Email);
                             toast('Your email address has been verified');
-                            App.changeViewTo('#signupView');
+                            App.changeViewTo('#signupView');//[[allow usertype choice first]]
                         } else {
                             toast(p.message);
                         }
@@ -831,7 +795,7 @@
                     dataType: 'json',
                     success: function(p) {
                         if (p.state == 'success') {
-                            Store.setItem('retrievalEmail', Email);
+                            document.querySelector('#retrieve-form-code input[name="email"]').value = Email;
                             toast("We've sent you a reset key");
                             App.changeViewTo('#resetTokenPrompt');
                         } else {
@@ -846,9 +810,10 @@
                 });
                 break;
             case 'retrieve-form-code':
+                var Email = el.querySelector('input[name="email"]').value.toLowerCase();
                 var Password = el.querySelector('input[name="password"]').value;
-                var Code = el.querySelector('input[name="token"]').value;
-                if (!Code) return;
+                var Key = el.querySelector('input[name="token"]').value;
+                if (!Key) return;
                 el.dataset.disabled = 'true';
                 $('body').spin();
                 $.ajax({
@@ -856,8 +821,8 @@
                     data: {
                         action: 'passwordRetrieve',
                         password: Password,
-                        code: Code,
-                        email: Store.getItem('retrievalEmail')
+                        key: Key,
+                        email: Email
                     },
                     method: "POST",
                     timeout: 30000,
@@ -884,7 +849,7 @@
                 var Pass = el.querySelector('input[name="password"]').value;
 
                 if (!Fullname && !error) error = "<div class='b bb pd10'>Full Name is Required</div><div class='pd10'>Your full name is required.</div>";
-                if (!UsernameRegexp.test(Username) && !error) error = "<div class='b bb pd10'>Display name error</div><div class='pd10'>Username must be 4 or more characters long and may contain letters, underscore and numbers but cannot start with a number. Special characters and full-stop are not allowed</div>";
+                if (!UsernameRegexp.test(Username) && !error) error = "<div class='b bb pd10'>Display name error</div><div class='pd10'>Username must be 4 or more characters long and may contain letters, underscore and numbers but cannot start with a number. Special characters, full-stop and spaces are not allowed</div>";
                 if (Campus == 0 && !error) error = "<div class='b bb pd10'>Please select your institution</div><div class='pd10'>Select your institution to help us serve you nearby items.</div>";
                 if (!Phone && !error) error = "<div class='b bb pd10'>Provide your phone number</div><div class='pd10'>Your phone number is required for notifications.</div>";
                 if ((Pass.length < 8 || Pass.length > 32) && !error) error = "<div class='b bb pd10'>Password not accepted</div><div class='pd10'>Password must be between 8 - 32 characters long.</div>";
@@ -906,6 +871,7 @@
                         action: 'register',
                         email: Store.getItem('userEmail'),
                         fullname: Fullname,
+                        category: '0',
                         username: Username,
                         campus: Campus,
                         phone: Phone,
@@ -1027,6 +993,39 @@
                     }
                 });
                 break;
+            case 'advert-channel-form':
+                var channelIndex = el.querySelector('select[name="channel"]').value;
+                if (!channelIndex) return toast('Please select one channel');
+                $.ajax({
+                    url: MY_URL + "/send.php",
+                    data: {
+                        action: 'adsChannel',
+                        me: UUID,
+                        channel: channelIndex
+                    },
+                    timeout: 30000,
+                    dataType: 'json',
+                    method: "POST",
+                    success: function(p) {
+                        if (p == 1) {
+                            toast('Thanks for your feedback');
+                            App.changeViewTo('#home');
+                            preparePage(false);
+                            SQL.transaction(function(i) {
+                                i.executeSql("UPDATE on_user SET channel=? WHERE id=?", [channelIndex, 1]);
+                            });
+                        } else if (p == 0) {
+                            toast('Network error. Try again');
+                        }
+                    },
+                    complete: function(x) {
+                        if (x.status == 0) {
+                            toast('Network error. Try again');
+                            $('body').unspin();
+                        }
+                    }
+                });
+                break;
             case 'login-form':
                 var Email = this.querySelector("input[name='emailaddress']").value.toLowerCase();
                 var Pass = this.querySelector("input[name='password']").value;
@@ -1075,7 +1074,7 @@
                     if (!Address && !error) error = "<div class='b bb pd10'>Your Address is Required</div><div class='pd10'>Your address is required for pickup.</div>";
                 } else {
                     Birthday = el.querySelector('input[name="birthday"]').value;
-                    if (!UsernameRegexp.test(Username) && !error) error = "<div class='b bb pd10'>Username not available</div><div class='pd10'>Username must be 4 or more characters long and may contain letters, underscore and numbers but cannot start with a number. Special characters and full-stop are not allowed</div>";
+                    if (!UsernameRegexp.test(Username) && !error) error = "<div class='b bb pd10'>Username not available</div><div class='pd10'>Username must be 4 or more characters long and may contain letters, underscore and numbers but cannot start with a number. Special characters, full-stop and spaces are not allowed</div>";
                     if (!Birthday && !error) error = "<div class='b bb pd10'>Your Birthday is Required</div><div class='pd10'>Your birthday is required.</div>";
                 }
                 if (error) {
@@ -1233,6 +1232,7 @@
                   , ProductDelivery = el.querySelector('select[name="product_delivery"]').value
                   , Price = parseInt(el.querySelector('input[name="price"]').value, 10) || 0
                   , Discount = parseInt(el.querySelector('input[name="discount"]').value, 10) || 0
+                  , PiecesAvailable = parseInt(el.querySelector('input[name="pieces_available"]').value, 10) || 0
                   , Description = el.querySelector('textarea[name="description"]').value
                   ;
                 if (!Name && !error) error = "<div class='b bb pd10'>Please add a Name</div><div class='pd10'>A name is required for item description.</div>";
@@ -1256,6 +1256,7 @@
                 fd.append('productDelivery', ProductDelivery);
                 fd.append('price', Price);
                 fd.append('discount', Discount);
+                fd.append('piecesAvailable', PiecesAvailable);
                 fd.append('description', Description);
                 var TotalImages = 0;
                 Images.forEach(function(el) {
@@ -1287,6 +1288,7 @@
                             name: Name,
                             price: Price,
                             discount: Discount,
+                            description: Description,
                             delivery: ProductDelivery
                         }
                         buildItems([p], CATEGORY, true);
@@ -1803,6 +1805,8 @@
     }).on('touchstart click', '.st-p', function(e) {
         // e.preventDefault();
         e.stopPropagation();
+    }).on('click', '.info_box', function() {
+        $(this).fadeOut($(this).remove());
     }).on('click', '.Modal', function() {
         $(this).hide();
         if (this.id == 'searchModal') {
@@ -1810,7 +1814,7 @@
             showAllOrderEntries();
         }
     }).on('click', '.modalClose', function() {
-        $('#menuModal').hide();
+        $MM.hide();
     }).on('touchmove', '.Modal', function(e) {
         if (e.cancelable) e.preventDefault();
         e.stopPropagation();
@@ -1820,12 +1824,12 @@
         mDrawer.classList.add('sh-l');
         mModal.style.display = 'block';
     }).on('click', '#myItemsLink, .shop-link', function() {
-        $('#proceed-to-cart').hide();
+        $('#proceed-to-invoice').hide();
         $('.items-container').hide();
         App.changeViewTo('#itemsView');
 
         var catg, shopId, shopName, shopAddress;
-        if (this.id == 'myItemsLink') {//owner's item
+        if (this.id == 'myItemsLink') {//owner's items
             catg = CATEGORY;
             shopId = UUID;
             shopName = USERNAME;
@@ -1835,7 +1839,7 @@
             shopId = this.dataset.shopId;
             shopName = this.dataset.shopName;
             shopAddress = this.dataset.shopAddress;
-            if (catg != 3) $('#proceed-to-cart').show().attr('data-catg', catg);
+            if (catg != 3) $('#proceed-to-invoice').show().attr('data-catg', catg);
         }
 
         updateStoreInformation(shopId, shopName, shopAddress, catg);
@@ -1943,7 +1947,7 @@
         } else if (id.contains('item-add')) {
             counter.innerText = ++count;
         }
-    }).on('click', '#item-checkout', function(e) {
+    }).on('click', '#add-to-cart', function(e) {
         var itemId = this.dataset.itemId;
         var c = PRODUCTS.find(function(p) { return p.itemID == itemId; });
         if (c) {
@@ -1971,24 +1975,37 @@
                         if (totalColors > tt) return toast('Total colours cannot be more than number of items');
                     } else return toast('Select your preferred colour' + (tt > 1 ? 's' : ''));
                 }
-                var invoice = [{id: itemId, nm: c.name, pr: parseFloat(c.price).toFixed(2), ds: parseFloat(c.discount).toFixed(2), tt: tt, sz: selectedSizes, cl: selectedColors, isproduct:true}];
-                CURRENT_ORDER = invoice;
-                App.changeViewTo('#invoiceView');
-                $('#invoice-content').html(buildInvoice(invoice, null));
+                var invoice = {id: itemId, oi: c.ownerID, nm: c.name, pr: parseFloat(c.price).toFixed(2), ds: parseFloat(c.discount).toFixed(2), tt: tt, sz: selectedSizes, cl: selectedColors, isproduct:true};
+                var addedIndex = SELECTED_PRODUCTS.findIndex(function(i) {return i.id == itemId; });
+                if (addedIndex == -1) addedIndex = SELECTED_PRODUCTS.length;
+                SELECTED_PRODUCTS[addedIndex] = invoice;
+                //
+                var total = SELECTED_PRODUCTS.reduce(function(a, b) { return a + b.tt}, 0);
+                $('#shopping-cart').attr('data-total', total);
+                App.closeCurrentView();
+                toast('Item added to cart');
             } else {
                 toast('Please select number of items');
             }
         } else {
             toast('This item is no longer available');
         }
-    }).on('click', '#proceed-to-cart', function(e) {
+    }).on('click', '#shopping-cart', function(e) {
+        if (SELECTED_PRODUCTS.length == 0) return toast('Your cart is empty');
+        CURRENT_ORDER = SELECTED_PRODUCTS;
+        ORDER_TYPE = '1';
+        App.changeViewTo('#invoiceView');
+        $('#invoice-content').html(buildInvoice(SELECTED_PRODUCTS, null));
+    }).on('click', '.remove-from-cart', function(e) {
+        var i = this.dataset.index;
+        SELECTED_PRODUCTS.splice(i, 1);
+        $('#invoice-content').html(buildInvoice(SELECTED_PRODUCTS, null));
+    }).on('click', '#proceed-to-invoice', function(e) {
         var catg = this.dataset.catg;
         var menu = document.querySelector('.items-container[data-catg="'+catg+'"]');
         var items = menu.querySelectorAll('.item-count');
         var invoice = [];
         switch(catg) {
-            case '1'://e-commerce
-                break;
             case '2'://food
             case '4'://graphics
             case '5'://makeup
@@ -1998,7 +2015,7 @@
                     var id = item.dataset.itemId;
                     var d = ITEMS_DATA.find(function(a) {return a.itemID == id;});
                     if (d) {
-                        invoice.push({id: id, nm: d.name, pr: parseFloat(d.price).toFixed(2), ds: parseFloat(d.discount).toFixed(2), tt: tt});
+                        invoice.push({id: id, oi: d.ownerID, nm: d.name, pr: parseFloat(d.price).toFixed(2), ds: parseFloat(d.discount).toFixed(2), tt: tt});
                     }
                 });
                 break;
@@ -2009,13 +2026,14 @@
                     var d = ITEMS_DATA.find(function(a) {return a.itemID == id;});
                     if (d) {
                         var y = document.querySelector('.laundry-type[data-item-id="'+id+'"] .radio.selected').dataset.name;
-                        invoice.push({id: id, nm: d.name+' ('+y.split('_').map(function(t){return t[0].toUpperCase()+t.substring(1);}).join(' ')+')', pr: parseFloat(d[y]).toFixed(2), ds: '0.00', tt: tt});
+                        invoice.push({id: id, oi: d.ownerID, nm: d.name+' ('+y.split('_').map(function(t){return t[0].toUpperCase()+t.substring(1);}).join(' ')+')', pr: parseFloat(d[y]).toFixed(2), ds: '0.00', tt: tt});
                     }
                 });
                 break;
         }
         if (invoice[0]) {
             CURRENT_ORDER = invoice;
+            ORDER_TYPE = catg;
             App.changeViewTo('#invoiceView');
             $('#invoice-content').html(buildInvoice(invoice, null));
         } else toast('No item was selected');
@@ -2038,20 +2056,26 @@
         //
         var details = {address: address, name: name, phone: phone, friend: frd, instruction: deliveryInstruction};
         //
+        if (ORDER_TYPE != 3) ORDER_INFO = null;
+        //
+        if (ORDER_TYPE == 1) {
+            //re-group the items[[***]]
+        }
+        //
         $('body').spin();
         $.ajax({
             url: MY_URL + "/send.php",
             data: {
                 action: 'createOrder',
-                cost: ORDER_TOTAL,
                 invoice: JSON.stringify(CURRENT_ORDER),
-                details: JSON.stringify(details),
-                voucher: voucherCode,
-                // sellerID: ITEMS_DATA[0].ownerID,
-                isticket: ISTICKET,
+                total_cost: ORDER_TOTAL,
+                buyer_details: JSON.stringify(details),
+                voucher_code: voucherCode,
                 //
-                category: CURRENT_CATG,
-                sellerID: CURRENT_SHOP,
+                order_type: ORDER_TYPE,
+                order_info: ORDER_INFO,
+                //
+                sellerID: CURRENT_ORDER[0].oi,
                 buyerID: UUID
             },
             method: "POST",
@@ -2064,9 +2088,14 @@
                 } else {
                     Views = ['#home'];
                     App.changeViewTo('#successView');
-                    if (CURRENT_CATG == '3')
-                        $('#order-success-info').text('Check your orders and make payment');
-                    else $('#order-success-info').text('You will be contacted shortly');
+                    if (ORDER_TYPE=='3') $('#order-success-info').text('Check your orders and make payment');//no delivery charges
+                    else {
+                        $('#order-success-info').text('You will be contacted shortly');
+                        if (ORDER_TYPE=='1') {
+                            SELECTED_PRODUCTS.length = 0;//reset
+                            $('#shopping-cart').attr('data-total', '0');
+                        }
+                    }
                     Store.setItem('delivery_address', address);
                     Store.setItem('delivery_name', name);
                     Store.setItem('delivery_phone', phone);
@@ -2118,6 +2147,8 @@
     }).on('click', '.item-filter', function(e) {
         $('.item-filter.c-o').removeClass('c-o');
         this.classList.add('c-o');
+        var left = this.offsetLeft;
+        document.querySelector('#categories-filter').scrollLeft = left - 10;
         $('#catalog-items-container').empty();
         getProductFetchDetails();
     }).on('click', '#orders-link', function(e) {
@@ -2130,13 +2161,15 @@
         App.changeViewTo('#orderDetailsView');
     }).on('click', '.order-complete-btn', function(e) {
         var i = this.dataset.orderId;
+        var itm = this.dataset.itemId;
         $('body').spin();
         $.ajax({
             url: MY_URL + "/send.php",
             data: {
                 action: 'completeOrder',
                 sellerID: UUID,
-                orderID: i
+                orderID: i,
+                itemID: itm
             },
             timeout: 30000,
             dataType: 'json',
@@ -2186,16 +2219,16 @@
         otp 12345
         */
         PAYLOAD = {
-          // "PBFPubKey": "FLWPUBK-d7f08c4900b741ac9dbc917972bbf8db-X",
-          "PBFPubKey": "FLWPUBK_TEST-f97470a2644144b63407003be8af7c5f-X",
-          // "cardno": cardNumber,
-          "cardno": "5531886652142950",
-          // "cvv": cardCVV,
-          "cvv": "564",
-          // "expirymonth": cardMonth,
-          "expirymonth": "09",
-          // "expiryyear": cardYear,
-          "expiryyear": "22",
+          "PBFPubKey": "FLWPUBK-d7f08c4900b741ac9dbc917972bbf8db-X",
+          // "PBFPubKey": "FLWPUBK_TEST-f97470a2644144b63407003be8af7c5f-X",
+          "cardno": cardNumber,
+          // "cardno": "5531886652142950",
+          "cvv": cardCVV,
+          // "cvv": "564",
+          "expirymonth": cardMonth,
+          // "expirymonth": "09",
+          "expiryyear": cardYear,
+          // "expiryyear": "22",
           "currency": "NGN",
           "country": "NG",
           "amount": ORDER_TOTAL,
@@ -2203,7 +2236,7 @@
           "phonenumber": PHONE,
           "firstname": fName,
           "lastname": lName,
-          "txRef": CURRENT_ORDER_ID// your unique merchant reference
+          "txRef": ORDER_ID// your unique merchant reference
         }
         sendPaymentInfo(1);
     }).on('click', '.pin-key', function(e) {
@@ -2261,16 +2294,16 @@
         var text = document.querySelector('#review-input').value.trim();
         if (!text) return;
         var el = this;
-        if (el.dataset.disabled == 'true') return;
-        el.dataset.disabled = 'true';
+        if (el.dataset.disabled == 'true') return; el.dataset.disabled = 'true';
+        var shopId = this.dataset.shopId;
         $('body').spin();
         $.ajax({
             url: MY_URL + "/send.php",
             data: {
                 action: 'submitReview',
                 message: text,
-                reviewerID: UUID,
-                ownerID: CURRENT_SHOP
+                ownerID: shopId,
+                reviewerID: UUID
             },
             method: "POST",
             timeout: 30000,
@@ -2310,45 +2343,49 @@
         getProductFetchDetails();
     }).on('click', '.product-entry', function(e) {
         var itemId = this.dataset.itemId;
+        var isadded = SELECTED_PRODUCTS.find(function(i) {return i.id == itemId; });
         var c = PRODUCTS.find(function(p) { return p.itemID == itemId; });
         if (c) {
-            CURRENT_SHOP = c.ownerID;
-            CURRENT_CATG = '1';
             var images = '';
             if (c.images > 1) {
                 for (var i = 0; i < c.images; i++) images += "<img src='"+MY_URL+"/img/items/products/"+c.itemID+"_"+i+".jpg' class='thumbnail box96 ba bs-r mg-r "+(i==0?'active':'')+"'>";
             }
-            var h = "<div class='fw fx fx-ac fx-jc bb'>\
-                <img src='"+MY_URL+"/img/items/products/"+c.itemID+"_0.jpg' id='featured-photo' class='fw'>\
+            var h = "<div class='fw fx fx-ac fx-jc bb'>"+
+                (isadded ? "<div class='fw pd16 psf z4 t0 l0 info_box'><div class='fw bs-r sh-c pd16 psr bg c-o'>Item already in cart. This selection will override the previous one.<div class='box32 psa fx fx-ac fx-jc t0 r0 icon-cancel'></div></div></div>" : "")+
+                "<img src='"+MY_URL+"/img/items/products/"+c.itemID+"_0.jpg' id='featured-photo' class='fw'>\
             </div>"+
             (c.images > 1 ? "<div class='carousel pd16 f0 bb'>"+images+"</div>" : "")+
             "<div class='pd20'>\
                 <div class='f24 b'>"+c.name+"</div>"+
                 (c.discount > 0 ? "<div class='c-g tx-lt'>&#8358;"+comma(c.price)+"</div>" : "")+
                 "<div class='f16 b'>&#8358;"+comma((c.price - c.discount).toFixed(2))+"</div>\
+                <div class='c-o'>Available in stock: "+comma(c.pieces_available)+"</div>\
                 <div class='description pd16z c-g'>"+(c.description||'')+"</div>"+
-                (c.ownerID != UUID ? "<div class='fw fx fx-ac b5 pd516 b4-r ba'>\
-                    <div class='fx40'>PCS:</div>\
-                    <div class='fx60 h50 mg-lxx pd020'><input class='fw fh f16' type='number' name='item-count' value='1' min='1' placeholder='1'></div>\
-                </div>"+
-                (c.sizes != null ? "<div class='fw fx fx-ac pd516 b4-r ba triangle-down'>\
-                    <div class='fx40 b'>SIZE:</div>\
-                    <div class='size-picker picker psr fx fx-ac fx60 h50 mg-lxx pd020 ov-h ovx-a not-null' data-available-sizes='"+c.sizes+"' data-selected-options='' placeholder='Select size'></div>\
-                </div>" : "")+
-                (c.colors != null ? "<div class='fw fx fx-ac pd516 b4-r ba triangle-down'>\
-                    <div class='fx40 b'>COLOUR:</div>\
-                    <div class='color-picker picker psr fx fx-ac fx60 h50 mg-lxx pd020 ov-h ovx-a not-null' data-available-colors='"+c.colors+"' data-selected-options='' placeholder='Select colours'></div>\
-                </div>" : "")+
-                "<div id='item-checkout' class='fw Orange psf b0 l0 white pd16 t-c b f16' data-item-id='"+c.itemID+"'>BUY THIS ITEM</div>"
-                :"<div class='item-remove fw Orange psf b0 l0 white pd16 t-c b f16' data-item-id='"+c.itemID+"' data-catg='1'>DELETE THIS ITEM</div>")+
+                (c.ownerID != UUID ?
+                    "<div class='fw fx fx-ac b5 pd516 mg-bx b4-r ba'>\
+                        <div class='fx40'>PCS:</div>\
+                        <div class='fx60 h50 mg-lxx pd020'><input class='fw fh f16' type='number' name='item-count' value='1' min='1' placeholder='1'></div>\
+                    </div>"+
+                    (c.sizes ? "<div class='fw fx fx-ac pd516 mg-bx b4-r ba triangle-down'>\
+                        <div class='fx40 b'>SIZE:</div>\
+                        <div class='size-picker picker psr fx fx-ac fx60 h50 mg-lxx pd020 ov-h ovx-a not-null' data-available-sizes='"+c.sizes+"' data-selected-options='' placeholder='Select size'></div>\
+                    </div>" : "")+
+                    (c.colors ? "<div class='fw fx fx-ac pd516 mg-bx b4-r ba triangle-down'>\
+                        <div class='fx40 b'>COLOUR:</div>\
+                        <div class='color-picker picker psr fx fx-ac fx60 h50 mg-lxx pd020 ov-h ovx-a not-null' data-available-colors='"+c.colors+"' data-selected-options='' placeholder='Select colours'></div>\
+                    </div>" : "")+
+                    "<div id='add-to-cart' class='fw mg-tx Orange white b4-r pd16 t-c b' data-item-id='"+c.itemID+"'>ADD TO CART</div>"
+                    :"<div class='item-remove fw Orange psf b0 l0 white pd16 t-c b' data-item-id='"+c.itemID+"' data-catg='1'>DELETE THIS ITEM</div>"
+                )+
             "</div>";
             $('#productWrapper').html(h);
             App.changeViewTo('#productView');
+            $('#productWrapper').parent().scrollTop(0);
         }
     }).on('click', '.thumbnail', function(e) {
         $('.thumbnail.active').removeClass('active');
         this.classList.add('active');
-        $('#featured-photo').attr('src', this.src).hide().slideDown();
+        $('#featured-photo').attr('src', this.src).hide().fadeIn();
     }).on('click', '.event-entry', function(e) {
         var itemId = this.dataset.itemId;
         var c = ITEMS_DATA.find(function(a) {return a.itemID == itemId;});
@@ -2383,9 +2420,10 @@
         var d = ITEMS_DATA.find(function(a) {return a.itemID == itemId;});
         if (d) {
             var tk = d.tickets.find(function(b){return b.ticket_type==tType});
-            var invoice = [{id: itemId, nm: d.name+' ('+TICKETS[tType]+')', pr: parseFloat(tk.price).toFixed(2), ds: parseFloat(tk.discount).toFixed(2), tt: 1}];
+            var invoice = [{id: itemId, oi: d.ownerID, nm: d.name+' ('+TICKETS[tType]+')', pr: parseFloat(tk.price).toFixed(2), ds: parseFloat(tk.discount).toFixed(2), tt: 1}];
             CURRENT_ORDER = invoice;
-            ISTICKET = JSON.stringify({ticket_type: tType, event_id: itemId});
+            ORDER_TYPE = '3';
+            ORDER_INFO = JSON.stringify({ticket_type: tType, event_id: itemId});
             App.changeViewTo('#invoiceView');
             $('#invoice-content').html(buildInvoice(invoice, null));
         }
@@ -2398,7 +2436,7 @@
         fetchMails();
     }).on('click', '.msg-entry', function(e) {
         var key = this.dataset.key;
-        var msg = MY_MAILS.find(function(m) {return m.k = key;});
+        var msg = MY_MAILS.find(function(m) {return m.k == key;});
         $('#repliesWrapper').empty().attr('placeholder','Loading replies...');
         App.changeViewTo('#messageView');
         buildMessage(msg);
@@ -2453,7 +2491,7 @@
             method: "POST",
             success: function(p) {
                 if (p == 1) {
-                    var msg = MY_MAILS.find(function(m) {return m.k = key;});
+                    var msg = MY_MAILS.find(function(m) {return m.k == key;});
                     msg.isopen = 0;
                     buildMessage(msg);
                     $('.mail-status[data-key="'+key+'"]').removeClass('Orange').addClass('bg-fd').text('closed');
@@ -2477,7 +2515,7 @@
             success: function(p) {
                 if (p == '1') {
                     $('.msg-entry[data-key="'+key+'"]').remove();
-                    var msg = MY_MAILS.find(function(m) {return m.k = key;});
+                    var msg = MY_MAILS.find(function(m) {return m.k == key;});
                     msg.isdeleted = 1;
                     App.closeCurrentView();
                 }
@@ -2614,23 +2652,42 @@
         this.removeEventListener('touchmove', swipeMove);
         this.removeEventListener('touchend', swipeEnd);
         S.z = parseInt(this.dataset.left);
-        if (S.z < -VIEWPORTWIDTH * 0.4 - VIEWPORTWIDTH) {
-            var p = -VIEWPORTWIDTH * 2;
-            this.style.transform = 'translate3d(' + p + 'px, 0, 0)';
-            this.dataset.index = '2';
-            S.z = p;
-        } else if (S.z < -VIEWPORTWIDTH * 0.4) {
-            var p = -VIEWPORTWIDTH;
-            this.style.transform = 'translate3d(' + p + 'px, 0, 0)';
-            this.dataset.index = '1';
-            S.z = p;
+        if (S.a - e.changedTouches[0].pageX > 1) {
+            if (S.z < -(VIEWPORTWIDTH * 0.2) - VIEWPORTWIDTH) {
+                var p = -VIEWPORTWIDTH * 2;
+                this.style.transform = 'translate3d(' + p + 'px, 0, 0)';
+                this.dataset.index = '2';
+                S.z = p;
+            } else if (S.z < -VIEWPORTWIDTH * 0.2) {
+                var p = -VIEWPORTWIDTH;
+                this.style.transform = 'translate3d(' + p + 'px, 0, 0)';
+                this.dataset.index = '1';
+                S.z = p;
+            } else {//-60 and higher (small swipe)
+                var p = 0;
+                this.style.transform = 'translate3d(' + p + 'px, 0, 0)';
+                this.dataset.index = '0';
+                S.z = p;
+            }
         } else {
-            var p = 0;
-            this.style.transform = 'translate3d(' + p + 'px, 0, 0)';
-            this.dataset.index = '0';
-            S.z = p;
+            if (S.z > -VIEWPORTWIDTH * 0.8) {//-240
+                var p = 0;
+                this.style.transform = 'translate3d(' + p + 'px, 0, 0)';
+                this.dataset.index = '0';
+                S.z = p;
+            } else if (S.z > -(VIEWPORTWIDTH * 0.8) - VIEWPORTWIDTH) {//>-540
+                var p = -VIEWPORTWIDTH;
+                this.style.transform = 'translate3d(' + p + 'px, 0, 0)';
+                this.dataset.index = '1';
+                S.z = p;
+            } else {//-60
+                var p = -VIEWPORTWIDTH * 2;
+                this.style.transform = 'translate3d(' + p + 'px, 0, 0)';
+                this.dataset.index = '2';
+                S.z = p;
+            }
         }
-        this.style.transition = 'transform 150ms ease-out';
+        this.style.transition = 'transform 300ms ease-out';
     }
 
  
@@ -2659,7 +2716,7 @@
                                     <img src='res/img/icon/party.jpg' width='110%'>\
                                 </div>\
                                 <div class='fw psa white info-banner h60 lh-i b0 l0 pd10'>\
-                                    <div class='fw b f14'>No suggested events</div>\
+                                    <div class='fw b f16'>No suggested events</div>\
                                     <div class='fw ovx-h f14'>Browse other events...?</div>\
                                 </div>\
                             </div>\
@@ -2698,7 +2755,7 @@
                                     <img src='res/img/icon/food.jpg' width='110%'>\
                                 </div>\
                                 <div class='fw psa white info-banner h60 lh-i b0 l0 pd10'>\
-                                    <div class='fw b f14'>No suggested restaurants</div>\
+                                    <div class='fw b f16'>No suggested restaurants</div>\
                                     <div class='fw ovx-h f14'>Check our top rated sellers...?</div>\
                                 </div>\
                             </div>\
@@ -2919,7 +2976,7 @@
             h += "<div class='msg-entry fw pd10 psr b4-r mg-b16 ba sh-a ov-h' data-key='"+c.k+"'>\
                 <div class='mail-status psa t0 r0 white "+(c.isopen == 1 ? 'Orange' : 'bg-fd')+"' data-key='"+c.k+"' style='padding:2px 5px;'>"+(c.isopen == 1 ? 'open' : 'closed')+"</div>\
                 <div class='fw b f16'>"+c.title+"</div>\
-                <div class='fw ov-h pd10z b5 tx-el c-g' style='white-space:nowrap;'>"+c.message+"</div>\
+                <div class='fw ov-h pd10z b5 tx-el c-g'>"+c.message+"</div>\
                 <div class='f10 c-g'>"+checkTime(c.time_*1000)+"</div>\
             </div>";
         });
@@ -2972,12 +3029,11 @@
     function buildItems(p, catg, local) {
         var h = '';
         var user = p[0].ownerID == UUID;
+        //
         if (catg != 1) {
             if (local) ITEMS_DATA.push(p[0]);
             else ITEMS_DATA = p;
         }
-        CURRENT_SHOP = p[0].ownerID;
-        CURRENT_CATG = catg;
 
         if (catg == '1') {//e-commerce, fetched by the owner
             if (local) PRODUCTS.push(p[0]);
@@ -3235,7 +3291,7 @@
                         <img class='fw im-sh' src='"+MY_URL+"/img/items/products/"+c.itemID+"_0.jpg'>\
                     </div>\
                     <div class='fw'>\
-                        <div class='f16 b'>"+c.name+"</div>"+
+                        <div class='fw ovx-h f16 b tx-el'>"+c.name+"</div>"+
                         (c.discount > 0 ? "<span class='tx-lt ltt c-g f10 mg-r'>&#8358;"+comma(c.price)+"</span>" : "")+
                         "<span class='f16'>&#8358;"+comma((c.price - c.discount).toFixed(2))+"</span>\
                     </div>"+
@@ -3243,7 +3299,7 @@
                     "<div class='fx f10'>\
                         <div style='width:54px;'><img src='res/img/logo.png' class='fw'></div><i class='b'>Express</i>\
                     </div>":
-                    ""
+                    "<div style='height:13px;'></div>"
                     )+
                 "</div>";
         });
@@ -3252,7 +3308,7 @@
     function buildInvoice(invoice, order) {
         var h = '';
         var total = 0;
-        invoice.forEach(function(c) {
+        invoice.forEach(function(c,x) {
             var price = (c.pr - c.ds) * c.tt;
             total += price;
             h+="<div class='fw fx f16 pd516'>\
@@ -3261,7 +3317,7 @@
                     <span class='b'>&#8358;"+comma(price)+"</span>\
                 </div>";
             if (c.isproduct) {
-                h+="<div class='pd16'>";
+                h+="<div class='pd1015 bb'>";
                 if(c.sz){
                     var sizes = [];
                     c.sz.split(',').forEach(function(d) { sizes.push(SIZES.find(function(c) {return c.dex == d;})); });
@@ -3274,14 +3330,22 @@
                         h += "<div class='pd5 mg-rm mg-bm i-b ba b5 b4-r'><div class='i-b b-rd ba1 mg-rm' style='background-color:"+l.hex+";vertical-align:bottom;width:18px;height:18px;'></div>"+l.name+"</div>";
                     });
                 }
-                h+="</div><div class='pd016'><img src='"+MY_URL+"/img/items/products/"+c.id+"_0.jpg' class='invoice-item-thumb box120 ba bs-r' data-item-id='"+c.id+"'></div>";
+                h+="<div>\
+                        <img src='"+MY_URL+"/img/items/products/"+c.id+"_0.jpg' class='invoice-item-thumb box96 ba bs-r' data-item-id='"+c.id+"'>\
+                    </div>\
+                    <div class='remove-from-cart pd10 i-b b4-r Orange white' data-index='"+x+"'>Remove this item</div>\
+                </div>";
             }
         });
+        var service_ch;
+        if (USERTYPE == 0) service_ch = 50;
+        else service_ch = 0;
+        //
         var delivery = order ? order.delivery_charge : 0;
-        ORDER_TOTAL = Math.ceil(total+50+parseInt(delivery));
+        ORDER_TOTAL = Math.ceil(total+service_ch+parseInt(delivery));
         h+=(!order ? "<div class='fw pd30'><input type='text' name='voucherCode' class='fw pd16 bg-ac t-c b4-r ba' placeholder='Enter Voucher Code'></div>" : "<div class='fw pd16'></div>")+
-            "<div class='fw fx b5 c-g pd516'><span class='fx60'>Sub Total</span><span class=''>&#8358;"+comma(total)+"</span></div>\
-            <div class='fw fx b5 c-g pd516'><span class='fx60'>Service Charge</span><span class=''>&#8358;50</span></div>"+
+            "<div class='fw fx b5 c-g pd516'><span class='fx60'>Sub Total</span><span class=''>&#8358;"+comma(total)+"</span></div>"+
+            (USERTYPE == 0 ? "<div class='fw fx b5 c-g pd516'><span class='fx60'>Service Charge</span><span class=''>&#8358;50</span></div>" : "")+
             (delivery > 0 ? "<div class='fw fx b5 c-g pd516'><span class='fx60'>Delivery Charge</span><span class=''>&#8358;"+delivery+"</span></div>" : "")+
             "<div class='fw fx b pd516'><span class='fx60'>Total</span><span class=''>&#8358;"+comma(ORDER_TOTAL)+"</span></div>";
         if (order) {
@@ -3295,15 +3359,15 @@
                     <div class='fw pd10 ba b4-r bg'>\
                         <div class='fw pd10 bg-ac mg-bm t-c b4-r b5 ba'>Customer Info</div>\
                         <div class='fw mg-bm'>"+info.name+"</div>\
-                        <div class='fw mg-bm'>"+info.address+"</div>\
                         <div class='fw mg-bm'>"+info.phone+"</div>\
-                        <div class='fw mg-bm'>"+(info.friend == 1 ? 'Ordered for friend' : 'Ordered for self')+"</div>\
+                        <div class='fw mg-bm'>"+info.address+"</div>\
+                        <div class='fw mg-bm'>Ordered for "+(info.friend == 1 ? 'friend' : 'self')+"</div>\
                         <div class='fw'>"+info.instruction+"</div>\
                     </div>\
                 </div>"+
                 (
                     (seller && delivered == 0) ?
-                        "<div class='fw pd016 fx fx-jc'><div class='Orange white b4-r sh-c b5 pd1015 order-complete-btn' data-order-id='"+orderID+"'>Complete Order</div></div>"
+                        "<div class='fw pd016 fx fx-jc'><div class='Orange white b4-r sh-c b5 pd1015 order-complete-btn' data-order-id='"+orderID+"' data-item-id='"+order.itemID+"'>Complete Order</div></div>"
                     : (!seller) ?
                         (paid == 0) ?
                             (admined == 1) ? "<div class='fw pd016 fx fx-jc'><div class='Orange white b4-r sh-c b5 pd1015 order-payment-btn' data-order-id='"+orderID+"'>Make Payment</div></div>"
@@ -3313,7 +3377,7 @@
                         : ""
                     : ""
                 );
-            CURRENT_ORDER_ID = orderID;
+            ORDER_ID = orderID;
         }
         return h;
     }
@@ -3346,7 +3410,7 @@
                 <div class='fw fx fx-fs bb'>\
                     <div class='fx60 fx-js pd10'>\
                         <div class='b'>#"+c.orderID+"</div>\
-                        <div class='f10'>"+checkTime(c.time_*1000)+"</div>\
+                        <div class='f10'>"+checkTime(c.time_start*1000)+"</div>\
                     </div>\
                     <div class='order-status pd5 white' data-order-id='"+c.orderID+"' data-status='"+c.delivery_status+"'>"+(c.delivery_status=='0'?'Pending':'Completed')+"</div>\
                 </div>\
@@ -3383,7 +3447,7 @@
                 otp: otp,
                 ref: TRN_REF,
                 buyerID: UUID,
-                orderID: CURRENT_ORDER_ID
+                orderID: ORDER_ID
             },
             timeout: 30000,
             dataType: 'json',
@@ -3421,8 +3485,8 @@
         // console.log(body.data.data.responsecode);
         if (body.state == 1) {
             toast('Your payment was successful');
-            $('.order-payment-btn[data-order-id="'+CURRENT_ORDER_ID+'"]').replaceWith("<div class='fw pd016 fx fx-jc'><div class='ba b4-r b5 pd1015'>Awaiting Delivery</div></div>");
-            var order = MY_ORDERS.find(function(e) {return e.orderID == CURRENT_ORDER_ID;});
+            $('.order-payment-btn[data-order-id="'+ORDER_ID+'"]').replaceWith("<div class='fw pd016 fx fx-jc'><div class='ba b4-r b5 pd1015'>Awaiting Delivery</div></div>");
+            var order = MY_ORDERS.find(function(e) {return e.orderID == ORDER_ID;});
             order.payment_status = 1;
             //
             let cv=Views.indexOf('#orderDetailsView');
@@ -3472,6 +3536,7 @@
             ;
             if (action == 'signup' || p.ch == 0) showChannelScreen();//sign in? if ch == 0, means no activities yet
             else {//has passed ch check, possibly has some activities
+                App.changeViewTo('#home');
                 preparePage(true);//existing
                 loadUserPicture();
             }
@@ -3487,6 +3552,7 @@
         $('#display-name').text(shopName);
         $('#user-address').text(shopAddress);
         $('.items-container[data-catg="'+catg+'"]').show();
+        $('#post-a-review').attr('data-shop-id', shopId);
     }
     function showAllOrderEntries() {
         var ct = document.querySelector('#search-input').dataset.container;
@@ -3534,6 +3600,19 @@
         else formatted=day+' '+month+' '+hour+':'+minute+M;/*not new year...different day or month*/
         return formatted;
     }
+
+    var POLLING_TIME = 3;
+    POLLING_TRACKER = null;
+    POLLING_TRACKER = setInterval(function() {
+        if (POLLING_TIME == 0) {
+            checkMail();
+            if (USERTYPE == 0) {
+                fetchEvents('timeline', 10);
+                fetchRestaurants('timeline', 10);
+            }
+            POLLING_TIME = 3;
+        } else POLLING_TIME--;
+    }, 60000);
 
     var TST = null;
     var $tst = $('#toast-container');

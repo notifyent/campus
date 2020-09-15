@@ -307,6 +307,7 @@ img[src=""]{
     text-decoration: underline;
 }
 .tx-el {
+    white-space:nowrap;
     text-overflow: ellipsis;
 }
 .tx-hs {
@@ -391,6 +392,9 @@ img[src=""]{
 }
 .h36_4 {
     height: 2.6em;
+}
+.h40 {
+    height: 40px;
 }
 .h50 {
     height: 50px;
@@ -837,9 +841,6 @@ img[src=""]{
 .radio.selected:before {
     border: 6px solid #fe5215;
 }
-.pops:not([data-total="0"]) {
-    margin-right: 10px;
-}
 .pops:not([data-total="0"]):after {
     content: attr(data-total);
     position: absolute;
@@ -855,6 +856,7 @@ img[src=""]{
     font-size: 12px;
     color: #fff;
     background-color: #FE5215;
+    border: 1px solid #fff;
     border-radius: 32px;
 }
 .xtra-img:nth-of-type(odd) {
