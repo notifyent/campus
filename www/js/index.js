@@ -908,6 +908,8 @@
                                 toast('Email address not available');
                             } else if (p.message.indexOf("username") > -1) {
                                 toast('Username not available');
+                            } else if (p.message.indexOf("phone") > -1) {
+                                toast('Phone number not available');
                             } else toast('An error occurred. Please try again later.');//not expecting this.
                         }
                     },
@@ -3413,15 +3415,15 @@
                     <div class='fw'>\
                         <div class='fw ov-h f16 b tx-el'>"+c.name+"</div>"+
                         (c.discount > 0 ? "<span class='tx-lt ltt c-g f10 mg-r'>&#8358;"+comma(c.price)+"</span>" : "")+
-                        "<span class='f16'>&#8358;"+comma((c.price - c.discount).toFixed(2))+"</span>\
-                    </div>"+
-                    (c.delivery == 1 ?
-                    "<div class='fx f10'>\
-                        <div style='width:54px;'><img src='res/img/logo.png' class='fw'></div><i class='b'>Express</i>\
-                    </div>":
-                    "<div style='height:13px;'></div>"
-                    )+
-                "</div>";
+                        "<span class='f16'>&#8358;"+comma((c.price - c.discount).toFixed(2))+"</span>"+
+                        (c.delivery == 1 ?
+                        "<div class='fw ov-h tx-el fx f10' style='height:14px;'>\
+                            <div style='width:54px;'><img src='res/img/logo.png' class='fw'></div><i class='b'>Express</i>\
+                        </div>":
+                        "<div class='fw ov-h tx-el f10 c-g' style='height:14px;'>Sold by "+c.shop_name+"</div>"
+                        )+
+                    "</div>\
+                </div>";
         });
         return h;
     }
