@@ -61,9 +61,10 @@
 	  				<input type="submit" name="submit" class="pd20 b f16 fw Orange white" value="SUBMIT">
 	  			</div>
 	  			<div class="fw pd16 t-c f10 mg-b">Got a verification token? <span class="view-locator b ac c-o" data-view="#tokenPrompt">PROCEED</span></div>
+	  			<div class="fw f10 t-c">By clicking to sign up, you're agreeing to our <span class="terms-link c-o tx-u">Terms of Service</span> and <span class="privacy-link c-o tx-u">Privacy Policy</span></div>
   			</form>
-  			<div class="fw pd1015 t-c f10 psa mg-b b0 l0">Already have an account? <span class="view-locator b ac c-o" data-view="#loginView">SIGN IN</span></div>
   		</div>
+		<div class="fw pd1015 t-c f10 psa mg-b b0 l0">Already have an account? <span class="view-locator b ac c-o" data-view="#loginView">SIGN IN</span></div>
   	</div>
 
 
@@ -89,7 +90,7 @@
 		<div class="fw bg psf z4 t0 l0 b sh-b" style="height: 66px;">
 			<div class="fw t-c pd20 f20">Sign up</div>
 		</div>
-		<div class="fw fh psf z4 t0 l0 bg bg-im-cv info_box" style="background-image: url(res/img/icon/more.jpg);">
+		<div class="fw fh psf z4 t0 l0 bg bg-im-cv info_box" style="background-image: url(res/img/bg.jpg);">
 			<div class="fw fh pd30 fx fx-ac fx-jc cd">
 				<div class="signup-option w80p pd20 b4-r sh-a c-o ba bg" data-index="1">
 					<div class="fw t-c b5">I'M A SELLER</div>
@@ -159,7 +160,6 @@
 	  			</form>
 
 	  			<div class="forgot-password fw pd16 c-g b5 t-c">Forgot Password?</div>
-	  			<div class="fw f10 c-o t-c tx-u terms-link">By clicking to sign up, you're agreeing to our terms of service</div>
 	  		</div><!-- end form component -->
 
 	  		<div class="h20"></div>
@@ -241,11 +241,10 @@
 
 
   	<div id="channelPrompt" class="Grey" data-function="View">
-		<div class="fw fh fx fx-jc cd pd20 ovx-h ovy-a" style="background-image:url(res/img/icon/fashion.jpg);background-size: cover;background-repeat: no-repeat;">
-			<div class="pd1030 Grey b4-r ba sh-b">
-		  		<div class="fw c-o t-c pd1020 b f16">One More Step</div>
+		<div class="fw fh fx fx-jc cd pd20 ovx-h ovy-a" style="background-image:url(res/img/bg.jpg);background-size: cover;background-repeat: no-repeat;">
+			<div class="pd10">
 		  		<form id="advert-channel-form" class="fw mg-b ba ov-h b4-r sh-b start-form" autocomplete="off">
-			  		<div class="fw t-c pd16 bb bg">How did you hear about us?</div>
+			  		<div class="fw pd16 f16 t-c bb bg">How did you hear about us?</div>
 					<div class="triangle-down"><select id="channel-select" name="channel" class="fw bb pd16 bg">
 						<option value="">Select One</option>
 						<option value="1">Twitter Influencer</option>
@@ -322,6 +321,19 @@
 			  		<div class="bg bt bb mg-t">
 						<div class="fw fx pd1015 b bb"><div class="fx60 fx fx-ac">Buy Event Tickets</div> <div class="fx fx-ac ac ba b4-r pd5 t-c more-services" data-catg="3" data-name="Events">Browse More...</div></div>
 						<div id="carousel-buy-ticket" class="carousel pd16 f0 lh0">
+							<div class='w85p-c i-b ov-h mg-r ba psr bs-r more-services' data-catg='3' data-name='Events'>
+                                <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'>
+                                    <img src='res/img/icon/party.jpg' width='110%'>
+                                </div>
+                                <div class='fw psa white info-banner h60 lh-i b0 l0 pd10'>
+                                    <div class='fw b f16'>No suggested events</div>
+                                    <div class='fw ovx-h f14'>Browse other events...</div>
+                                </div>
+                            </div>
+                            <div class='w85p-c i-b ov-h mg-r ba psr bs-r'>
+                                <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'></div>
+                                <div class='fw psa bg-ac h60 b0 l0 pd10'></div>
+                            </div>
 							<div class='w85p-c i-b ov-h mg-r ba psr bs-r'>
 			                    <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'></div>
 			                    <div class='fw psa bg-ac h60 b0 l0 pd10'></div>
@@ -336,6 +348,19 @@
 					<div class="bg bt bb mg-t">
 						<div class="fw fx pd1015 b bb"><div class="fx60 fx fx-ac">Restaurants around you</div> <div class="fx fx-ac ac ba b4-r pd5 t-c more-services" data-catg="2" data-name="Restaurants">Browse More...</div></div>
 						<div id="carousel-buy-food" class="carousel pd16 f0 lh0">
+							<div class='w85p-c i-b ov-h mg-r ba psr bs-r more-services' data-catg='2' data-name='Restaurants'>
+                                <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'>
+                                    <img src='res/img/icon/food.jpg' width='110%'>
+                                </div>
+                                <div class='fw psa white info-banner h60 lh-i b0 l0 pd10'>
+                                    <div class='fw b f16'>No suggested restaurants</div>
+                                    <div class='fw ovx-h f14'>Check our top rated sellers...</div>
+                                </div>
+                            </div>
+                            <div class='w85p-c i-b ov-h mg-r ba psr bs-r'>
+                                <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'></div>
+                                <div class='fw psa bg-ac h60 b0 l0 pd10'></div>
+                            </div>
 							<div class='w85p-c i-b ov-h mg-r ba psr bs-r'>
 			                    <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'></div>
 			                    <div class='fw psa bg-ac h60 b0 l0 pd10'></div>
@@ -346,6 +371,7 @@
 			                </div>
 						</div>
 			  		</div>
+					<div class="shopping-cart pops zoom psf fx fx-ac fx-jc box60 f24 Orange white sh-l b-rd icon-basket" data-total="0" style="right: 16px; bottom: 72px;"></div>
 			  	</div>
 
 			  	<div class="forSeller fh" data-role="screen">
@@ -395,9 +421,7 @@
 	  			<div id="total-found" class="fw pd1016 bb b">Search for Products and Services</div>
 	  			<div id="search-output" class="fw pd16"></div>
 	  		</div>
-	  		<div class="shopping-cart pops zoom psa fx fx-ac fx-jc box60" data-total="0" style="right: 16px; bottom: 72px;">
-	  			<div class="box48 fx fx-ac fx-jc f24 Orange white sh-l b-rd icon-basket"></div>
-	  		</div>
+	  		<div class="shopping-cart pops zoom psa fx fx-ac fx-jc box60 f24 Orange white sh-l b-rd icon-basket" data-total="0" style="right: 16px; bottom: 72px;"></div>
 		</div>
 
 		<div id="ordersTab" data-function="Tab"><!-- checkout -->
@@ -1063,9 +1087,7 @@
   			</div>
   			<div id="catalog-items-container" class="fw pd20 ovx-h ovy-a not-null" placeholder="Fetching products..." style="height: calc(100% - 60px);"></div>
   		</div>
-  		<div class="shopping-cart pops zoom psa fx fx-ac fx-jc box60" data-total="0" style="right: 16px; bottom: 16px;">
-  			<div class="box48 fx fx-ac fx-jc f24 Orange white sh-l b-rd icon-basket"></div>
-  		</div>
+  		<div class="shopping-cart pops zoom psa fx fx-ac fx-jc box60 f24 Orange white sh-l b-rd icon-basket" data-total="0" style="right: 16px; bottom: 16px;"></div>
   	</div>
 
   	<div id="productView" class="Grey" data-function="View">
@@ -1214,11 +1236,200 @@
   	</div>
 
   	<div id="productModal" class="Modal bg-tr">
-  		<div class="bg psa bs-r sh-c c-o b5" style="top: 45px; right: 25px;">
+  		<div class="bg psa bs-r sh-c c-o b5 zoom" style="top: 45px; right: 25px;">
   			<div id="report-product" class="product-menu-item pd16 ac bb icon-cancel"> Report Item</div>
   			<div id="copy-product-link" class="product-menu-item pd16 ac icon-edit-1"> Copy Item Link</div>
   		</div>
   	</div>
+
+
+  	<div id="termsView" class="bg" data-function="View">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
+  			<div class="b f16">Terms of Service</div>
+  		</div>
+  		<div class="fw fh ovx-h ovy-a pd60t">
+  			<div class="pd020">
+	  			<h1>Terms and Conditions for OnCampus services </h1>
+
+	  			<h2>Introduction</h2> 
+	  			  
+	  			<p>These Website Standard Terms and Conditions written on this webpage shall manage your use of our website, OnCampus.ng accessible at http://www.oncampus.ng.</p>
+
+	  			<p>These Terms will be applied fully and affect to your use of this Website. By using this Website, you agreed to accept all terms and conditions written in here. You must not use this Website if you disagree with any of these Website Standard Terms and Conditions.</p>
+
+	  			<p>Minors or people below 13 years old are not allowed to use this Website.</p>
+
+	  			<h2>Intellectual Property Rights</h2>
+
+	  			<p>Other than the content you own, under these Terms, OnCampus services  and/or its licensors own all the intellectual property rights and materials contained in this Website.</p>
+
+	  			<p>You are granted limited license only for purposes of viewing the material contained on this Website.</p>
+
+	  			<h2>Restrictions</h2>
+
+	  			<p>You are specifically restricted from all of the following:</p>
+
+	  			<ul>
+	  			    <li>publishing any Website material in any other media;</li>
+	  			    <li>selling, sublicensing and/or otherwise commercializing any Website material;</li>
+	  			    <li>publicly performing and/or showing any Website material;</li>
+	  			    <li>using this Website in any way that is or may be damaging to this Website;</li>
+	  			    <li>using this Website in any way that impacts user access to this Website;</li>
+	  			    <li>using this Website contrary to applicable laws and regulations, or in any way may cause harm to the Website, or to any person or business entity;</li>
+	  			    <li>engaging in any data mining, data harvesting, data extracting or any other similar activity in relation to this Website;</li>
+	  			    <li>using this Website to engage in any advertising or marketing.</li>
+	  			</ul>
+
+	  			<p>Certain areas of this Website are restricted from being access by you and OnCampus services  may further restrict access by you to any areas of this Website, at any time, in absolute discretion. Any user ID and password you may have for this Website are confidential and you must maintain confidentiality as well.</p>
+
+	  			<h2>Your Content</h2>
+
+	  			<p>In these Website Standard Terms and Conditions, "Your Content" shall mean any audio, video text, images or other material you choose to display on this Website. By displaying Your Content, you grant OnCampus services  a non-exclusive, worldwide irrevocable, sub licensable license to use, reproduce, adapt, publish, translate and distribute it in any and all media.</p>
+
+	  			<p>Your Content must be your own and must not be invading any third-party’s rights. OnCampus services  reserves the right to remove any of Your Content from this Website at any time without notice.</p>
+
+	  			<p>Your content to be posted mustn’t have your brand name or contact watermarked or it will face rejection.</p>
+
+	  			<p>contents posted must be of a clean,photographed background or good design to avoid being rejected.</p>
+
+	  			<h2>Your Privacy</h2>
+
+	  			<p>Please read Privacy Policy.</p>
+
+	  			<h2>No warranties</h2>
+
+	  			<p>This Website is provided "as is," with all faults, and OnCampus services  express no representations or warranties, of any kind related to this Website or the materials contained on this Website. Also, nothing contained on this Website shall be interpreted as advising you.</p>
+
+	  			<h2>pricing </h2>
+
+	  			<p>for Seller’s—>there will be a percentage cut from each item sold on the OnCampus platform(pricing might vary based on the department) a 5% charge to a 15% charge from each sale.  
+
+	  			For buyers—>there’s a service charge on each purchases made that will be added to the delivery cost.
+
+	  			<h2>Limitation of liability</h2>
+
+	  			<p>In no event shall OnCampus services , nor any of its officers, directors and employees, shall be held liable for anything arising out of or in any way connected with your use of this Website whether such liability is under contract.  OnCampus services , including its officers, directors and employees shall not be held liable for any indirect, consequential or special liability arising out of or in any way related to your use of this Website.</p>
+
+	  			<h2>Indemnification</h2>
+
+	  			<p>You hereby indemnify to the fullest extent OnCampus services  from and against any and/or all liabilities, costs, demands, causes of action, damages and expenses arising in any way related to your breach of any of the provisions of these Terms.</p>
+
+	  			<h2>Severability</h2>
+
+	  			<p>If any provision of these Terms is found to be invalid under any applicable law, such provisions shall be deleted without affecting the remaining provisions herein.</p>
+
+	  			<h2>Variation of Terms</h2>
+
+	  			<p>OnCampus services  is permitted to revise these Terms at any time as it sees fit, and by using this Website you are expected to review these Terms on a regular basis.</p>
+
+	  			<h2>Assignment</h2>
+
+	  			<p>The OnCampus services  is allowed to assign, transfer, and subcontract its rights and/or obligations under these Terms without any notification. However, you are not allowed to assign, transfer, or subcontract any of your rights and/or obligations under these Terms.</p>
+
+	  			<h2>Entire Agreement</h2>
+	  			    
+	  			<p>These Terms constitute the entire agreement between OnCampus services  and you in relation to your use of this Website, and supersede all prior agreements and understandings.</p>
+
+	  			<h2>Governing Law & Jurisdiction</h2>
+
+	  			<p>These Terms will be governed by and interpreted in accordance with the laws of the State of ng, and you submit to the non-exclusive jurisdiction of the state and federal courts located in ng for the resolution of any disputes.</p>
+	  		</div>
+  		</div>
+  	</div>
+
+  	<div id="privacyView" class="bg" data-function="View">
+	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
+  			<div class="b f16">Privacy Policy</div>
+  		</div>
+  		<div class="fw fh ovx-h ovy-a pd60t">
+  			<div class="pd020">
+	  			<h1>Privacy Policy for OnCampus services </h1>
+
+	  			<p>At OnCampus.ng, accessible from http://www.oncampus.ng, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected and recorded by OnCampus.ng and how we use it.</p>
+
+	  			<p>If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact us(link to our contact us)</p>
+
+	  			<p>This Privacy Policy applies only to our online activities and is valid for visitors to our website and app with regards to the information that they shared and/or collect in OnCampus.ng. This policy is not applicable to any information collected offline or via channels other than this website</p>
+
+	  			<h2>Consent</h2>
+
+	  			<p>By using our website, you hereby consent to our Privacy Policy and agree to its terms.</p>
+
+	  			<h2>Information we collect</h2>
+
+	  			<p>The personal information that you are asked to provide, and the reasons why you are asked to provide it, will be made clear to you at the point we ask you to provide your personal information.</p>
+	  			<p>If you contact us directly, we may receive additional information about you such as your name, email address, phone number, the contents of the message and/or attachments you may send us, and any other information you may choose to provide.</p>
+	  			<p>When you register for an Account, we may ask for your contact information, including items such as name, company name, address, email address, and telephone number.</p>
+
+	  			<h2>How we use your information</h2>
+
+	  			<p>We use the information we collect in various ways, including to:</p>
+
+	  			<ul>
+	  			<li>Provide, operate, and maintain our webste</li>
+	  			<li>Improve, personalize, and expand our webste</li>
+	  			<li>Understand and analyze how you use our webste</li>
+	  			<li>Develop new products, services, features, and functionality</li>
+	  			<li>Communicate with you, either directly or through one of our partners, including for customer service, to provide you with updates and other information relating to the webste, and for marketing and promotional purposes</li>
+	  			<li>Send you emails</li>
+	  			<li>Find and prevent fraud</li>
+	  			</ul>
+
+	  			<h2>Log Files</h2>
+
+	  			<p>OnCampus.ng follows a standard procedure of using log files. These files log visitors when they visit websites. All hosting companies do this and a part of hosting services' analytics. The information collected by log files include internet protocol (IP) addresses, browser type, Internet Service Provider (ISP), date and time stamp, referring/exit pages, and possibly the number of clicks. These are not linked to any information that is personally identifiable. The purpose of the information is for analyzing trends, administering the site, tracking users' movement on the website, and gathering demographic information.</p>
+
+	  			<h2>Cookies and Web Beacons</h2>
+
+	  			<p>Like any other website, OnCampus.ng uses 'cookies'. These cookies are used to store information including visitors' preferences, and the pages on the website that the visitor accessed or visited. The information is used to optimize the users' experience by customizing our web page content based on visitors' browser type and/or other information.</p>
+
+
+
+	  			<h2>Advertising Partners Privacy Policies</h2>
+
+	  			<P>You may consult this list to find the Privacy Policy for each of the advertising partners of OnCampus.ng.</p>
+
+	  			<p>Third-party ad servers or ad networks uses technologies like cookies, JavaScript, or Web Beacons that are used in their respective advertisements and links that appear on OnCampus.ng, which are sent directly to users' browser. They automatically receive your IP address when this occurs. These technologies are used to measure the effectiveness of their advertising campaigns and/or to personalize the advertising content that you see on websites that you visit.</p>
+
+	  			<p>Note that OnCampus.ng has no access to or control over these cookies that are used by third-party advertisers.</p>
+
+	  			<h2>Third Party Privacy Policies</h2>
+
+	  			<p>OnCampus.ng's Privacy Policy does not apply to other advertisers or websites. Thus, we are advising you to consult the respective Privacy Policies of these third-party ad servers for more detailed information. It may include their practices and instructions about how to opt-out of certain options. </p>
+
+	  			<p>You can choose to disable cookies through your individual browser options. To know more detailed information about cookie management with specific web browsers, it can be found at the browsers' respective websites.</p>
+
+	  			<h2>CCPA Privacy Rights (Do Not Sell My Personal Information)</h2>
+
+	  			<p>Under the CCPA, among other rights, California consumers have the right to:</p>
+	  			<p>Request that a business that collects a consumer's personal data disclose the categories and specific pieces of personal data that a business has collected about consumers.</p>
+	  			<p>Request that a business delete any personal data about the consumer that a business has collected.</p>
+	  			<p>Request that a business that sells a consumer's personal data, not sell the consumer's personal data.</p>
+	  			<p>If you make a request, we have one month to respond to you. If you would like to exercise any of these rights, please contact us.</p>
+
+	  			<h2>GDPR Data Protection Rights</h2>
+
+	  			<p>We would like to make sure you are fully aware of all of your data protection rights. Every user is entitled to the following:</p>
+	  			<p>The right to access – You have the right to request copies of your personal data. We may charge you a small fee for this service.</p>
+	  			<p>The right to rectification – You have the right to request that we correct any information you believe is inaccurate. You also have the right to request that we complete the information you believe is incomplete.</p>
+	  			<p>The right to erasure – You have the right to request that we erase your personal data, under certain conditions.</p>
+	  			<p>The right to restrict processing – You have the right to request that we restrict the processing of your personal data, under certain conditions.</p>
+	  			<p>The right to object to processing – You have the right to object to our processing of your personal data, under certain conditions.</p>
+	  			<p>The right to data portability – You have the right to request that we transfer the data that we have collected to another organization, or directly to you, under certain conditions.</p>
+	  			<p>If you make a request, we have one month to respond to you. If you would like to exercise any of these rights, please contact us.</p>
+
+	  			<h2>Children's Information</h2>
+
+	  			<p>Another part of our priority is adding protection for children while using the internet. We encourage parents and guardians to observe, participate in, and/or monitor and guide their online activity.</p>
+
+	  			<p>OnCampus.ng does not knowingly collect any Personal Identifiable Information from children under the age of 13. If you think that your child provided this kind of information on our website, we strongly encourage you to contact us immediately and we will do our best efforts to promptly remove such information from our records.</p>
+	  		</div>
+  		</div>
+  	</div>
+
+  	
 
   	
 

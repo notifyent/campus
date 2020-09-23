@@ -673,7 +673,11 @@
     }).on('click', '.view-closer', function() {
         App.closeCurrentView();
     }).on('click', '.terms-link', function() {
-        window.open(BASE_URL + '/legal/terms', '_system');
+        App.changeViewTo('#termsView');
+        // window.open(BASE_URL + '/legal/terms', '_system');
+    }).on('click', '.privacy-link', function() {
+        App.changeViewTo('#privacyView');
+        // window.open(BASE_URL + '/legal/privacy', '_system');
     }).on('click', '.forgot-password', function() {
         App.changeViewTo('#retrievalView');
     }).on('click', '.signup-option', function() {
@@ -2168,7 +2172,7 @@
         var left = this.offsetLeft;
         document.querySelector('#categories-filter').scrollLeft = left - 10;
         $('#catalog-items-container').empty();
-        getDetailsOfProductToFetch('top');
+        getDetailsOfProductsToFetch('top');
     }).on('click', '#orders-link', function(e) {
         fetchMyOrders($('#ordersWrapper'), 'full');
     }).on('click', '.order-details-btn', function(e) {
@@ -2851,7 +2855,7 @@
                                 </div>\
                                 <div class='fw psa white info-banner h60 lh-i b0 l0 pd10'>\
                                     <div class='fw b f16'>No suggested events</div>\
-                                    <div class='fw ovx-h f14'>Browse other events...?</div>\
+                                    <div class='fw ovx-h f14'>Browse other events...</div>\
                                 </div>\
                             </div>\
                             <div class='w85p-c i-b ov-h mg-r ba psr bs-r'>\
@@ -2890,7 +2894,7 @@
                                 </div>\
                                 <div class='fw psa white info-banner h60 lh-i b0 l0 pd10'>\
                                     <div class='fw b f16'>No suggested restaurants</div>\
-                                    <div class='fw ovx-h f14'>Check our top rated sellers...?</div>\
+                                    <div class='fw ovx-h f14'>Check our top rated sellers...</div>\
                                 </div>\
                             </div>\
                             <div class='w85p-c i-b ov-h mg-r ba psr bs-r'>\
@@ -2917,14 +2921,14 @@
                     +"' data-shop-address='"+c.sd
                     +"' data-catg='3' style='background-image: url("+MY_URL+"/img/items/events/"+c.id+".jpg)'>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
-                        <div class='fw b f16'>"+c.nm+" - "+EVENTS[c.tp]+" <span class='f10 b'>"+c.dt+"</span></div>\
-                        <div class='fw f14 ov-h tx-el'>"+c.ad+"</div>\
+                        <div class='fw b f16 ov-h tx-el'>"+c.nm+" - <span class='f14 b'>"+c.dt+"</span></div>\
+                        <div class='fw f14 ov-h tx-el'>"+EVENTS[c.tp]+"</div>\
                     </div>\
                 </div>";
         });
         h+="<div class='w85p-c i-b ov-h mg-r sh-a ba psr bs-r more-services' data-catg='3' data-name='Events'>\
                 <div class='fw fh fx fx-ac fx-jc ov-h bg-mod'>\
-                    <img src='res/img/icon/party.jpg' class='fw'>\
+                    <img src='res/img/icon/party.jpg' width='110%'>\
                 </div>\
                 <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
                     <div class='fw b f16'>Want something different?</div>\
@@ -2942,8 +2946,8 @@
                     +"' data-shop-address='"+c.sd
                     +"' data-catg='3' style='background-image: url("+MY_URL+"/img/items/events/"+c.id+".jpg)'>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
-                        <div class='fw b f16'>"+c.nm+" - "+EVENTS[c.tp]+" <span class='f10 b'>"+c.dt+"</span></div>\
-                        <div class='fw f14 ov-h tx-el'>"+c.ad+"</div>\
+                        <div class='fw b f16 ov-h tx-el'>"+c.nm+" - <span class='f14 b'>"+c.dt+"</span></div>\
+                        <div class='fw f14 ov-h tx-el'>"+EVENTS[c.tp]+"</div>\
                     </div>\
                 </div>";
         });
@@ -2959,14 +2963,14 @@
                     +"' data-shop-address='"+c.ad
                     +"' style='background-image: url("+MY_URL+"/img/users/"+c.ui+".jpg)'>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
-                        <div class='fw b f16'>"+c.nm+"</div>\
+                        <div class='fw b f16 ov-h tx-el'>"+c.nm+"</div>\
                         <div class='fw f14 ov-h tx-el'>"+c.ad+"</div>\
                     </div>\
                 </div>";
         });
         h+="<div class='w85p-c i-b ov-h mg-r psr bs-r sh-a ba more-services' data-catg='2' data-name='Restaurants'>\
                 <div class='fw fh fx fx-ac fx-jc ov-h bg-mod'>\
-                    <img src='res/img/icon/food.jpg' class='fw'>\
+                    <img src='res/img/icon/food.jpg' width='110%'>\
                 </div>\
                 <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
                     <div class='fw b f16'>More...</div>\
@@ -3353,7 +3357,7 @@
         Views.pop();
         App.changeViewTo('#itemsView');
     }
-    function getDetailsOfProductToFetch(type) {
+    function getDetailsOfProductsToFetch(type) {
         var $entries = $('#catalog-items-container .product-entry');
         var catg = $('.item-filter.c-o').attr('data-catg');
         if ($entries.length == 0) {//empty (no products loaded), search-link and filter
@@ -3398,8 +3402,15 @@
                 } else {
                     $cn.attr("placeholder","We couldn't find a matching product");//suggest related products
                 }
+                if (type == 'less' && cue != 0) {
+                    var el = document.querySelector('#catalog-items-container');
+                    el.lastLoaded = Date.now();
+                    el.isLoading = false;
+                }
             },
-            complete: function() {$('body').unspin();}
+            complete: function() {
+                $('body').unspin();
+            }
         });
     }
     function buildProducts(p, buyer, check) {
@@ -3418,7 +3429,7 @@
                         "<span class='f16'>&#8358;"+comma((c.price - c.discount).toFixed(2))+"</span>"+
                         (c.delivery == 1 ?
                         "<div class='fw ov-h tx-el fx f10' style='height:14px;'>\
-                            <div style='width:54px;'><img src='res/img/logo.png' class='fw'></div><i class='b'>Express</i>\
+                            <div class='bg-im-ct' style='width:54px;height:100%;background-image:url(res/img/logo.png)'></div><i class='b'>Express</i>\
                         </div>":
                         "<div class='fw ov-h tx-el f10 c-g' style='height:14px;'>Sold by "+c.shop_name+"</div>"
                         )+
@@ -3788,12 +3799,15 @@
     document.querySelector('#catalog-items-container').addEventListener('scroll', function(e) {
         clearTimeout(CATALOG_LOADER);
         var el = this;
+        if (Date.now() - el.lastLoaded < 30000 || el.isLoading === true) return;//if is loading, ie, server fails to return, check if time > 30000 disregard and proceed
+
         CATALOG_LOADER = setTimeout(function() {
             var sh = el.scrollHeight;
             var st = el.scrollTop;
             var hg = el.offsetHeight;
             if (sh - st - 60 < hg) {
-                getDetailsOfProductToFetch('less');
+                el.isLoading = true;
+                getDetailsOfProductsToFetch('less');
             }
         }, 300);
     });
