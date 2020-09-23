@@ -8,7 +8,7 @@
  * SERVER
  * use number in stock for products
  * increase upload limit on server
- * check for existing review on server and update if found
+ * check for existing review on server and update if any
  *
  *
  * UPDATE
@@ -354,7 +354,7 @@
     function onBackButton() {
         if ($MM.is(':visible')) return $MM.hide();
         if ($SM.is(':visible')) {
-            $SH.hide();//for ui
+            $SH.hide();//for animation
             $SM.hide();
             showAllOrderEntries();
             return;
@@ -428,8 +428,7 @@
             , address VARCHAR NULL
             , birthday VARCHAR NULL
             , category INT NOT NULL
-            )`,[], s => {
-            //category=e-co,food,ticket,gas,graphics,laundry,makeup
+            )`,[], s => {//category=e-co,food,ticket,gas,graphics,laundry,makeup
                 s.executeSql("SELECT * FROM on_user WHERE id = ?", [1], (k, result) => {
                     var len = result.rows.length;
                     if (len > 0) {//data found
@@ -455,6 +454,8 @@
                 });
             });
     }, function() {/*error*/}, function() {/*success*/});
+    //
+    //
     function loadUserPicture() {
         var im = new Image();
         im.onload = function() {
@@ -1907,8 +1908,8 @@
                             $('.product-entry[data-item-id="'+itemId+'"]').remove();
                             App.closeCurrentView();
                             //remove from object
-                            var c = PRODUCTS.find(function(p) { return p.itemID == itemId; });
-                            delete c;
+                            var d = PRODUCTS.find(function(a) {return a.itemID == itemId;});
+                            delete d;
                             break;
                         case '2'://food
                             $('.food-entry[data-item-id="'+itemId+'"]').remove();
@@ -2132,7 +2133,7 @@
     }).on('click', '.services-link', function(e) {
         var catg = this.dataset.catg;
         $('#services-found').html($H+$H+$H);
-        $('#current-service').text(this.querySelector('.service-link-name').dataset.name);
+        $('#current-service').text(this.dataset.name);
         App.changeViewTo('#servicesView');
         $('body').spin();
         $.ajax({
@@ -2396,7 +2397,7 @@
                         <div class='color-picker picker psr fx fx-ac fx60 h50 mg-lxx pd020 ov-h ovx-a not-null' data-available-colors='"+c.colors+"' data-selected-options='' placeholder='Select colours'></div>\
                     </div>" : "")+
                     "<div id='add-to-cart' class='fw mg-tx Orange white b4-r pd16 t-c b' data-item-id='"+c.itemID+"'>ADD TO CART</div>"
-                    :"<div class='item-remove fw Orange psf b0 l0 white pd16 t-c b' data-item-id='"+c.itemID+"' data-catg='1'>DELETE THIS ITEM</div>"
+                    :"<div class='item-remove fw mg-tx Orange white b4-r pd16 t-c b' data-item-id='"+c.itemID+"' data-catg='1'>DELETE THIS ITEM</div>"
                 )+
             "</div>";
             $('#productWrapper').html(h);
@@ -3425,7 +3426,7 @@
                     </div>\
                     <div class='fw'>\
                         <div class='fw ov-h f16 b tx-el'>"+c.name+"</div>"+
-                        (c.discount > 0 ? "<span class='tx-lt ltt c-g f10 mg-r'>&#8358;"+comma(c.price)+"</span>" : "")+
+                        (c.discount > 0 ? "<span class='tx-lt ltt c-g f10'>&#8358;"+comma(c.price)+"</span>" : "")+
                         "<span class='f16'>&#8358;"+comma((c.price - c.discount).toFixed(2))+"</span>"+
                         (c.delivery == 1 ?
                         "<div class='fw ov-h tx-el fx f10' style='height:14px;'>\
