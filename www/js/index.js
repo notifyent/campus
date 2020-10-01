@@ -12,8 +12,6 @@
  *
  *
  * UPDATE
- * Report item
- * search services
  * items edit
  * withdrawals history
  * gallery items delete and add-more
@@ -25,6 +23,7 @@
     window.addEventListener('resize', handleResize, false);
 
     var VERSION = '1.0.0'
+    , PLATFORM = 'android'
     //
     // , MY_URL = "http://localhost/api/v1"
     // 
@@ -36,16 +35,14 @@
     //
     , BASE_URL = "https://www.oncampus.ng"
     //
-    , PLATFORM = 'android'
     , Views = ['#splashView']
     , ChangingView = false
     //
     , VIEWPORTWIDTH = $(window).width()
     , VIEWPORTHEIGHT = $(window).height()
-    , SQL = window.openDatabase("OnCampus", "1.0", "user records", 5 * 1024 * 1024)
     , Store = window.localStorage
     , UsernameRegexp = /^[_]{0,2}[a-zA-Z]+[a-zA-Z0-9_]{3,31}$/
-
+    , SQL = window.openDatabase("OnCampus", "1.0", "user records", 5 * 1024 * 1024)
 
     , MT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
     , DY=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
@@ -91,12 +88,13 @@
 
     , mDrawer = document.querySelector('#side-nav-panel')
     , mModal = document.querySelector('#side-nav-modal')
-    , mNav = document.querySelector('#side-nav')
+    , sideNav = document.querySelector('#side-nav-wrapper')
 
 
+    , OPENSTATE = ['Closed', 'Open']
 
     , CURRENT_ORDER = {}
-    , ORDER_TYPE = '0'
+    , ORDER_TYPE = 0
     , ORDER_INFO = null
     , ORDER_TOTAL = 0
     , ORDER_ID = null//for payment
@@ -356,10 +354,12 @@
         if ($SM.is(':visible')) {
             $SH.hide();//for animation
             $SM.hide();
-            showAllOrderEntries();
+            var type = document.querySelector('#search-input').dataset.type;
+            if (type == 'orders') showAllOrderEntries();
+            else if (type == 'services') showAllShopLink();
             return;
         }
-        if ($('#side-nav-modal').is(':visible')) return navEnd.call(mNav);
+        if ($('#side-nav-modal').is(':visible')) return navEnd.call(sideNav);
         if ($('#productModal').is(':visible')) return $('#productModal').hide();
         var activeView = document.querySelector('.active-view').id;
         switch (activeView) {
@@ -551,6 +551,27 @@
     }).on('click', '.option', function() {
         var idx = this.dataset.index;
         ACTIVESELECT.selectedIndex = idx;
+        if (ACTIVESELECT.id == 'order_for_select') {
+            var name, phone;
+            if (idx) {
+                if (idx == 1) {
+                    name = 'Your full name';
+                    phone = 'Your phone number';
+                } else if (idx == 2) {
+                    name = 'Name of receiver';
+                    phone = 'Phone number of receiver';
+                } else return;
+            }
+            App.changeViewTo('#dropoffView');
+            var fm = document.querySelector('#dropoff-content');
+            fm.querySelector('input[name="address"]').value = Store.getItem('delivery_address');
+            //
+            fm.querySelector('input[name="name"]').value = Store.getItem('delivery_name');
+            fm.querySelector('input[name="name"]').setAttribute('placeholder', name);
+            //
+            fm.querySelector('input[name="phone"]').value = Store.getItem('delivery_phone');
+            fm.querySelector('input[name="phone"]').setAttribute('placeholder', phone);
+        }
     }).on('click', '.color-picker', function() {
         COLORPICKER = this;
         var colors = [];
@@ -900,6 +921,7 @@
                                 , sk: Campus
                                 , ph: Phone
                                 , ut: '0'
+                                , ot: 1
                                 , ma: null
                                 , fn: null
                                 , ad: null
@@ -982,6 +1004,7 @@
                                 , em: Store.getItem('userEmail')
                                 , sk: '0'
                                 , ut: '1'
+                                , ot: 1
                                 , ph: Phone
                                 , fn: Fullname
                                 , ad: Address
@@ -1047,7 +1070,7 @@
                         url: MY_URL + "/fetch.php",
                         data: {
                             action: 'login',
-                            id: Email,
+                            email: Email,
                             password: Pass,
                             platform: PLATFORM
                         },
@@ -1397,12 +1420,11 @@
                     var Discount = parseInt(t.querySelector('input[name="discount"]').value, 10) || 0;
                     var Seats = parseInt(t.querySelector('input[name="seats"]').value, 10) || 0;
                       ;
-                    if (TicketCatg == '0' || Price === 0) {
+                    if (TicketCatg == '0' || Price === 0 || Seats === 0) {
                         t.classList.add('Red');
                         localError = true;
                         return;
                     }
-                    // var entry = [TicketCatg, Price, Discount, Seats];
                     var ticket = {ticket_type: TicketCatg, price: Price, discount: Discount, seats: Seats, sales: 0};
                     // console.log(entry);
                     AllTickets.push(ticket);
@@ -1824,7 +1846,9 @@
         $(this).hide();
         if (this.id == 'searchModal') {
             $SH.hide();
-            showAllOrderEntries();
+            var type = document.querySelector('#search-input').dataset.type;
+            if (type == 'orders') showAllOrderEntries();
+            else if (type == 'services') showAllShopLink();
         }
     }).on('click', '.modalClose', function() {
         $MM.hide();
@@ -1837,7 +1861,6 @@
         mDrawer.classList.add('sh-l');
         mModal.style.display = 'block';
     }).on('click', '#myItemsLink, .shop-link', function() {
-        $('#proceed-to-invoice').hide();
         $('.items-container').hide();
         App.changeViewTo('#itemsView');
 
@@ -1852,7 +1875,7 @@
             shopId = this.dataset.shopId;
             shopName = this.dataset.shopName;
             shopAddress = this.dataset.shopAddress;
-            if (catg != 3) $('#proceed-to-invoice').show().attr('data-catg', catg);
+            $('#proceed-to-invoice').attr('data-catg', catg);
         }
 
         updateStoreInformation(shopId, shopName, shopAddress, catg);
@@ -1869,10 +1892,10 @@
             timeout: 30000,
             method: "GET",
             success: function(p) {
-                if (p.length > 0) {
-                    buildItems(p, catg, false);
+                if (p[0].length > 0) {
+                    buildItems(p[0], catg, false, p[1].opennow);
                 } else {
-                    // toast('No items was found');
+                    if (shopId != UUID) toast('No item was found');
                 }
             },
             complete: function() {$('body').unspin();}
@@ -1880,7 +1903,7 @@
     }).on('click', '.item-remove', function(e) {
         h="<div class='pd16 st-p t-c b'>Confirm to remove this item?</div>\
             <div class='fx bt modalClose'>\
-                <div id='item-remove-confirm' class='pd16z t-c fx50 b-rg b ac' data-item-id='"+this.dataset.itemId+"' data-catg='"+this.dataset.catg+"'>YES</div>\
+                <div id='item-remove-confirm' class='pd16z t-c fx50 b-rg b ac' data-item-id='"+this.dataset.itemId+"' data-item-type='"+this.dataset.itemType+"' data-catg='"+this.dataset.catg+"'>YES</div>\
                 <div class='pd16z t-c fx50 b ac'>CANCEL</div>\
             </div>";
         $MM.show();
@@ -1888,6 +1911,8 @@
     }).on('click', '#item-remove-confirm', function(e) {
         var itemId = this.dataset.itemId;
         var catg = this.dataset.catg;
+        var type = this.dataset.itemType;
+        //
         if (catg != CATEGORY) return;
         $('body').spin();
         $.ajax({
@@ -1895,6 +1920,7 @@
             data: {
                 action: 'removeItem',
                 itemID: itemId,
+                itemType: type,
                 catg: catg,
                 ownerID: UUID
             },
@@ -1917,9 +1943,10 @@
                             delete d;
                             break;
                         case '3'://ticket
-                            $('.event-entry[data-item-id="'+itemId+'"] .item-remove').text('Not selling').removeClass('item-remove');
+                            $('.ticket-entry[data-item-type="'+type+'"]').remove();
                             var d = ITEMS_DATA.find(function(a) {return a.itemID == itemId;});
-                            d.isselling = 0;
+                            var tk = d.tickets.find(function(a) {return a.ticket_type == type;});
+                            delete tk;
                             break;
                         case '4'://graphics
                             $('.graphics-entry[data-item-id="'+itemId+'"]').remove();
@@ -2004,9 +2031,9 @@
             toast('This item is no longer available');
         }
     }).on('click', '.shopping-cart', function(e) {
-        if (SELECTED_PRODUCTS.length == 0) return toast('Your cart is empty');
+        if (SELECTED_PRODUCTS.length == 0) return toast('Your shopping cart is empty');
         CURRENT_ORDER = SELECTED_PRODUCTS;
-        ORDER_TYPE = '1';
+        ORDER_TYPE = 1;
         //
         var temp = {};
         SELECTED_PRODUCTS.forEach(function(s) {
@@ -2044,6 +2071,18 @@
                     }
                 });
                 break;
+            case '3'://ticket
+                items.forEach(function(item) {
+                    var tt = item.innerText; if (tt == 0) return;
+                    var id = item.dataset.itemId;
+                    var ty = item.dataset.itemType;
+                    var d = ITEMS_DATA.find(function(a) {return a.itemID == id;});
+                    var tk = d.tickets.find(function(a) {return a.ticket_type == ty;});
+                    if (d) {
+                        invoice.push({id: id, oi: d.ownerID, nm: d.name+' ('+TICKETS[ty]+')', pr: parseFloat(tk.price).toFixed(2), ds: parseFloat(tk.discount).toFixed(2), tt: tt, type: ty});
+                    }
+                });
+                break;
             case '6'://laundry
                 items.forEach(function(item) {
                     var tt = item.innerText; if (tt == 0) return;
@@ -2061,29 +2100,29 @@
             ORDER_TYPE = catg;
             App.changeViewTo('#invoiceView');
             $('#invoice-content').html(buildInvoice(invoice, null));
-        } else toast('No item was selected');
+        } else toast('No item was added');
     }).on('click', '#accept-invoice', function(e) {
-        App.changeViewTo('#dropoffView');
-        var fm = document.querySelector('#dropoff-content');
-        fm.querySelector('input[name="address"]').value = Store.getItem('delivery_address');
-        fm.querySelector('input[name="name"]').value = Store.getItem('delivery_name');
-        fm.querySelector('input[name="phone"]').value = Store.getItem('delivery_phone');
-    }).on('click', '#submit-for-review', function(e) {
+        App.changeViewTo('#orderOwnerView');
+    })/*.on('change', '#order_for_select', function(e) {
+        
+    })*/.on('click', '#submit-for-review', function(e) {
         var fm = document.querySelector('#dropoff-content');
         var address = fm.querySelector('input[name="address"]').value;
         var name = fm.querySelector('input[name="name"]').value;
         var phone = fm.querySelector('input[name="phone"]').value;
-        var frd = fm.querySelector('select[name="order_for"]').value;
+        //
+        var frd = document.querySelector('#order_for_select').value;
+        //
         var deliveryInstruction = fm.querySelector('textarea[name="deliveryInstruction"]').value;
         var voucherCode = document.querySelector('input[name="voucherCode"]').value;
         var seller_ = CURRENT_ORDER[0].oi;
         var invoice_ = JSON.stringify(CURRENT_ORDER);
         //
-        if (!address || !name || !phone || !frd) return toast('Provide all required fields');
+        if (!name || !phone || !frd) return toast('Provide all required fields');
         //
         var details = {address: address, name: name, phone: phone, friend: frd, instruction: deliveryInstruction};
         //
-        if (ORDER_TYPE != 3 && ORDER_TYPE != 1) ORDER_INFO = null;
+        if (ORDER_TYPE != 1) ORDER_INFO = null;
         //
         // return;
         //
@@ -2097,6 +2136,8 @@
                 buyer_details: JSON.stringify(details),
                 voucher_code: voucherCode,
                 //
+                campus: CAMPUSKEY,
+                //
                 order_type: ORDER_TYPE,
                 order_info: ORDER_INFO,
                 //
@@ -2109,14 +2150,18 @@
             success: function(p) {
                 // console.log(p);
                 if (p.state == '0') {
-                    toast(p.message);
+                    if (ORDER_TYPE == 3) {
+                        toast('Category (' + TICKETS[p.type] + ') has been sold out.');
+                    } else toast(p.message);
                 } else {
                     Views = ['#home'];
-                    App.changeViewTo('#successView');
-                    if (ORDER_TYPE=='3') $('#order-success-info').text('Check your orders and make payment');//no delivery charges
-                    else {
-                        $('#order-success-info').text('You will be contacted shortly');
-                        if (ORDER_TYPE=='1') {
+                    if (ORDER_TYPE == 3) {
+                        App.changeViewTo('#cardView');
+                        $('.total-payment').html('&#8358;' + ORDER_TOTAL);
+                        ORDER_ID = p.generatedID;
+                    } else {
+                        App.changeViewTo('#successView');
+                        if (ORDER_TYPE==1) {
                             SELECTED_PRODUCTS.length = 0;//reset
                             $('.shopping-cart').attr('data-total', '0');
                         }
@@ -2134,7 +2179,7 @@
         var catg = this.dataset.catg;
         $('#services-found').html($H+$H+$H);
         $('#current-service').text(this.dataset.name);
-        App.changeViewTo('#servicesView');
+        App.changeViewTo('#servicesDiscoverView');
         $('body').spin();
         $.ajax({
             url: MY_URL + "/fetch.php",
@@ -2157,7 +2202,7 @@
         var g = this.dataset.catg;
         $('#services-found').html($H+$H+$H);
         $('#current-service').text(this.dataset.name);
-        App.changeViewTo('#servicesView');
+        App.changeViewTo('#servicesDiscoverView');
         //
         if (g == '2') fetchRestaurants('more', 20);
         else if (g == '3') fetchEvents('more', 20);
@@ -2212,12 +2257,16 @@
         });
     }).on('click', '.order-payment-btn', function(e) {
         App.changeViewTo('#cardView');
+        $('.total-payment').html('&#8358;' + ORDER_TOTAL);
     }).on('click', '#submit-card-details', function(e) {
         var el = document.querySelector('#card-content');
         var cardNumber = el.querySelector('input[name="cardNumber"]').value;
-        var cardMonth = parseInt(el.querySelector('input[name="cardMonth"]').value);
+        var cardMonth = parseInt(el.querySelector('input[name="cardMonth"]').value)||0;
         var cardYear = el.querySelector('input[name="cardYear"]').value;
         var cardCVV = el.querySelector('input[name="cardCVV"]').value;
+        //
+        if (cardNumber.length < 16 || cardYear.length < 4 || cardMonth == 0 || cardCVV.length < 4) return toast('Invalid card details');
+        //
         if (cardMonth < 10) cardMonth = '0' + cardMonth;
         //
         var fName = '', lName = '';
@@ -2259,7 +2308,7 @@
           "phonenumber": PHONE,
           "firstname": fName,
           "lastname": lName,
-          "txRef": ORDER_ID// your unique merchant reference
+          "txRef": ORDER_ID//your unique merchant reference
         }
         sendPaymentInfo(1);
     }).on('click', '.pin-key', function(e) {
@@ -2294,23 +2343,46 @@
         App.changeViewTo('#ordersPendingView');
     })/*.on('click', '#withdrawals-query-btn', function(e) {
         fetchWithdrawals();
-    })*/.on('click', '.orders-filter', function(e) {
+    })*/.on('click', '.search-button', function(e) {
         $SM.show();
         $SH.show(300);
         var ip = document.querySelector('#search-input');
         ip.dataset.container = this.dataset.container;
+        ip.dataset.type = this.dataset.type;
+        ip.setAttribute('placeholder', this.dataset.placeholder);
         ip.value = '';
         ip.focus();
     }).on('keyup', '#search-input', function(e) {
-        var query=this.value;
-        var ct = this.dataset.container;
-        var items = document.querySelectorAll(ct + ' .order-entry');
-        items.forEach(function(el){
-            var id = el.dataset.orderId;
-            if(id && id.startsWith(query)){
-                el.style.display = '';
-            } else el.style.display = 'none';
-        });
+        var query = this.value.toLowerCase();
+        if (query) {
+            var type = this.dataset.type;
+            if (type == 'orders') {
+                var ct = this.dataset.container;
+                var items = document.querySelectorAll(ct + ' .order-entry');
+                items.forEach(function(el){
+                    var id = el.dataset.orderId;
+                    if(id && id.startsWith(query)){
+                        el.style.display = '';
+                    } else el.style.display = 'none';
+                });
+            } else if (type == 'services') {
+                var items = document.querySelectorAll('#services-found .shop-link');
+                items.forEach(function(el){
+                    var nm = el.querySelector('.item-name').innerText.toLowerCase();
+                    var nms = nm.split(' ');
+                    var qrs = query.split(' ');
+                    var found = 0;
+                    qrs.forEach(function(q){
+                        nms.forEach(function(n){
+                            if (n && n.startsWith(q)) found++;
+                        });
+                    });
+                    if (found > 0){
+                        el.style.display = '';
+                    } else el.style.display = 'none';
+                });
+            }
+        }
     }).on('click', '#store-review', function(e) {
         App.changeViewTo('#reviewView');
     }).on('click', '#post-a-review', function(e) {
@@ -2422,48 +2494,38 @@
         document.body.removeChild(ip);
         toast('Link copied to clipboard');
     }).on('click', '#report-product', function(e) {
-        toast("Thank you for reporting this item. We will look into it and give you feedback.");
-    }).on('click', '.event-entry', function(e) {
-        var itemId = this.dataset.itemId;
-        var c = ITEMS_DATA.find(function(a) {return a.itemID == itemId;});
-        if (c) {
-            if (c.isselling == 0) return toast('This event is no more selling');
-            var h = "<div class='fw b f16 pd16 bb t-c'>BUY A TICKET</div>";
-            var user = c.ownerID == UUID;
-            c.tickets.forEach(function(v) {
-                h+="<div class='ticket-entry fw pd16 bb'>\
-                    <div class='fw fx fx-fs'>\
-                        <div class='fx60'>\
-                            <div class='f16 b'>"+TICKETS[v.ticket_type]+"</div>\
-                            <div class='fw fx fx-fe mg-t'>\
-                                <div class='fx50'>"
-                                    +(v.discount > 0 ? "<div class='tx-lt c-g f10'>&#8358;"+comma(v.price)+"</div>" : "")+
-                                    "<div class='f16'>&#8358;"+comma((v.price - v.discount).toFixed(2))+"</div>\
-                                </div>"+
-                                (user ? ""
-                                    :v.sales == v.seats ? "<div class='pd10 b4-r bg-fd carousel c-g'>SOLD OUT</div>"
-                                    : "<div class='buy-ticket pd10 b4-r Orange white' data-item-id='"+c.itemID+"' data-item-type='"+v.ticket_type+"'>BUY</div>")+
-                            "</div>\
-                        </div>\
-                    </div>\
-                </div>";
-            });
-            $MM.show();
-            $MF.html(h).zoom();
-        }
-    }).on('click', '.buy-ticket', function(e) {
-        var itemId = this.dataset.itemId;
-        var tType = this.dataset.itemType;
-        var d = ITEMS_DATA.find(function(a) {return a.itemID == itemId;});
-        if (d) {
-            var tk = d.tickets.find(function(b){return b.ticket_type == tType});
-            var invoice = [{id: itemId, oi: d.ownerID, nm: d.name+' ('+TICKETS[tType]+')', pr: parseFloat(tk.price).toFixed(2), ds: parseFloat(tk.discount).toFixed(2), tt: 1}];
-            CURRENT_ORDER = invoice;
-            ORDER_TYPE = '3';
-            ORDER_INFO = JSON.stringify({ticket_type: tType, event_id: itemId});
-            App.changeViewTo('#invoiceView');
-            $('#invoice-content').html(buildInvoice(invoice, null));
-        }
+        App.changeViewTo('#reportView');
+        $('#send-a-report').attr('data-item-id', this.dataset.itemId);
+    }).on('click', '#send-a-report', function(e) {
+        var report = $('#report-input').val().trim();
+        if (!report) return;
+        var el = this;
+        if (el.dataset.disabled == 'true') return; el.dataset.disabled = 'true';
+        $('body').spin();
+        $.ajax({
+            url: MY_URL + "/send.php",
+            data: {
+                action: 'reportAnItem',
+                report: report,
+                item_id: el.dataset.itemId,
+                senderID: UUID
+            },
+            method: "POST",
+            timeout: 30000,
+            dataType: 'json',
+            success: function(p) {
+                if (p.state == '1') {
+                    App.closeCurrentView();
+                    toast("Thank you for reporting this item. We will look into it and give you feedback.");
+                } else {
+                    toast("There was an error lodging your report. Please retry.");
+                }
+            },
+            complete: function() {
+                el.dataset.disabled = 'false';
+                $('body').unspin();
+            }
+        });
     }).on('click', '#withdraw-cash', function(e) {
         $('body').spin();
         checkWallet('withdrawalQuery');
@@ -2582,7 +2644,7 @@
             timeout: 30000,
             method: "POST",
             success: function(p) {
-                if (p == '1') {
+                if (p == 1) {
                     $('.msg-entry[data-key="'+key+'"]').remove();
                     var msg = MY_MAILS.find(function(m) {return m.k == key;});
                     msg.isdeleted = 1;
@@ -2615,6 +2677,35 @@
                 }
             },
             complete: function(x) {$('body').unspin(); if (x.status === 0) toast('Network error');}
+        });
+    }).on('click', '#store-open-toggle', function(e) {
+        if (USERTYPE == 0) return;
+        var status = this.dataset.toggleTo, code, toggleOpen;
+        if (status == 'Open') code = 1;
+        else if (status == 'Close') code = 0;
+        //
+        $('body').spin();
+        $.ajax({
+            url: MY_URL + "/send.php",
+            data: {
+                action: 'storeOpenToggle',
+                storeID: UUID,
+                code: code
+            },
+            dataType: 'json',
+            timeout: 30000,
+            method: "POST",
+            success: function(p) {
+                if (p == 1) {
+                    $('#opennow').attr('data-status', code).text('Status: ' + OPENSTATE[code]);
+                    if (code == 0) toggleOpen = 'Open'; else toggleOpen = 'Close';
+                    $('#store-open-toggle').attr('data-toggle-to', toggleOpen).text('Tap here to ' + toggleOpen);
+                    Store.setItem('open_toggle', code);
+                } else toast('Network error. Try again.');
+            },
+            complete: function() {
+                $('body').unspin();
+            }
         });
     }).on('click', '#suggestions-link', function(e) {
         fetchSuggestedItems();
@@ -2735,7 +2826,7 @@
     }
 
     var nav = { x: 0, y: 0, z: 0 }
-    mNav.addEventListener('touchstart', function(e) {
+    sideNav.addEventListener('touchstart', function(e) {
         e.stopPropagation();
         mDrawer.style.transition = '';
         var touch = e.touches[0];
@@ -2922,8 +3013,8 @@
                     +"' data-shop-address='"+c.sd
                     +"' data-catg='3' style='background-image: url("+MY_URL+"/img/items/events/"+c.id+".jpg)'>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
-                        <div class='fw b f16 ov-h tx-el'>"+c.nm+" - <span class='f14 b'>"+c.dt+"</span></div>\
-                        <div class='fw f14 ov-h tx-el'>"+EVENTS[c.tp]+"</div>\
+                        <div class='fw b f16 ov-h tx-el item-name'>"+c.nm+"</div>\
+                        <div class='fw f14 ov-h tx-el'>"+EVENTS[c.tp]+" - <span class='f10 b'>"+c.dt+"</span></div>\
                     </div>\
                 </div>";
         });
@@ -2947,8 +3038,8 @@
                     +"' data-shop-address='"+c.sd
                     +"' data-catg='3' style='background-image: url("+MY_URL+"/img/items/events/"+c.id+".jpg)'>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
-                        <div class='fw b f16 ov-h tx-el'>"+c.nm+" - <span class='f14 b'>"+c.dt+"</span></div>\
-                        <div class='fw f14 ov-h tx-el'>"+EVENTS[c.tp]+"</div>\
+                        <div class='fw b f16 ov-h tx-el item-name'>"+c.nm+"</div>\
+                        <div class='fw f14 ov-h tx-el'>"+EVENTS[c.tp]+" - <span class='f10 b'>"+c.dt+"</span></div>\
                     </div>\
                 </div>";
         });
@@ -2964,7 +3055,7 @@
                     +"' data-shop-address='"+c.ad
                     +"' style='background-image: url("+MY_URL+"/img/users/"+c.ui+".jpg)'>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
-                        <div class='fw b f16 ov-h tx-el'>"+c.nm+"</div>\
+                        <div class='fw b f16 ov-h tx-el item-name'>"+c.nm+"</div>\
                         <div class='fw f14 ov-h tx-el'>"+c.ad+"</div>\
                     </div>\
                 </div>";
@@ -2990,8 +3081,8 @@
                     +"' data-shop-address='"+c.ad
                     +"' style='background-image: url("+MY_URL+"/img/users/"+c.ui+".jpg)'>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
-                        <div class='fw b f16'>"+c.nm+"</div>\
-                        <div class='fw ovx-h ovy-a f10'>"+c.ad+"</div>\
+                        <div class='fw b f16 ov-h tx-el item-name'>"+c.nm+"</div>\
+                        <div class='fw f14 ov-h tx-el'>"+c.ad+"</div>\
                     </div>\
                 </div>";
         });
@@ -3008,8 +3099,8 @@
                     +"'>\
                     <div class='box120 mg-r fx fx-ac fx-jc ov-h bg-ac bg-im-cv' style='background-image: url("+MY_URL+"/img/users/"+c.ui+".jpg)'></div>\
                     <div class='fx60 pd10'>\
-                        <div class='fw b f16'>"+c.nm+"</div>\
-                        <div class='fw ovx-h ovy-a f10'>"+c.ad+"</div>\
+                        <div class='fw b f16 item-name'>"+c.nm+"</div>\
+                        <div class='fw ovy-a f14'>"+c.ad+"</div>\
                     </div>\
                 </div>";
         });
@@ -3147,9 +3238,14 @@
         });
         return h;
     }
-    function buildItems(p, catg, local) {
+    function buildItems(p, catg, local, opennow) {
         var h = '';
         var user = p[0].ownerID == UUID;
+        var toggleOpen;
+        if (opennow == undefined) opennow = Store.getItem('open_toggle') || 1;
+        $('#opennow').attr('data-status', opennow).text('Status: ' + OPENSTATE[opennow]);
+        if (opennow == 0) toggleOpen = 'Open'; else toggleOpen = 'Close';
+        $('#store-open-toggle').attr('data-toggle-to', toggleOpen).text('Tap here to ' + toggleOpen);
         //
         if (catg != 1) {
             if (local) ITEMS_DATA.push(p[0]);
@@ -3168,7 +3264,7 @@
             p.forEach(function(c) {
                 var m="<div class='fw food-entry bg pd16 mg-tx sh-c' data-item-id='"+c.itemID+"'>\
                     <div class='fw fx fx-fs'>\
-                        <div class='w120 xh120 bg-ac ba bs-r ov-h'><img src='"+MY_URL+"/img/items/food/"+c.itemID+".jpg' class='fw bs-r'></div>\
+                        <div class='box120 fx fx-ac fx-jc bg-ac ba bs-r ov-h'><img src='"+MY_URL+"/img/items/food/"+c.itemID+".jpg' class='fw bs-r'></div>\
                         <div class='fx60 mg-lx'>\
                             <div class='fw fx fx-fs'>\
                                 <div class='fx60 f16 b mg-rx'>"+c.name+"</div>"+
@@ -3214,25 +3310,48 @@
                 $v.find('[data-menu="4"]').html(h4);
             }
         } else if (catg == '3') {//ticket
+            var img = new Image();
+            img.onload = function() {
+                $('#shop-banner').css('backgroundImage', 'url('+img.src+')');
+            }
+            img.src = MY_URL+"/img/items/events/"+p[0].itemID+".jpg";
+            //
             p.forEach(function(c) {
-                h+="<div class='fw event-entry psr mg-b16' data-item-id='"+c.itemID+"'>\
-                    <div class='fw fx fx-ac pd1015 Grey tx-ws psa t0 l0'>\
-                        <div class='fx60'>\
-                            <div class='f20 b'>"+c.name+"</div>\
-                            <div class='f10'>"+EVENTS[c.event_type]+"</div>\
-                            <div class='f10'>"+c.event_date+"</div>\
+                /*h+="<div class='fw'>\
+                    <img class='fw fx sh-a' src='"+MY_URL+"/img/items/events/"+c.itemID+".jpg'>\
+                </div>";*/
+                c.tickets.forEach(function(v) {
+                    h+="<div class='ticket-entry fw pd16 bb' data-item-type='"+v.ticket_type+"'>\
+                        <div class='fw fx fx-fs'>\
+                            <div class='fx60'>\
+                                <div class='fw'>\
+                                    <div class='f16 b'>"+TICKETS[v.ticket_type]+(user && v.sales == v.seats ? "<span class='mg-l f8 b4-r bg-fd c-g' style='padding:1px 5px;'>SOLD OUT</span>":"")+"</div>\
+                                    <div class='c-g f10'>("+v.sales+") seats sold out of "+v.seats+" available seats</div>\
+                                </div>\
+                                <div class='fw fx fx-fe mg-t'>\
+                                    <div class='fx50'>"
+                                        +(v.discount > 0 ? "<div class='tx-lt c-g f10'>&#8358;"+comma(v.price)+"</div>" : "")+
+                                        "<div class='f16'>&#8358;"+comma((v.price - v.discount).toFixed(2))+"</div>\
+                                    </div>"+
+                                    (user ? 
+                                    "<div class='fx fx-je c-g'>\
+                                        <!--<div class='item-edit f20 mg-rxx icon-edit-1' data-item-id='"+c.itemID+"'></div>-->\
+                                        <div class='item-remove f16 icon-cancel' data-item-id='"+c.itemID+"' data-item-type='"+v.ticket_type+"' data-catg='3'></div>\
+                                    </div>"
+                                    :v.sales == v.seats ? "<div class='pd5 b4-r bg-fd c-g'>SOLD OUT</div>"
+                                    :"<div class='fx fx-jc item-order-spinner' data-item-id='"+c.itemID+"'>\
+                                        <div class='fx fx-ac fx-jc Orange white b2-r box20 f20 item-subtract'>-</div>\
+                                        <div class='fx fx-ac fx-jc w32 item-count t-c' data-item-id='"+c.itemID+"' data-item-type='"+v.ticket_type+"'>0</div>\
+                                        <div class='fx fx-ac fx-jc Orange white b2-r box20 f20 item-add'>+</div>\
+                                    </div>"
+                                    )+
+                                "</div>\
+                            </div>\
                         </div>\
-                    </div>"+
-                    (user ?
-                        c.isselling == 1 ?
-                            "<div class='item-remove psa pd5 Grey bs-r mg-t mg-r ba r0 ac b' data-item-id='"+c.itemID+"' data-catg='3'>Stop Selling</div>"
-                            :"<div class='psa pd5 Grey bs-r mg-t mg-r ba r0 b'>Not Selling</div>"
-                    : c.isselling == 1 ?
-                        "<div class='psa pd5 Grey bs-r mg-t mg-r ba r0 b'>Still Selling</div>"
-                        :"<div class='psa pd5 Grey bs-r mg-t mg-r ba r0 b'>No more Selling</div>")+
-                    "<img class='fw fx sh-a' src='"+MY_URL+"/img/items/events/"+c.itemID+".jpg'>\
-                </div>";
+                    </div>";
+                });
             });
+            //
             var $v = $('#events-container');
             if (local) $v.append(h); else $v.html(h);
         } else if (catg == '4') {//graphics
@@ -3629,7 +3748,7 @@
         }else if(body.status == "success" && body.data.authurl != 'N/A') {
             toast('Please try another Card');//iframe
         }else {
-            toast('Error');// an error has probably occurred.
+            toast('Error');// a gateway error has probably occurred.
         }
     }
     function checkPINSuccess(body) {
@@ -3694,6 +3813,7 @@
             , ADDRESS = p.ad
             , CATEGORY = p.cg
             ;
+            Store.setItem('open_toggle', p.ot);
             if (action == 'signup' || p.ch == 0) showChannelScreen();//sign in? if ch == 0, means no activities yet
             else {//has passed ch check, possibly has some activities
                 App.changeViewTo('#home');
@@ -3703,6 +3823,7 @@
         });
     }
     function updateStoreInformation(shopId, shopName, shopAddress, catg) {
+        $('#shop-banner').css('backgroundImage', '');
         var img = new Image();
         img.onload = function() {
             $('#shop-banner').css('backgroundImage', 'url('+img.src+')');
@@ -3713,12 +3834,23 @@
         $('#user-address').text(shopAddress);
         $('#post-a-review').attr('data-shop-id', shopId);
         $('#send-a-message').attr('data-shop-id', shopId);
-        $('.items-container[data-catg="'+catg+'"]').show();
-        if (catg == 4 || catg == 5) $('#gallery-viewer').show(); else $('#gallery-viewer').hide();
+        $('.items-container[data-catg="'+catg+'"]').show().find('.items-wrapper').empty();
+        if (catg == 4 || catg == 5) $('#special-services-buttons-container').show(); else $('#special-services-buttons-container').hide();
+        var dlvAddr = document.querySelector('#dropoff-content').querySelector('input[name="address"]');
+        if (catg == 3) {
+            dlvAddr.style.display = 'none';
+            dlvAddr.value = '';
+        } else dlvAddr.style.display = '';
     }
     function showAllOrderEntries() {
         var ct = document.querySelector('#search-input').dataset.container;
         var items = document.querySelectorAll(ct + ' .order-entry');
+        items.forEach(function(el){
+            el.style.display = '';
+        });
+    }
+    function showAllShopLink() {
+        var items = document.querySelectorAll('#services-found .shop-link');
         items.forEach(function(el){
             el.style.display = '';
         });
@@ -3764,7 +3896,6 @@
                 formatted=day+' '+month+' '+hour+':'+minute+M;
             }
         }
-        // else formatted=day+' '+month+' '+hour+':'+minute+M;/*not new year...different day or month*/
         return formatted;
     }
 
@@ -3773,10 +3904,10 @@
     POLLING_TRACKER = setInterval(function() {
         if (POLLING_TIME == 0) {
             checkMail();
-            if (USERTYPE == 0) {
+            /*if (USERTYPE == 0) {
                 fetchEvents('timeline', 10);
                 fetchRestaurants('timeline', 10);
-            }
+            }*/
             POLLING_TIME = 3;
         } else POLLING_TIME--;
     }, 60000);
@@ -3784,6 +3915,7 @@
     var TST = null;
     var $tst = $('#toast-container');
     function toast(message) {
+        // var message = [].slice.call(arguments).join(',');
         clearTimeout(TST);
         $tst.stop()
             .html('<div class="b bg-mod pd1015 bs-r t-c f14 white" style="background-color:rgba(0, 0, 0, 0.8);">' + message + '</div>')

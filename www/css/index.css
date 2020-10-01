@@ -20,12 +20,21 @@ body {
     padding: 0;
     /* Padding to avoid the "unsafe" areas behind notches in the screen */
     padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    overflow: hidden;
+    cursor: pointer;
 }
 input, select, textarea, img {
     border: 0;
     margin: 0;
     outline: 0;
     background: transparent;
+    font-family: mont;
+    font-size: 14px;
 }
 select, [type="date"], [type="number"] {
     position: relative;
@@ -210,6 +219,9 @@ img[src=""]{
 }
 .f24 {
     font-size: 24px;
+}
+.f32 {
+    font-size: 32px;
 }
 .b5 {
     font-weight: 500;
@@ -844,6 +856,10 @@ img[src=""]{
     margin: 0 auto;
     pointer-events: none;
 }
+.tr-14 {
+    margin-top: -14px;
+    margin-right: -14px;
+}
 .radio {
     margin-left: 24px;
 }
@@ -884,9 +900,6 @@ img[src=""]{
 }
 .xtra-img:nth-child(2) {
     margin-top: 0px!important;
-}
-.ticket-entry:last-child {
-    border-bottom: 0;
 }
 #toast-container {
     position: fixed;
