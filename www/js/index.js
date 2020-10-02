@@ -719,6 +719,7 @@
                 fd.append('displaypix', this.files[0]);
                 fd.append('me', UUID);
                 //
+                toast("Uploading your profile picture...");
                 $.ajax({
                     url: MY_URL + "/send.php",
                     data: fd,
@@ -726,13 +727,15 @@
                     cache: false,
                     processData: false,
                     contentType: false,
-                    dataType: 'json',
                     timeout: 30000,
                     success: function(p) {
-                        if (p == '1') {
+                        if (p == 1) {
                             loadUserPicture();
                             toast("Profile picture uploaded successfully");
-                        }
+                        } else toast(p);
+                    },
+                    error: function() {
+                        toast('No network');
                     }
                 });
             }
@@ -803,6 +806,7 @@
                             toast(p.message);
                         }
                     },
+                    error: function() {toast('No connection');},
                     complete: function() {
                         el.dataset.disabled = 'false';
                         $('body').unspin();
@@ -865,6 +869,7 @@
                             toast(p.message);
                         }
                     },
+                    error: function() {toast('No connection');},
                     complete: function() {
                         el.dataset.disabled = 'false';
                         $('body').unspin();
@@ -940,6 +945,7 @@
                             } else toast('An error occurred. Please try again later.');//not expecting this.
                         }
                     },
+                    error: function() {toast('No connection');},
                     complete: function() {
                         el.dataset.disabled = 'false';
                         $('body').unspin();
@@ -1018,9 +1024,12 @@
                                 toast('Email address not available');
                             } else if (p.message.indexOf("username") > -1) {
                                 toast('Username not available');
+                            } else if (p.message.indexOf("phone") > -1) {
+                                toast('Phone number not available');
                             } else toast('An error occurred. Please try again.');//maybe key conflict.
                         }
                     },
+                    error: function() {toast('No connection');},
                     complete: function() {
                         el.dataset.disabled = 'false';
                         $('body').unspin();
@@ -1052,6 +1061,7 @@
                             toast('Network error. Try again');
                         }
                     },
+                    error: function() {toast('No connection');},
                     complete: function(x) {
                         if (x.status == 0) {
                             toast('Network error. Try again');
@@ -1102,8 +1112,8 @@
                 if (!Phone && !error) error = "<div class='b bb pd10'>Provide your phone number</div><div class='pd10'>Your phone number is required for notifications.</div>";
                 
                 if (USERTYPE == 1) {
-                      Address = el.querySelector('textarea[name="officeAddress"]').value
-                      ;
+                    Address = el.querySelector('textarea[name="officeAddress"]').value
+                    ;
                     if (!Username && !error) error = "<div class='b bb pd10'>Display/Brand Name is Required</div><div class='pd10'>Your Display/Brand name would be displayed on your profile.</div>";
                     if (!Address && !error) error = "<div class='b bb pd10'>Your Address is Required</div><div class='pd10'>Your address is required for pickup.</div>";
                 } else {
@@ -1153,9 +1163,12 @@
                         } else {
                             if (p.message.indexOf('username') > -1) {
                                 toast('Username not available');
-                            } else toast('An error occurred. Please try again later.');//not expecting this.
+                            } else if (p.message.indexOf('phone') > -1) {
+                                toast('Phone number not available');
+                            } else toast('Temporary network error. Please try again later.');//not expecting this.
                         }
                     },
+                    error: function() {toast('No connection');},
                     complete: function() {
                         el.dataset.disabled = 'false';
                         $('body').unspin();
@@ -1195,6 +1208,7 @@
                             toast('There was an error. Please try again later.');
                         }
                     },
+                    error: function() {toast('No connection');},
                     complete: function() {
                         el.dataset.disabled = 'false';
                         $('body').unspin();
@@ -1315,7 +1329,7 @@
                     dataType: 'json',
                     timeout: 30000,
                     success: function(d) {
-                        if (d.error) return toast('Unable to add item');
+                        if (d.error) return toast(d.error);
                         toast('Item added successfully');
                         var p = {
                             itemID: d.success,
@@ -1377,7 +1391,7 @@
                     dataType: 'json',
                     timeout: 30000,
                     success: function(d) {
-                        if (d.error) return toast('Unable to add item');
+                        if (d.error) return toast(d.error);
                         toast('Item added successfully');
                         var p = {
                             itemID: d.success,
@@ -1465,7 +1479,7 @@
                     dataType: 'json',
                     timeout: 30000,
                     success: function(d) {
-                        if (d.error) return toast('Unable to add item');
+                        if (d.error) return toast(d.error);
                         toast('Item added successfully');
                         var p = {
                             itemID: d.success,
@@ -1522,7 +1536,7 @@
                     timeout: 30000,
                     success: function(d) {
                         // var d = JSON.parse(d);
-                        if (d.error) return toast('Unable to add item');
+                        if (d.error) return toast(d.error);
                         toast('Item added successfully');
                         var p = {
                             itemID: d.success,//array
@@ -1579,7 +1593,7 @@
                     timeout: 30000,
                     success: function(d) {
                         // var d = JSON.parse(d);
-                        if (d.error) return toast('Unable to add item');
+                        if (d.error) return toast(d.error);
                         toast('Item added successfully');
                         var p = {
                             itemID: d.success,//array
@@ -1645,7 +1659,7 @@
                     timeout: 30000,
                     success: function(d) {
                         // var d = JSON.parse(d);
-                        if (d.error) return toast('Unable to add item');
+                        if (d.error) return toast(d.error);
                         toast('Item added successfully');
                         buildItems(items, CATEGORY, true);
                         exitItemAddView();
@@ -1700,7 +1714,7 @@
                     dataType: 'json',
                     timeout: 30000,
                     success: function(d) {
-                        if (d.error) return toast('Unable to add item');
+                        if (d.error) return toast(d.error);
                         toast('Item added successfully');
                         buildItems(items, CATEGORY, true);
                         exitItemAddView();
@@ -1743,11 +1757,11 @@
             contentType: false,
             dataType: 'json',
             timeout: 30000,
-            success: function(d) {
-                if (d.state && d.state == 1) {
-                    buildGalleryItems(d.links);
+            success: function(p) {
+                if (p.state == 1) {
+                    buildGalleryItems(p.links);
                     App.closeCurrentView();
-                } else toast('There was an error');
+                } else toast(p.state);
             },
             error: function() { toast('Unable to connect'); },
             complete: function() {
@@ -1898,6 +1912,7 @@
                     if (shopId != UUID) toast('No item was found');
                 }
             },
+            error: function() {toast('No connection');},
             complete: function() {$('body').unspin();}
         });
     }).on('click', '.item-remove', function(e) {
@@ -1928,7 +1943,7 @@
             method: "POST",
             timeout: 30000,
             success: function(p) {
-                if (p.state && p.state == 1) {
+                if (p.state == 1) {
                     switch(catg) {
                         case '1'://e-commerce
                             $('.product-entry[data-item-id="'+itemId+'"]').remove();
@@ -1970,9 +1985,10 @@
                             break;
                     }
                 } else {
-                    toast('There was an error');
+                    toast(p.state);
                 }
             },
+            error: function() {toast('No connection');},
             complete: function() {
                $('body').unspin();
             }
@@ -2149,7 +2165,7 @@
             dataType: 'json',
             success: function(p) {
                 // console.log(p);
-                if (p.state == '0') {
+                if (p.state == 0) {
                     if (ORDER_TYPE == 3) {
                         toast('Category (' + TICKETS[p.type] + ') has been sold out.');
                     } else toast(p.message);
@@ -2171,6 +2187,7 @@
                     Store.setItem('delivery_phone', phone);
                 }
             },
+            error: function() {toast('No connection');},
             complete: function() {
                $('body').unspin();
             }
@@ -2196,6 +2213,7 @@
                 if (p.length == 0) return toast('No seller was found');
                 $('#services-found').html(buildServices(p));
             },
+            error: function() {toast('No connection');},
             complete: function() {$('body').unspin();}
         });
     }).on('click', '.more-services', function(e) {
@@ -2267,7 +2285,7 @@
             dataType: 'json',
             method: "POST",
             success: function(p) {
-                if (p.state == '1') {
+                if (p.state == 1) {
                     toast('Order completed successfully');
                     $('.order-status[data-order-id="'+i+'"]').attr('data-status', '1').text('Completed');
                     var order = MY_ORDERS.find(function(e) {return e.orderID == i;});
@@ -2275,8 +2293,9 @@
                     checkWallet('landing');
                     fetchProgress();
                     App.closeCurrentView();
-                } else toast('Please try again');
+                } else toast(p.state);
             },
+            error: function() {toast('No connection');},
             complete: function() {$('body').unspin();}
         });
     }).on('click', '.order-payment-btn', function(e) {
@@ -2428,13 +2447,14 @@
             timeout: 30000,
             dataType: 'json',
             success: function(p) {
-                if (p.state == '1') {
+                if (p.state == 1) {
                     toast('Your review was posted successfully');
                     App.closeCurrentView();
                 } else {
                     toast(p.state);
                 }
             },
+            error: function() {toast('No connection');},
             complete: function() {
                 el.dataset.disabled = 'false';
                 $('body').unspin();
@@ -2456,6 +2476,7 @@
                 if (p.length == 0) return;
                 $WRP.html(buildReviews(p));
             },
+            error: function() {toast('No connection');},
             complete: function() {$('body').unspin();}
         });
     }).on('click', '.product-entry', function(e) {
@@ -2538,18 +2559,21 @@
             timeout: 30000,
             dataType: 'json',
             success: function(p) {
-                if (p.state == '1') {
+                if (p.state == 1) {
                     App.closeCurrentView();
                     toast("Thank you for reporting this item. We will look into it and give you feedback.");
                 } else {
                     toast("There was an error lodging your report. Please retry.");
                 }
             },
+            error: function() {toast('No connection');},
             complete: function() {
                 el.dataset.disabled = 'false';
                 $('body').unspin();
             }
         });
+    }).on('click', '#more-categories', function(e) {
+        $('#categoriesModal').show();
     }).on('click', '#withdraw-cash', function(e) {
         $('body').spin();
         checkWallet('withdrawalQuery');
@@ -2586,12 +2610,13 @@
             timeout: 30000,
             dataType: 'json',
             success: function(p) {
-                if (p.state == '1') {
+                if (p.state == 1) {
                     App.closeCurrentView();
                 } else {
-                    toast("There was an error sending your message. Please try again later.");
+                    toast(p.state);
                 }
             },
+            error: function() {toast('No connection');},
             complete: function() {
                 el.dataset.disabled = 'false';
                 $('body').unspin();
@@ -2625,6 +2650,7 @@
                     toast(p.state);
                 }
             },
+            error: function() {toast('No connection');},
             complete: function() {
                 el.dataset.disabled = 'false';
                 $('body').unspin();
@@ -2641,7 +2667,6 @@
                 ownerID: UUID,
                 key: key
             },
-            dataType: 'json',
             timeout: 30000,
             method: "POST",
             success: function(p) {
@@ -2650,8 +2675,9 @@
                     msg.isopen = 0;
                     buildMessage(msg);
                     $('.mail-status[data-key="'+key+'"]').removeClass('Orange').addClass('bg-fd').text('closed');
-                }
-            }
+                } else toast(p);
+            },
+            error: function() {toast('No connection');},
         });
     }).on('click', '.msg-delete', function(e) {
         buildConfirm('message-delete-confirm', 'Confirm to Delete this Message?', this.dataset.key);
@@ -2664,7 +2690,6 @@
                 ownerID: UUID,
                 key: key
             },
-            dataType: 'json',
             timeout: 30000,
             method: "POST",
             success: function(p) {
@@ -2673,8 +2698,9 @@
                     var msg = MY_MAILS.find(function(m) {return m.k == key;});
                     msg.isdeleted = 1;
                     App.closeCurrentView();
-                }
-            }
+                } else toast(p);
+            },
+            error: function() {toast('No connection');},
         });
     }).on('click', '#add-gallery-items', function(e) {
         App.changeViewTo('#galleryAddView');
@@ -2720,13 +2746,14 @@
             timeout: 30000,
             method: "POST",
             success: function(p) {
-                if (p == 1) {
+                if (p.state == 1) {
                     $('#opennow').attr('data-status', code).text('Status: ' + OPENSTATE[code]);
                     if (code == 0) toggleOpen = 'Open'; else toggleOpen = 'Close';
                     $('#store-open-toggle').attr('data-toggle-to', toggleOpen).text('Tap here to ' + toggleOpen);
                     Store.setItem('open_toggle', code);
-                } else toast('Network error. Try again.');
+                } else toast(p.state);
             },
+            error: function() {toast('No connection');},
             complete: function() {
                 $('body').unspin();
             }
@@ -2796,6 +2823,7 @@
                         }
                         else if (type == 2) $SO.html(buildServices(p));
                     },
+                    error: function() {toast('No connection');},
                     complete: function(x) {$('body').unspin(); if (x.status === 0) toast('Network error');}
                 });
             }
@@ -3202,7 +3230,8 @@
                     MY_MAILS = p;
                     $('#messagesWrapper').html(buildMails(p));
                 }
-            }
+            },
+            error: function() {toast('No connection');},
         });
     }
     function buildMails(p) {
@@ -3248,6 +3277,7 @@
                 if (p.length == 0) return $('#repliesWrapper').attr('placeholder','No replies');
                 $('#repliesWrapper').html(buildReplies(p));
             },
+            error: function() {toast('No connection');},
             complete: function() {$('body').unspin();}
         });
     }
@@ -3539,7 +3569,8 @@
                     el.isLoading = false;
                 }
             },
-            complete: function() {
+            complete: function(x) {
+                if (x.status === 0) $cn.attr("placeholder","Connection to the server was lost.");
                 $('body').unspin();
             }
         });
@@ -3662,6 +3693,7 @@
                 MY_ORDERS = p;
                 $wrapper.html(buildOrders(p, type));
             },
+            error: function() {toast('No connection');},
             complete: function() {$('body').unspin();}
         });
     }
@@ -3725,6 +3757,7 @@
                 if (stage == 1) checkPaymentInitiationResponse(p);
                 else if (stage == 2) checkPINSuccess(p);
             },
+            error: function() {toast('No connection');},
             complete: function() {$('body').unspin();}
         });
     }
@@ -3746,6 +3779,7 @@
                 if (p.status == 'failure') return toast('Temporary server error. Please try again.');
                 updatePaymentStatus(p);
             },
+            error: function() {toast('No connection');},
             complete: function() {$('body').unspin();}
         });
     }
