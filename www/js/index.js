@@ -2208,17 +2208,41 @@
         else if (g == '3') fetchEvents('more', 20);
         else return;
         $('body').spin();
-    }).on('click', '.products-catg-entry', function(e) {
-        var catg = this.dataset.catg;
+    }).on('click', '#products-catg-entry', function(e) {
         App.changeViewTo('#catalogView');
-        $('.item-filter[data-catg="'+catg+'"]').click();
+        var $entries = $('#catalog-items-container .product-entry');
+        var cue = $entries.first().attr('data-item-key') || 0;
+        if (cue == 0) $('body').spin();
+        fetchProducts('more', cue, 0);
     }).on('click', '.item-filter', function(e) {
-        $('.item-filter.c-o').removeClass('c-o');
-        this.classList.add('c-o');
-        var left = this.offsetLeft;
-        document.querySelector('#categories-filter').scrollLeft = left - 10;
-        $('#catalog-items-container').empty();
-        getDetailsOfProductsToFetch('top');
+        $('#category-items-container').empty();
+        App.changeViewTo('#categoryView');
+        $('body').spin();
+        $('#current-category').text(this.dataset.name);
+        fetchProducts('filter', 0, this.dataset.catg);
+    }).on('keyup', '#filter-input', function(e) {
+        var query = this.value.toLowerCase();
+        if (query) {
+            var items = document.querySelectorAll('#category-items-container .product-entry');
+            items.forEach(function(el){
+                var nm = el.querySelector('.product-name').innerText.toLowerCase();
+                var nms = nm.split(' ').filter(function(m){return m;});
+                var qrs = query.split(' ').filter(function(r){return r;});
+                var found = 0;
+                qrs.forEach(function(q){
+                    nms.forEach(function(n){
+                        if (n && n.startsWith(q)) found++;
+                    });
+                });
+                if (found > 0){
+                    el.style.display = '';
+                } else el.style.display = 'none';
+            });
+        } else {
+            document.querySelectorAll('#category-items-container .product-entry').forEach(function(el){
+                el.style.display = '';
+            });
+        }
     }).on('click', '#orders-link', function(e) {
         fetchMyOrders($('#ordersWrapper'), 'full');
     }).on('click', '.order-details-btn', function(e) {
@@ -2369,8 +2393,8 @@
                 var items = document.querySelectorAll('#services-found .shop-link');
                 items.forEach(function(el){
                     var nm = el.querySelector('.item-name').innerText.toLowerCase();
-                    var nms = nm.split(' ');
-                    var qrs = query.split(' ');
+                    var nms = nm.split(' ').filter(function(m){return m;});
+                    var qrs = query.split(' ').filter(function(r){return r;});
                     var found = 0;
                     qrs.forEach(function(q){
                         nms.forEach(function(n){
@@ -3477,22 +3501,13 @@
         Views.pop();
         App.changeViewTo('#itemsView');
     }
-    function getDetailsOfProductsToFetch(type) {
-        var $entries = $('#catalog-items-container .product-entry');
-        var catg = $('.item-filter.c-o').attr('data-catg');
-        if ($entries.length == 0) {//empty (no products loaded), search-link and filter
-            $('body').spin();
-            fetchProducts('top', 1, catg);
-        } else if (type == 'less') {//some products loaded, infinite loader only
-            var cue = $entries.last().attr('data-item-key');
-            fetchProducts('less', cue, catg);
-        } else {//some products loaded, search-link only
-            var cue = $entries.first().attr('data-item-key');
-            fetchProducts('more', cue, catg);
-        }
-    }
     function fetchProducts(type, cue, catg) {
-        var $cn = $('#catalog-items-container');
+        var $cn;
+        if (type == 'filter') {
+            $cn = $('#category-items-container');
+        } else {
+            $cn = $('#catalog-items-container');
+        }
         $cn.attr("placeholder","Fetching products...");
         $.ajax({
             url: MY_URL + "/fetch.php",
@@ -3509,13 +3524,10 @@
             success: function(p) {
                 if (p.length > 0) {
                     var h = buildProducts(p, true, true);
-                    if (type == 'top') {
-                        $cn.html(h);
-                        PRODUCTS = p;
-                    } else if (type == 'more') {
+                    if (type == 'more') {
                         $cn.prepend(h);
                         p.forEach(function(i) { PRODUCTS.push(i); });
-                    } else if (type == 'less') {
+                    } else {
                         $cn.append(h);
                         p.forEach(function(i) { PRODUCTS.push(i); });
                     }
@@ -3544,7 +3556,7 @@
                         "<img class='fw im-sh' src='"+MY_URL+"/img/items/products/"+c.itemID+"_0.jpg'>\
                     </div>\
                     <div class='fw'>\
-                        <div class='fw ov-h f16 b tx-el'>"+c.name+"</div>"+
+                        <div class='fw ov-h f16 b tx-el product-name'>"+c.name+"</div>"+
                         (c.discount > 0 ? "<span class='tx-lt ltt c-g f10'>&#8358;"+comma(c.price)+"</span>" : "")+
                         "<span class='f16'>&#8358;"+comma((c.price - c.discount).toFixed(2))+"</span>"+
                         (c.delivery == 1 ?
@@ -3832,6 +3844,7 @@
         
         $('#display-name').text(shopName);
         $('#user-address').text(shopAddress);
+        $('#opennow').attr('data-status', '').text('');
         $('#post-a-review').attr('data-shop-id', shopId);
         $('#send-a-message').attr('data-shop-id', shopId);
         $('.items-container[data-catg="'+catg+'"]').show().find('.items-wrapper').empty();
@@ -3940,7 +3953,9 @@
             var hg = el.offsetHeight;
             if (sh - st - 60 < hg) {
                 el.isLoading = true;
-                getDetailsOfProductsToFetch('less');
+                var $entries = $('#catalog-items-container .product-entry');
+                var cue = $entries.last().attr('data-item-key');
+                fetchProducts('less', cue, 0);
             }
         }, 300);
     });
