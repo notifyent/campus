@@ -3522,8 +3522,9 @@
             timeout: 30000,
             method: "GET",
             success: function(p) {
+                $cn.attr("placeholder","We couldn't find a matching product");//suggest related products
                 if (p.length > 0) {
-                    var h = buildProducts(p, true, true);
+                    var h = buildProducts(p, true, (type != 'filter'));
                     if (type == 'more') {
                         $cn.prepend(h);
                         p.forEach(function(i) { PRODUCTS.push(i); });
@@ -3531,8 +3532,6 @@
                         $cn.append(h);
                         p.forEach(function(i) { PRODUCTS.push(i); });
                     }
-                } else {
-                    $cn.attr("placeholder","We couldn't find a matching product");//suggest related products
                 }
                 if (type == 'less' && cue != 0) {
                     var el = document.querySelector('#catalog-items-container');
