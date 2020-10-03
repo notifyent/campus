@@ -7,7 +7,6 @@
  *
  * SERVER
  * use number in stock for products
- * increase upload limit on server
  * check for existing review on server and update if any
  *
  *
@@ -2197,33 +2196,51 @@
         $('#services-found').html($H+$H+$H);
         $('#current-service').text(this.dataset.name);
         App.changeViewTo('#servicesDiscoverView');
-        $('body').spin();
-        $.ajax({
-            url: MY_URL + "/fetch.php",
-            data: {
-                action: 'fetchServices',
-                campus: CAMPUSKEY,
-                catg: catg
-            },
-            timeout: 30000,
-            dataType: 'json',
-            method: "GET",
-            success: function(p) {
-                // console.log(p);
-                if (p.length == 0) return toast('No seller was found');
-                $('#services-found').html(buildServices(p));
-            },
-            error: function() {toast('No connection');},
-            complete: function() {$('body').unspin();}
-        });
+        //
+        function fetchServices(){
+            $('body').spin();
+            $.ajax({
+                url: MY_URL + "/fetch.php",
+                data: {
+                    action: 'fetchServices',
+                    campus: CAMPUSKEY,
+                    catg: catg
+                },
+                timeout: 30000,
+                dataType: 'json',
+                method: "GET",
+                success: function(p) {
+                    // console.log(p);
+                    if (p.length == 0) return toast('No seller was found');
+                    $('#services-found').html(buildServices(p));
+                },
+                error: function() {toast('No connection');},
+                complete: function(x) {
+                    if (x.status === 0) {
+                        var h = $("<div class='fw fh fx fx-ac fx-jc'>"+
+                            "<div class='t-c'>"+
+                                "<div class='c-g'>The connection to the server was lost</div>"+
+                                "<div class='pd516 bs-r mg-t Orange white i-b ac'>Retry</div>"+
+                            "</div>"+
+                        "</div>").click(function(){
+                            fetchServices();
+                            $(this).remove();
+                        });
+                        $('#services-found').html(h);
+                    }
+                    $('body').unspin();
+                }
+            });
+        }
+        fetchServices();
     }).on('click', '.more-services', function(e) {
         var g = this.dataset.catg;
         $('#services-found').html($H+$H+$H);
         $('#current-service').text(this.dataset.name);
         App.changeViewTo('#servicesDiscoverView');
         //
-        if (g == '2') fetchRestaurants('more', 20);
-        else if (g == '3') fetchEvents('more', 20);
+        if (g == 2) fetchRestaurants('more', 20);
+        else if (g == 3) fetchEvents('more', 20);
         else return;
         $('body').spin();
     }).on('click', '#products-catg-entry', function(e) {
@@ -2580,6 +2597,7 @@
     }).on('click', '#notifications-btn', function(e) {
         this.dataset.total = '0';
         App.changeViewTo('#inboxView');
+        $('body').spin();
         fetchMails();
     }).on('click', '.msg-entry', function(e) {
         var key = this.dataset.key;
@@ -2677,7 +2695,7 @@
                     $('.mail-status[data-key="'+key+'"]').removeClass('Orange').addClass('bg-fd').text('closed');
                 } else toast(p);
             },
-            error: function() {toast('No connection');},
+            error: function() {toast('No connection');}
         });
     }).on('click', '.msg-delete', function(e) {
         buildConfirm('message-delete-confirm', 'Confirm to Delete this Message?', this.dataset.key);
@@ -2700,7 +2718,7 @@
                     App.closeCurrentView();
                 } else toast(p);
             },
-            error: function() {toast('No connection');},
+            error: function() {toast('No connection');}
         });
     }).on('click', '#add-gallery-items', function(e) {
         App.changeViewTo('#galleryAddView');
@@ -3014,7 +3032,23 @@
                     $('#carousel-buy-ticket').html(buildEvents(p));
                 }else if (source == 'more') $('#services-found').html(buildMoreEvents(p));
             },
-            complete: function() {$('body').unspin();}
+            complete: function(x) {
+                if (x.status === 0) {
+                    if (source == 'more') {
+                        var h = $("<div class='fw fh fx fx-ac fx-jc'>"+
+                            "<div class='t-c'>"+
+                                "<div class='c-g'>The connection to the server was lost</div>"+
+                                "<div class='pd516 bs-r mg-t Orange white i-b ac'>Retry</div>"+
+                            "</div>"+
+                        "</div>").click(function(){
+                            fetchEvents(source,limit);
+                            $(this).remove();
+                        });
+                        $('#services-found').html(h);
+                    }
+                }
+                $('body').unspin();
+            }
         });
     }
     function fetchRestaurants(source,limit) {//timeline, search,
@@ -3053,7 +3087,23 @@
                     $('#carousel-buy-food').html(buildRestaurants(p));
                 }else if (source == 'more') $('#services-found').html(buildMoreRestaurants(p));
             },
-            complete: function() {$('body').unspin();}
+            complete: function(x) {
+                if (x.status === 0) {
+                    if (source == 'more') {
+                        var h = $("<div class='fw fh fx fx-ac fx-jc'>"+
+                            "<div class='t-c'>"+
+                                "<div class='c-g'>The connection to the server was lost</div>"+
+                                "<div class='pd516 bs-r mg-t Orange white i-b ac'>Retry</div>"+
+                            "</div>"+
+                        "</div>").click(function(){
+                            fetchRestaurants(source,limit);
+                            $(this).remove();
+                        });
+                        $('#services-found').html(h);
+                    }
+                }
+                $('body').unspin();
+            }
         });
     }
     function buildEvents(p) {
@@ -3232,6 +3282,7 @@
                 }
             },
             error: function() {toast('No connection');},
+            complete: function() {$('body').unspin();}
         });
     }
     function buildMails(p) {
@@ -3570,7 +3621,19 @@
                 }
             },
             complete: function(x) {
-                if (x.status === 0) $cn.attr("placeholder","Connection to the server was lost.");
+                if (x.status === 0) {
+                    $cn.attr("placeholder","The connection to the server was lost.");
+                    var h = $("<div class='fw fh fx fx-ac fx-jc' style='margin-top:-50px;'>"+
+                        "<div class='t-c'>"+
+                            "<div class='c-g'>The connection to the server was lost</div>"+
+                            "<div class='pd516 bs-r mg-t Orange white i-b ac'>Retry</div>"+
+                        "</div>"+
+                    "</div>").click(function(){
+                        fetchProducts(type, cue, catg);
+                        $(this).remove();
+                    });
+                    $cn.html(h);
+                }
                 $('body').unspin();
             }
         });
@@ -3694,7 +3757,22 @@
                 $wrapper.html(buildOrders(p, type));
             },
             error: function() {toast('No connection');},
-            complete: function() {$('body').unspin();}
+            complete: function(x) {
+                if (x.status === 0) {
+                    $wrapper.attr("placeholder","The connection to the server was lost.");
+                    var h = $("<div class='fw fh fx fx-ac fx-jc'>"+
+                        "<div class='t-c'>"+
+                            "<div class='c-g'>The connection to the server was lost</div>"+
+                            "<div class='pd516 bs-r mg-t Orange white i-b ac'>Retry</div>"+
+                        "</div>"+
+                    "</div>").click(function(){
+                        fetchMyOrders($wrapper, type);
+                        $(this).remove();
+                    });
+                    $wrapper.html(h);
+                }
+                $('body').unspin();
+            }
         });
     }
     function buildOrders(orders, type) {
@@ -3950,10 +4028,6 @@
     POLLING_TRACKER = setInterval(function() {
         if (POLLING_TIME == 0) {
             checkMail();
-            /*if (USERTYPE == 0) {
-                fetchEvents('timeline', 10);
-                fetchRestaurants('timeline', 10);
-            }*/
             POLLING_TIME = 3;
         } else POLLING_TIME--;
     }, 60000);
