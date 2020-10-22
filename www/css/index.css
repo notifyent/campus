@@ -474,6 +474,9 @@ img[src=""]{
 .pd516 {
     padding: 5px 16px;
 }
+.pd1f {
+    padding: 1px 5px;
+}
 .pd5 {
     padding: 5px;
 }
@@ -589,6 +592,7 @@ img[src=""]{
 .content-area {
     height: calc(100% - 35vw);
     min-height: calc(100% - 150px);
+    padding-bottom: 60px;
 }
 .not-null:empty:after {
     content: attr(placeholder);

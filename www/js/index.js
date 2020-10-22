@@ -24,11 +24,11 @@
     var VERSION = '1.0.0'
     , PLATFORM = 'android'
     //
-    // , MY_URL = "http://localhost/api/v1"
+    // , MY_URL = "http://localhost/oncmp/api/v1"
     // 
-    // , MY_URL = "http://192.168.43.75/api/v1"
+    // , MY_URL = "http://192.168.43.75/oncmp/api/v1"
     //
-    // , MY_URL = "http://172.20.10.4/api/v1"
+    // , MY_URL = "http://172.20.10.4/oncmp/api/v1"
     //
     , MY_URL = "https://www.oncampus.ng/api/v1"
     //
@@ -92,7 +92,7 @@
 
     , OPENSTATE = ['Closed', 'Open']
 
-    , CURRENT_ORDER = {}
+    , CURRENT_ORDER = []
     , ORDER_TYPE = 0
     , ORDER_INFO = null
     , ORDER_TOTAL = 0
@@ -926,8 +926,7 @@
                                 , ph: Phone
                                 , ut: '0'
                                 , ot: 1
-                                , ma: null
-                                , fn: null
+                                , fn: Fullname
                                 , ad: null
                                 , cg: '0'
                                 , ch: '0'
@@ -1104,21 +1103,18 @@
                 var Fullname = el.querySelector('input[name="fullname"]').value
                   , Username = el.querySelector('input[name="username"]').value
                   , Phone = el.querySelector('input[name="phone"]').value
-                  , Birthday = null
-                  , Address = null
+                  , Address = el.querySelector('textarea[name="officeAddress"]').value
+                  , Birthday = el.querySelector('input[name="birthday"]').value || '0000-00-00'
                   ;
                 if (!Fullname && !error) error = "<div class='b bb pd10'>Full Name is Required</div><div class='pd10'>Your full name is required.</div>";
                 if (!Phone && !error) error = "<div class='b bb pd10'>Provide your phone number</div><div class='pd10'>Your phone number is required for notifications.</div>";
                 
                 if (USERTYPE == 1) {
-                    Address = el.querySelector('textarea[name="officeAddress"]').value
-                    ;
                     if (!Username && !error) error = "<div class='b bb pd10'>Display/Brand Name is Required</div><div class='pd10'>Your Display/Brand name would be displayed on your profile.</div>";
-                    if (!Address && !error) error = "<div class='b bb pd10'>Your Address is Required</div><div class='pd10'>Your address is required for pickup.</div>";
+                    if (!Address && !error) error = "<div class='b bb pd10'>Your Address is Required</div><div class='pd10'>Your address is required.</div>";
                 } else {
-                    Birthday = el.querySelector('input[name="birthday"]').value;
                     if (!UsernameRegexp.test(Username) && !error) error = "<div class='b bb pd10'>Username not available</div><div class='pd10'>Username must be 4 or more characters long and may contain letters, underscore and numbers but cannot start with a number. Special characters, full-stop and spaces are not allowed</div>";
-                    if (!Birthday && !error) error = "<div class='b bb pd10'>Your Birthday is Required</div><div class='pd10'>Your birthday is required.</div>";
+                    // if (!Birthday && !error) error = "<div class='b bb pd10'>Your Birthday is Required</div><div class='pd10'>Your birthday is required.</div>";
                 }
                 if (error) {
                     var h = '<div class="pd10">'+error+'<div class="fw fx"><div class="fx60"></div><div class="pd516 b bg-ac c-o ac">OK</div></div></div>';
@@ -1999,8 +1995,14 @@
         if (id.contains('item-subtract')) {
             if (count == 0) return;
             counter.innerText = --count;
+            if (count == 0) {
+                counter.classList.add('disabled');
+                counter.classList.remove('selected');
+            }
         } else if (id.contains('item-add')) {
             counter.innerText = ++count;
+            counter.classList.add('selected');
+            counter.classList.remove('disabled');
         }
     }).on('click', '#add-to-cart', function(e) {
         var itemId = this.dataset.itemId;
@@ -2070,7 +2072,7 @@
     }).on('click', '#proceed-to-invoice', function(e) {
         var catg = this.dataset.catg;
         var menu = document.querySelector('.items-container[data-catg="'+catg+'"]');
-        var items = menu.querySelectorAll('.item-count');
+        var items = menu.querySelectorAll('.item-count.selected');
         var invoice = [];
         switch(catg) {
             case '2'://food
@@ -2118,9 +2120,7 @@
         } else toast('No item was added');
     }).on('click', '#accept-invoice', function(e) {
         App.changeViewTo('#orderOwnerView');
-    })/*.on('change', '#order_for_select', function(e) {
-        
-    })*/.on('click', '#submit-for-review', function(e) {
+    }).on('click', '#submit-for-review', function(e) {
         var fm = document.querySelector('#dropoff-content');
         var address = fm.querySelector('input[name="address"]').value;
         var name = fm.querySelector('input[name="name"]').value;
@@ -2325,7 +2325,7 @@
         var cardYear = el.querySelector('input[name="cardYear"]').value;
         var cardCVV = el.querySelector('input[name="cardCVV"]').value;
         //
-        if (cardNumber.length < 16 || cardYear.length < 4 || cardMonth == 0 || cardCVV.length < 4) return toast('Invalid card details');
+        if (cardNumber.length < 16 || cardYear.length < 2 || cardMonth == 0 || cardCVV.length < 3) return toast('Invalid card details');
         //
         if (cardMonth < 10) cardMonth = '0' + cardMonth;
         //
@@ -2383,13 +2383,13 @@
     }).on('click', '#submit-card-pin', function(e) {
         var PIN = $('#card-pin-container').attr('data-value');
         if (PIN.length < 4) return;
-        // PAYLOAD.pin = PIN;
         PAYLOAD.suggested_auth = 'PIN';
-        PAYLOAD.pin = '3310';
+        PAYLOAD.pin = PIN;
+        // PAYLOAD.pin = '3310';
         sendPaymentInfo(2);
     }).on('click', '#submit-card-token', function(e) {
-        // var OTP = $('#card-token-input').val();
-        var OTP = '12345';
+        var OTP = $('#card-token-input').val();
+        // var OTP = '12345';
         validatePayment(OTP);
     }).on('click', '#transaction-history-btn', function(e) {
         App.changeViewTo('#transactionsView');
@@ -2630,6 +2630,7 @@
             success: function(p) {
                 if (p.state == 1) {
                     App.closeCurrentView();
+                    toast('Message sent successfully');
                 } else {
                     toast(p.state);
                 }
@@ -3041,6 +3042,7 @@
                                 "<div class='pd516 bs-r mg-t Orange white i-b ac'>Retry</div>"+
                             "</div>"+
                         "</div>").click(function(){
+                            $('body').spin();
                             fetchEvents(source,limit);
                             $(this).remove();
                         });
@@ -3096,6 +3098,7 @@
                                 "<div class='pd516 bs-r mg-t Orange white i-b ac'>Retry</div>"+
                             "</div>"+
                         "</div>").click(function(){
+                            $('body').spin();
                             fetchRestaurants(source,limit);
                             $(this).remove();
                         });
@@ -3291,9 +3294,8 @@
             h += "<div class='msg-entry fw pd10 psr b4-r mg-b16 ba sh-a ov-h' data-key='"+c.k+"'>\
                 <div class='mail-status psa t0 r0 white "+(c.isopen == 1 ? 'Orange' : 'bg-fd')+"' data-key='"+c.k+"' style='padding:2px 5px;'>"+(c.isopen == 1 ? 'open' : 'closed')+"</div>\
                 <div class='fw b f16'>"+c.title+"</div>\
-                <i class='fw c-g'>"+(c.sent_by == UUID ? "Sent" : "Received")+"</i>\
                 <div class='fw ov-h pd10z b5 tx-el c-g'>"+c.message+"</div>\
-                <div class='f10 c-g'>"+checkTime(c.time_*1000)+"</div>\
+                <div class='f10 c-g'><span class='bg-ac pd1f mg-rm b4-r f10 c-g'>"+(c.sent_by == UUID ? "Sent" : "Received")+"</span>"+checkTime(c.time_*1000)+"</div>\
             </div>";
         });
         return h;
@@ -3302,7 +3304,7 @@
         var h = "<div class='fw psr b4-r ov-h'>\
                 <div class='psa t0 r0 white "+(c.isopen == 1 ? 'Orange' : 'bg-fd')+"' style='padding:2px 5px;'>"+(c.isopen == 1 ? 'open' : 'closed')+"</div>\
                 <div class='fw b f16'>"+c.title+"</div>\
-                <div class='f10 c-g'>"+checkTime(c.time_*1000)+"</div>\
+                <div class='f10 c-g'><span class='bg-ac pd1f mg-rm b4-r f10 c-g'>"+(c.sent_by == UUID ? "Sent" : "Received")+"</span>"+checkTime(c.time_*1000)+"</div>\
                 <div class='fw pd10z pr-w'>"+c.message+"</div>\
                 <div class='fw fx c-g b5'>\
                     <div class='msg-reply mg-r' data-key='"+c.k+"'>Reply</div>\
@@ -3422,14 +3424,12 @@
             img.src = MY_URL+"/img/items/events/"+p[0].itemID+".jpg";
             //
             p.forEach(function(c) {
-                /*h+="<div class='fw'>\
-                    <img class='fw fx sh-a' src='"+MY_URL+"/img/items/events/"+c.itemID+".jpg'>\
-                </div>";*/
                 c.tickets.forEach(function(v) {
                     h+="<div class='ticket-entry fw pd16 bb' data-item-type='"+v.ticket_type+"'>\
                         <div class='fw fx fx-fs'>\
                             <div class='fx60'>\
                                 <div class='fw'>\
+                                    <div class='f16'>"+c.name+"</div>\
                                     <div class='f16 b'>"+TICKETS[v.ticket_type]+(user && v.sales == v.seats ? "<span class='mg-l f8 b4-r bg-fd c-g' style='padding:1px 5px;'>SOLD OUT</span>":"")+"</div>\
                                     <div class='c-g f10'>("+v.sales+") seats sold out of "+v.seats+" available seats</div>\
                                 </div>\
@@ -3621,7 +3621,7 @@
                 }
             },
             complete: function(x) {
-                if (x.status === 0) {
+                if (x.status === 0 && cue == 0) {
                     $cn.attr("placeholder","The connection to the server was lost.");
                     var h = $("<div class='fw fh fx fx-ac fx-jc' style='margin-top:-50px;'>"+
                         "<div class='t-c'>"+
@@ -3629,6 +3629,7 @@
                             "<div class='pd516 bs-r mg-t Orange white i-b ac'>Retry</div>"+
                         "</div>"+
                     "</div>").click(function(){
+                        $('body').spin();
                         fetchProducts(type, cue, catg);
                         $(this).remove();
                     });
@@ -3740,13 +3741,15 @@
         return h;
     }
     function fetchMyOrders($wrapper, type) {
+        $wrapper.attr("placeholder","Your orders will show here.");
         $('body').spin();
         $.ajax({
             url: MY_URL + "/fetch.php",
             data: {
                 action: 'fetchOrders',
                 userID: UUID,
-                type: USERTYPE
+                userType: USERTYPE,
+                orderType: type
             },
             timeout: 30000,
             dataType: 'json',
@@ -3778,8 +3781,6 @@
     function buildOrders(orders, type) {
         var h = '';
         orders.forEach(function(c) {
-            if (type == 'pending' && c.delivery_status != '0') return;
-            if (type == 'completed' && c.delivery_status != '1') return;
             h += "<div class='order-entry fw ba b4-r ov-h bg mg-b16 sh-a' data-order-id='"+c.orderID+"'>\
                 <div class='fw fx fx-fs bb'>\
                     <div class='fx60 fx-js pd10'>\
@@ -3848,14 +3849,15 @@
                 otp: otp,
                 ref: TRN_REF,
                 buyerID: UUID,
-                orderID: ORDER_ID
+                orderID: ORDER_ID,
+                orderTOTAL: ORDER_TOTAL
             },
             timeout: 30000,
             dataType: 'json',
             method: "POST",
             success: function(p) {
-                if (p.status == 'failure') return toast('Temporary server error. Please try again.');
-                updatePaymentStatus(p);
+                if (p.status == 'success') { updatePaymentStatus(p); }
+                else toast('Temporary server error. Please try again.');
             },
             error: function() {toast('No connection');},
             complete: function() {$('body').unspin();}
@@ -3871,7 +3873,7 @@
         }else if(body.status == "success" && body.data.authurl != 'N/A') {
             toast('Please try another Card');//iframe
         }else {
-            toast('Error');// a gateway error has probably occurred.
+            toast('Payment Gateway Error');// a gateway error has probably occurred.
         }
     }
     function checkPINSuccess(body) {
@@ -3885,7 +3887,7 @@
     }
     function updatePaymentStatus(body) {
         // console.log(body.data.data.responsecode);
-        if (body.state == 1) {
+        if (body.databaseUpdate == 'success') {
             toast('Your payment was successful');
             $('.order-payment-btn[data-order-id="'+ORDER_ID+'"]').replaceWith("<div class='fw pd016 fx fx-jc'><div class='ba b4-r b5 pd1015'>Awaiting Delivery</div></div>");
             var order = MY_ORDERS.find(function(e) {return e.orderID == ORDER_ID;});
@@ -3911,11 +3913,13 @@
     }
     function buildGalleryItems(gallery_links) {
         var h = '';
-        var g = gallery_links.split(',');
-        g.forEach(function(imageLink) {
-            h += "<div class='fw mg-b16'><img src='"+MY_URL+'/img/gallery/'+imageLink+'.jpg'+"' class='fw'></div>";
-        });
-        $('#pictures-container').html(h);
+        var g = gallery_links.split(',').filter(function(n) {return n != '';});
+        if (g.length > 0) {
+            g.forEach(function(imageLink) {
+                h += "<div class='fw mg-b16'><img src='"+MY_URL+'/img/gallery/'+imageLink+'.jpg'+"' class='fw'></div>";
+            });
+            $('#pictures-container').html(h);
+        }            
         if (g.length == 6) $('#add-gallery-items').hide();
         else if (USERTYPE == 1) $('#add-gallery-items').show();
     }
