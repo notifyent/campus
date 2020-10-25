@@ -592,7 +592,7 @@ img[src=""]{
 .content-area {
     height: calc(100% - 35vw);
     min-height: calc(100% - 150px);
-    padding-bottom: 60px;
+    padding-bottom: 56px;
 }
 .not-null:empty:after {
     content: attr(placeholder);

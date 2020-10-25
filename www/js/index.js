@@ -24,13 +24,13 @@
     var VERSION = '1.0.0'
     , PLATFORM = 'android'
     //
-    // , MY_URL = "http://localhost/oncmp/api/v1"
+    , MY_URL = "http://localhost/oncmp/api/v1"
     // 
     // , MY_URL = "http://192.168.43.75/oncmp/api/v1"
     //
     // , MY_URL = "http://172.20.10.4/oncmp/api/v1"
     //
-    , MY_URL = "https://www.oncampus.ng/api/v1"
+    // , MY_URL = "https://www.oncampus.ng/api/v1"
     //
     , BASE_URL = "https://www.oncampus.ng"
     //
@@ -3470,6 +3470,7 @@
                         </div>\
                     </div>";
                 });
+                h+="<div class='fw pd5 Dark'></div>";
             });
             //
             var $v = $('#events-container');
