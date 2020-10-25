@@ -522,6 +522,8 @@
         el.querySelector('textarea[name="officeAddress"]').value = ADDRESS;
         $('#user-email').text(EMAIL);
         App.changeViewTo('#profileEditor');
+    }).on('click', '#contact-link', function() {
+        App.changeViewTo('#contactView');
     }).on('click', '#logoutLink', function() {
         SQL.transaction(function(i){
             i.executeSql("DROP TABLE IF EXISTS on_user");
@@ -682,6 +684,7 @@
         App.changeViewTo('#createView');
         $('.main-wrapper').remove();
         if (CATEGORY == 1) {
+            $('.size-picker').html('');
             $('.color-picker').html('');
             $('#product-add-form img.im-sh').attr('src','');
         }
@@ -1302,6 +1305,7 @@
                 fd.append('piecesAvailable', PiecesAvailable);
                 fd.append('description', Description);
                 fd.append('displayName', USERNAME);
+                fd.append('campusKey', CAMPUSKEY);
                 var TotalImages = 0;
                 Images.forEach(function(el) {
                     if (el.files && el.files[0]) {
@@ -1375,6 +1379,7 @@
                 fd.append('name', Name);
                 fd.append('price', Price);
                 fd.append('discount', Discount);
+                fd.append('campusKey', CAMPUSKEY);
 
                 $.ajax({
                     url: MY_URL + "/send.php",
@@ -1463,6 +1468,7 @@
                 fd.append('event_type', EventType);//pool,hangout,club...
                 fd.append('image', Image[0]);
                 fd.append('all_tickets', JSON.stringify(AllTickets));//regular,VIP...//all in one JSON stringified object
+                fd.append('campusKey', CAMPUSKEY);
 
                 $.ajax({
                     url: MY_URL + "/send.php",
@@ -1519,6 +1525,7 @@
                 fd.append('image', Image[0]);
                 fd.append('graphicsType', GraphicsType);
                 fd.append('price', Price);
+                fd.append('campusKey', CAMPUSKEY);
 
                 $.ajax({
                     url: MY_URL + "/send.php",
@@ -1576,6 +1583,7 @@
                 fd.append('makeupType', MakeupType);
                 fd.append('name', Name);
                 fd.append('price', Price);
+                fd.append('campusKey', CAMPUSKEY);
 
                 $.ajax({
                     url: MY_URL + "/send.php",
@@ -1642,6 +1650,7 @@
                 fd.append('action', 'addLaundryItem');
                 fd.append('ownerID', UUID);
                 fd.append('laundryData', JSON.stringify(items));
+                fd.append('campusKey', CAMPUSKEY);
 
                 $.ajax({
                     url: MY_URL + "/send.php",
@@ -1698,6 +1707,7 @@
                 fd.append('action', 'addGasItem');
                 fd.append('ownerID', UUID);
                 fd.append('gasData', JSON.stringify(items));
+                fd.append('campusKey', CAMPUSKEY);
 
                 $.ajax({
                     url: MY_URL + "/send.php",
@@ -1911,7 +1921,7 @@
             complete: function() {$('body').unspin();}
         });
     }).on('click', '.item-remove', function(e) {
-        h="<div class='pd16 st-p t-c b'>Confirm to remove this item?</div>\
+        var h="<div class='pd16 st-p t-c b'>Confirm to remove this item?</div>\
             <div class='fx bt modalClose'>\
                 <div id='item-remove-confirm' class='pd16z t-c fx50 b-rg b ac' data-item-id='"+this.dataset.itemId+"' data-item-type='"+this.dataset.itemType+"' data-catg='"+this.dataset.catg+"'>YES</div>\
                 <div class='pd16z t-c fx50 b ac'>CANCEL</div>\
@@ -1921,7 +1931,7 @@
     }).on('click', '#item-remove-confirm', function(e) {
         var itemId = this.dataset.itemId;
         var catg = this.dataset.catg;
-        var type = this.dataset.itemType;
+        var type = this.dataset.itemType;//for tickets
         //
         if (catg != CATEGORY) return;
         $('body').spin();
@@ -2414,8 +2424,8 @@
         ip.focus();
     }).on('keyup', '#search-input', function(e) {
         var query = this.value.toLowerCase();
+        var type = this.dataset.type;
         if (query) {
-            var type = this.dataset.type;
             if (type == 'orders') {
                 var ct = this.dataset.container;
                 var items = document.querySelectorAll(ct + ' .order-entry');
@@ -2441,6 +2451,12 @@
                         el.style.display = '';
                     } else el.style.display = 'none';
                 });
+            }
+        } else {
+            if (type == 'orders') {
+                showAllOrderEntries();
+            } else {
+                showAllShopLink();
             }
         }
     }).on('click', '#store-review', function(e) {
@@ -2519,7 +2535,7 @@
                 <div class='description pd16z c-g'>"+(c.description||'')+"</div>"+
                 (c.ownerID != UUID ?
                     "<div class='fw fx fx-ac b5 pd516 mg-bx b4-r ba'>\
-                        <div class='fx40'>PCS:</div>\
+                        <div class='fx40 b'>PCS:</div>\
                         <div class='fx60 h50 mg-lxx pd020'><input class='fw fh f16' type='number' name='item-count' value='1' min='1' placeholder='1'></div>\
                     </div>"+
                     (c.sizes ? "<div class='fw fx fx-ac pd516 mg-bx b4-r ba triangle-down'>\
@@ -2749,9 +2765,9 @@
         });
     }).on('click', '#store-open-toggle', function(e) {
         if (USERTYPE == 0) return;
-        var status = this.dataset.toggleTo, code, toggleOpen;
-        if (status == 'Open') code = 1;
-        else if (status == 'Close') code = 0;
+        var setTo = this.dataset.toggleTo, code, toggleOpen;
+        if (setTo == 'Open') code = 1;
+        else/* if (setTo == 'Close')*/ code = 0;
         //
         $('body').spin();
         $.ajax({
@@ -2766,7 +2782,7 @@
             method: "POST",
             success: function(p) {
                 if (p.state == 1) {
-                    $('#opennow').attr('data-status', code).text('Status: ' + OPENSTATE[code]);
+                    $('#opennow').attr('data-status', code).text(OPENSTATE[code]);
                     if (code == 0) toggleOpen = 'Open'; else toggleOpen = 'Close';
                     $('#store-open-toggle').attr('data-toggle-to', toggleOpen).text('Tap here to ' + toggleOpen);
                     Store.setItem('open_toggle', code);
@@ -2781,10 +2797,9 @@
         fetchSuggestedItems();
     }).on('click', '.search-catg', function(e) {
         $(this).addClass('active').siblings().removeClass('active');
-        var $ic = $('#local-search-input');
         if (this.dataset.index == 0) {
             fetchSuggestedItems();
-        } else $ic.focus();
+        } else $('#local-search-input').focus();
     }).on('focusin', '#local-search-input', function(e) {
         var catg = $('.search-catg.active').attr('data-index');
         if (catg == 0) $('.search-catg[data-index="1"]').click();
@@ -2794,7 +2809,7 @@
         o.timer = setTimeout(function() {
             var term = o.value.toLowerCase();
             //
-            if (term.length > 2) {
+            if (term.length > 1) {
                 var type = $('.search-catg.active').attr('data-index');
                 var Action = 'searchQuery';
                 var catg = 0;
@@ -3350,7 +3365,7 @@
         var user = p[0].ownerID == UUID;
         var toggleOpen;
         if (opennow == undefined) opennow = Store.getItem('open_toggle') || 1;
-        $('#opennow').attr('data-status', opennow).text('Status: ' + OPENSTATE[opennow]);
+        $('#opennow').attr('data-status', opennow).text(OPENSTATE[opennow]);
         if (opennow == 0) toggleOpen = 'Open'; else toggleOpen = 'Close';
         $('#store-open-toggle').attr('data-toggle-to', toggleOpen).text('Tap here to ' + toggleOpen);
         //
@@ -3429,7 +3444,7 @@
                         <div class='fw fx fx-fs'>\
                             <div class='fx60'>\
                                 <div class='fw'>\
-                                    <div class='f16'>"+c.name+"</div>\
+                                    <div class='f16'><span class='c-o mg-rm icon-heart'></span>"+c.name+"</div>\
                                     <div class='f16 b'>"+TICKETS[v.ticket_type]+(user && v.sales == v.seats ? "<span class='mg-l f8 b4-r bg-fd c-g' style='padding:1px 5px;'>SOLD OUT</span>":"")+"</div>\
                                     <div class='c-g f10'>("+v.sales+") seats sold out of "+v.seats+" available seats</div>\
                                 </div>\
@@ -3678,34 +3693,42 @@
             if (c.isproduct) {
                 h+="<div class='pd1015 bb'>";
                 if(c.sz){
+                    h+="<div class='pd5 bb mg-bm'>Sizes: ";
                     var sizes = [];
                     c.sz.split(',').forEach(function(d) { sizes.push(SIZES.find(function(c) {return c.dex == d;})); });
                     sizes.forEach(function(s) { h += "<div class='pd5 mg-rm mg-bm i-b ba1 b5 b4-r'>"+s.val+"</div>"; });
+                    h+="</div>";
                 }
                 if(c.cl){
+                    h+="<div class='pd5 bb mg-bm'>Colours: ";
                     var colors = [];
                     c.cl.split(',').forEach(function(d) { colors.push(COLORS.find(function(c) {return c.dex == d;})); });
                     colors.forEach(function(l) {
                         h += "<div class='pd5 mg-rm mg-bm i-b ba b5 b4-r'><div class='i-b b-rd ba1 mg-rm' style='background-color:"+l.hex+";vertical-align:bottom;width:18px;height:18px;'></div>"+l.name+"</div>";
                     });
+                    h+="</div>";
                 }
-                h+="<div>\
-                        <img src='"+MY_URL+"/img/items/products/"+c.id+"_0.jpg' class='invoice-item-thumb box96 ba bs-r' data-item-id='"+c.id+"'>\
-                    </div>"+
-                    (!order ? "<div class='remove-from-cart pd10 i-b b4-r Orange white' data-index='"+x+"'>Remove this item</div>" : "")+
-                "</div>";
+                h+="<div class='fx fx-fe'>\
+                        <img src='"+MY_URL+"/img/items/products/"+c.id+"_0.jpg' class='invoice-item-thumb box40 ba bs-r mg-r' data-item-id='"+c.id+"'>"+
+                        (!order ?
+                            "<div class='product-entry pd10 c-o ba b4-r t-c b pointer hover-fade mg-r ac' data-item-id='"+c.id+"'>Edit</div>\
+                            <div class='remove-from-cart pd10 i-b b4-r Orange white' data-index='"+x+"'>Remove</div>"
+                        : "")+
+                    "</div>\
+                </div>";
             }
         });
-        var service_ch;
-        if (USERTYPE == 0) service_ch = 50;
-        else service_ch = 0;
+        var service_ch = (USERTYPE == 0) ? 50 : 0;
+        var delivery = (order && USERTYPE == 0) ? order.delivery_charge : 0;
         //
-        var delivery = order ? order.delivery_charge : 0;
-        ORDER_TOTAL = Math.ceil(total+service_ch+parseInt(delivery));
+        ORDER_TOTAL = Math.ceil(total + service_ch + parseInt(delivery));
+        //
         h+=(!order ? "<div class='fw pd30'><input type='text' name='voucherCode' class='fw pd16 bg-ac t-c b4-r ba' placeholder='Enter Voucher Code'></div>" : "<div class='fw pd16'></div>")+
-            "<div class='fw fx b5 c-g pd516'><span class='fx60'>Sub Total</span><span class=''>&#8358;"+comma(total)+"</span></div>"+
-            (USERTYPE == 0 ? "<div class='fw fx b5 c-g pd516'><span class='fx60'>Service Charge</span><span class=''>&#8358;50</span></div>" : "")+
-            (delivery > 0 ? "<div class='fw fx b5 c-g pd516'><span class='fx60'>Delivery Charge</span><span class=''>&#8358;"+delivery+"</span></div>" : "")+
+            (USERTYPE == 0 ?
+                "<div class='fw fx b5 c-g pd516'><span class='fx60'>Sub Total</span><span class=''>&#8358;"+comma(total)+"</span></div>\
+                <div class='fw fx b5 c-g pd516'><span class='fx60'>Service Charge</span><span class=''>&#8358;50</span></div>"+
+                (delivery > 0 ? "<div class='fw fx b5 c-g pd516'><span class='fx60'>Delivery Charge</span><span class=''>&#8358;"+delivery+"</span></div>" : "")
+            :"")+
             "<div class='fw fx b pd516'><span class='fx60'>Total</span><span class=''>&#8358;"+comma(ORDER_TOTAL)+"</span></div>";
         if (order) {
             var orderID = order.orderID;
@@ -3807,7 +3830,7 @@
             dataType: 'json',
             timeout: 30000,
             method: "GET",
-            success: function(p) {//Todo: all suggested items may not be products
+            success: function(p) {
                 $TF.text("("+p.length+") suggested items found");
                 if (p.length == 0) {
                     $SO.html($H+$H+$H);
@@ -3984,7 +4007,7 @@
         });
     }
     function buildConfirm(id, message, key) {
-        h="<div class='pd16 st-p t-c b'>"+message+"</div>\
+        var h="<div class='pd16 st-p t-c b'>"+message+"</div>\
             <div class='fx bt modalClose'>\
                 <div id='"+id+"' class='pd16z t-c fx50 b-rg b ac' data-key='"+key+"'>YES</div>\
                 <div class='pd16z t-c fx50 b ac'>CANCEL</div>\

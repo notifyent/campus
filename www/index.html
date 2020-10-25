@@ -457,6 +457,10 @@
 			    	<div class="w32 fx fx-ac fx-jc f20 icon-user"></div>
 			    	<div class="fx60 mg-l f14">My Account</div>
 			    </div>
+				<div class="fw pd16 fx fx-ac ac b5 side-menu-button" id="contact-link">
+			    	<div class="w32 fx fx-ac fx-jc f20 icon-phone-1"></div>
+			    	<div class="fx60 mg-l f14">Contact Us</div>
+			    </div>
 				<div class="fw pd16 fx fx-ac ac b5 side-menu-button" id="logoutLink">
 			    	<div class="w32 fx fx-ac fx-jc f20 icon-logout"></div>
 			    	<div class="fx60 mg-l f14">Logout</div>
@@ -845,10 +849,11 @@
 	<div id="invoiceView" class="bg" data-function="View">
 	  	<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
-  			<div class="b f16">Shopping Cart</div>
+  			<div class="fx60 b f16">Cart</div>
+  			<div class="view-closer fx cd fx-ac fx-jc icon-plus mg-rx">add item</div>
   		</div>
   		<div class="fw fh ovx-h ovy-a pd60t pd75b">
-  			<div id="invoice-content" class="fw pd10"></div>
+  			<div id="invoice-content" class="fw pd10 mg-tx"></div>
   		</div>
   		<div id="accept-invoice" class="fw h56 psf z3 fx fx-ac f16 b0 l0 b pd020 Orange white hideWhenShrink">Proceed to checkout</div>
   	</div>
@@ -1053,7 +1058,7 @@
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="b f16">Profile Update</div>
   		</div>
-		<div class="fw fh pd60t ovx-h ovy-a">
+		<div class="fw fh pd60t pd60b ovx-h ovy-a">
 	  		<div class="pd30">
 	  			<div class="fw pd020 mg-bx st-p">
 			        <div class="view-locator box120 ba ov-h psr fx fx-ac fx-jc b-rd side-menu-button" data-view="#dpEditor" style="margin: 0 auto;">
@@ -1086,6 +1091,21 @@
 	  			<img src="" class="fw fh psa im-sh">
   				<input id="profile-picture" type="file" accept="image/*" name="images" class="images fw fh psa t0 l0 op0 z1">
 			</div>
+		</div>
+  	</div>
+
+  	<div id="contactView" class="Grey" data-function="View">
+  		<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
+  			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
+  			<div class="b f16">Contact Us</div>
+  		</div>
+  		<div class="fw fh fx fx-ac fx-jc bg pd60t ovx-h ovy-a">
+  			<div>
+				<div class='pd16 st-p t-c b bb'>Contact Us</div>
+	            <div class='pd16 st-p fw b ac'>E-mail: <a href='mailto:admin@oncampus.ng' class='c-o'>admin@oncampus.ng</a></div>
+	            <div class='pd16 st-p fw b ac'>Phone: <a href='tel:+2347016431125' class='c-o'>2347016431125</a></div>
+	            <div class="pd30"></div>
+	        </div>
 		</div>
   	</div>
 
@@ -1233,7 +1253,7 @@
   			<div id="messageWrapper" class="fw pd16 not-null" placeholder="Loading message..."></div>
   			<div class="fw pd016">
   				<div class="fw pd10z b bt bb mg-b t-c">Message Replies</div>
-	  			<div id="repliesWrapper" class="fw psr not-null" placeholder="Loading replies..."></div>
+	  			<div id="repliesWrapper" class="fw psr not-null" placeholder="Loading replies..." style="min-height: 40px;"></div>
 	  		</div>
   		</div>
   	</div>
