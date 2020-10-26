@@ -4,11 +4,10 @@
  //||
  /*
  * TODO
+ * to edit cookie cart
  *
  * SERVER
  * use number in stock for products
- * check for existing review on server and update if any
- *
  *
  * UPDATE
  * items edit
@@ -24,13 +23,13 @@
     var VERSION = '1.0.0'
     , PLATFORM = 'android'
     //
-    , MY_URL = "http://localhost/oncmp/api/v1"
+    // , MY_URL = "http://localhost/oncmp/api/v1"
     // 
     // , MY_URL = "http://192.168.43.75/oncmp/api/v1"
     //
     // , MY_URL = "http://172.20.10.4/oncmp/api/v1"
     //
-    // , MY_URL = "https://www.oncampus.ng/api/v1"
+    , MY_URL = "https://www.oncampus.ng/api/v1"
     //
     , BASE_URL = "https://www.oncampus.ng"
     //
@@ -90,7 +89,7 @@
     , sideNav = document.querySelector('#side-nav-wrapper')
 
 
-    , OPENSTATE = ['Closed', 'Open']
+    , OPENSTATE = ['CLOSED', 'OPEN']
 
     , CURRENT_ORDER = []
     , ORDER_TYPE = 0
@@ -289,6 +288,7 @@
         {dex: '28', val: '50'}
     ]
 
+    , SHOPS = []
     , ITEMS_DATA = []
     , PRODUCTS = []
 
@@ -328,6 +328,34 @@
             $(Tab).addClass('active-tab');
         }
     }
+    var cookieUtil = {
+        setCookie: function(cname, cvalue, exdays) {
+            let d = new Date();
+            // console.log(d);
+            d.setTime(d.getTime() + (exdays*24*60*60*1000));
+            let expires = "expires="+ d.toUTCString();
+            // console.log(expires);
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";";
+        },
+        getCookie: function(cname) {
+            var name = cname + "=";
+            var decodedCookie = decodeURIComponent(document.cookie);
+            var ca = decodedCookie.split(';');
+            for(var i = 0; i <ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        },
+        deleteCookie: function(cname) {
+            this.setCookie(cname, '', Date.now(), -1);
+        }
+    }
 
     function comma(x) {
         var parts = x.toString().split(".");
@@ -355,7 +383,7 @@
             $SM.hide();
             var type = document.querySelector('#search-input').dataset.type;
             if (type == 'orders') showAllOrderEntries();
-            else if (type == 'services') showAllShopLink();
+            else if (type == 'services') showAllShopLinks();
             return;
         }
         if ($('#side-nav-modal').is(':visible')) return navEnd.call(sideNav);
@@ -448,6 +476,7 @@
                         else {
                             App.changeViewTo('#home');
                             preparePage(true);
+                            fetchOldCart();
                         }
                     }//else App.changeViewTo('#emailRegView');
                 });
@@ -479,12 +508,28 @@
             $('.forSeller').removeClass('hd');
             $('.forBuyer').addClass('hd');
             $('.create-form:not([data-catg="'+CATEGORY+'"])').hide();
+            //
+            var code = Store.getItem('open_toggle');
+            $('#store-open-toggle')[0].checked = Boolean(parseInt(code));
+            updateStoreOpenState(code);
+            //
             var tx = CATEGORIES[CATEGORY];
             $('#my-service-name').text(tx);
             if (existing) {
                 checkWallet('landing');
                 fetchProgress();
             }
+        }
+    }
+    function updateStoreOpenState(code) {
+        var c = $('#store_closed');
+        var o = $('#store_open');
+        if (code == 1) {
+            o.addClass('c-o').removeClass('c-g');
+            c.removeClass('c-o').addClass('c-g');
+        } else {
+            c.addClass('c-o').removeClass('c-g');
+            o.removeClass('c-o').addClass('c-g');
         }
     }
 
@@ -1254,7 +1299,7 @@
             <img src="res/img/icon/upload.png">
             <img class="fw psa im-sh" src="">
             <input type="file" accept="image/*" name="images" class="images fw fh psa t0 l0 op0">
-            <div class="wrapper-closer box32 f20 psa fx fx-ac Pink c-g b5 b bm-r mg-r mg-t t0 r0 fx-jc z4">&times;</div>
+            <div class="wrapper-closer box32 f20 psa fx fx-ac Pink c-g b5 b bm-r mg-r mg-t t0 r0 fx-jc">&times;</div>
         </div>`;
         $(this).before(h);
         $('.'+className).last().slideDown();
@@ -1867,7 +1912,7 @@
             $SH.hide();
             var type = document.querySelector('#search-input').dataset.type;
             if (type == 'orders') showAllOrderEntries();
-            else if (type == 'services') showAllShopLink();
+            else if (type == 'services') showAllShopLinks();
         }
     }).on('click', '.modalClose', function() {
         $MM.hide();
@@ -1890,10 +1935,11 @@
             shopName = USERNAME;
             shopAddress = ADDRESS;
         } else {//highlighted items
-            catg = this.dataset.catg;
             shopId = this.dataset.shopId;
-            shopName = this.dataset.shopName;
-            shopAddress = this.dataset.shopAddress;
+            var shop = SHOPS.find(function(s) {return s.ui == shopId;});
+            catg = shop.cg;
+            shopName = shop.nm;
+            shopAddress = shop.ad;
             $('#proceed-to-invoice').attr('data-catg', catg);
         }
 
@@ -2047,7 +2093,12 @@
                 if (addedIndex == -1) addedIndex = SELECTED_PRODUCTS.length;
                 SELECTED_PRODUCTS[addedIndex] = invoice;
                 //
-                var total = SELECTED_PRODUCTS.reduce(function(a, b) { return a + b.tt}, 0);
+                var cook = SELECTED_PRODUCTS.map(function(e) { return {id: e.id, total: e.tt, colors: e.cl, sizes: e.sz}; });
+                var cooked = JSON.stringify(cook);
+                cookieUtil.setCookie("wishlist", cooked, 180);
+                trackThisOrder(cooked, 'products');
+                //
+                var total = SELECTED_PRODUCTS.reduce(function(a, b) { return a + b.tt; }, 0);
                 $('.shopping-cart').attr('data-total', total);
                 App.closeCurrentView();
                 toast('Item added to cart');
@@ -2075,7 +2126,7 @@
     }).on('click', '.remove-from-cart', function(e) {
         var i = this.dataset.index;
         SELECTED_PRODUCTS.splice(i, 1);
-        var total = SELECTED_PRODUCTS.reduce(function(a, b) { return a + b.tt}, 0);
+        var total = SELECTED_PRODUCTS.reduce(function(a, b) { return a + b.tt; }, 0);
         $('.shopping-cart').attr('data-total', total);
         if (SELECTED_PRODUCTS.length === 0) return App.closeCurrentView();
         $('#invoice-content').html(buildInvoice(SELECTED_PRODUCTS, null));
@@ -2189,6 +2240,7 @@
                         if (ORDER_TYPE==1) {
                             SELECTED_PRODUCTS.length = 0;//reset
                             $('.shopping-cart').attr('data-total', '0');
+                            cookieUtil.deleteCookie('wishlist');
                         }
                     }
                     Store.setItem('delivery_address', address);
@@ -2249,8 +2301,8 @@
         $('#current-service').text(this.dataset.name);
         App.changeViewTo('#servicesDiscoverView');
         //
-        if (g == 2) fetchRestaurants('more', 20);
-        else if (g == 3) fetchEvents('more', 20);
+        if (g == 2) fetchRestaurants('more', 50);
+        else if (g == 3) fetchEvents('more', 50);
         else return;
         $('body').spin();
     }).on('click', '#products-catg-entry', function(e) {
@@ -2456,7 +2508,7 @@
             if (type == 'orders') {
                 showAllOrderEntries();
             } else {
-                showAllShopLink();
+                showAllShopLinks();
             }
         }
     }).on('click', '#store-review', function(e) {
@@ -2763,11 +2815,11 @@
             },
             complete: function(x) {$('body').unspin(); if (x.status === 0) toast('Network error');}
         });
-    }).on('click', '#store-open-toggle', function(e) {
+    }).on('change', '#store-open-toggle', function(e) {
         if (USERTYPE == 0) return;
-        var setTo = this.dataset.toggleTo, code, toggleOpen;
-        if (setTo == 'Open') code = 1;
-        else/* if (setTo == 'Close')*/ code = 0;
+        //
+        var code;
+        if (this.checked) code = 1; else code = 0;
         //
         $('body').spin();
         $.ajax({
@@ -2782,10 +2834,8 @@
             method: "POST",
             success: function(p) {
                 if (p.state == 1) {
-                    $('#opennow').attr('data-status', code).text(OPENSTATE[code]);
-                    if (code == 0) toggleOpen = 'Open'; else toggleOpen = 'Close';
-                    $('#store-open-toggle').attr('data-toggle-to', toggleOpen).text('Tap here to ' + toggleOpen);
                     Store.setItem('open_toggle', code);
+                    updateStoreOpenState(code);
                 } else toast(p.state);
             },
             error: function() {toast('No connection');},
@@ -3046,7 +3096,7 @@
                 }
                 if (source == 'timeline') {
                     $('#carousel-buy-ticket').html(buildEvents(p));
-                }else if (source == 'more') $('#services-found').html(buildMoreEvents(p));
+                } else if (source == 'more') $('#services-found').html(buildMoreEvents(p));
             },
             complete: function(x) {
                 if (x.status === 0) {
@@ -3127,13 +3177,11 @@
     function buildEvents(p) {
         var h = '';
         p.forEach(function(c) {
+            if (!SHOPS.find(function(s) {return s.ui == c.ui})) { SHOPS.push(c); }
             h+="<div class='w85p-c i-b ov-h mg-r sh-a ba psr bs-r shop-link bg-ac bg-im-cv"
-                    +"' data-shop-id='"+c.ui
-                    +"' data-shop-name='"+c.sn
-                    +"' data-shop-address='"+c.sd
-                    +"' data-catg='3' style='background-image: url("+MY_URL+"/img/items/events/"+c.id+".jpg)'>\
+                    +"' data-shop-id='"+c.ui+"' style='background-image: url("+MY_URL+"/img/items/events/"+c.id+".jpg)'>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
-                        <div class='fw b f16 ov-h tx-el item-name'>"+c.nm+"</div>\
+                        <div class='fw b f16 ov-h tx-el item-name'>"+c.vn+"</div>\
                         <div class='fw f14 ov-h tx-el'>"+EVENTS[c.tp]+" - <span class='f10 b'>"+c.dt+"</span></div>\
                     </div>\
                 </div>";
@@ -3152,13 +3200,11 @@
     function buildMoreEvents(p) {
         var h = '';
         p.forEach(function(c) {
+            if (!SHOPS.find(function(s) {return s.ui == c.ui})) { SHOPS.push(c); }
             h+="<div class='w85p-c-2 ov-h mg-b16 psr bs-r sh-a ba shop-link bg-ac bg-im-cv"
-                    +"' data-shop-id='"+c.ui
-                    +"' data-shop-name='"+c.sn
-                    +"' data-shop-address='"+c.sd
-                    +"' data-catg='3' style='background-image: url("+MY_URL+"/img/items/events/"+c.id+".jpg)'>\
+                    +"' data-shop-id='"+c.ui+"' style='background-image: url("+MY_URL+"/img/items/events/"+c.id+".jpg)'>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
-                        <div class='fw b f16 ov-h tx-el item-name'>"+c.nm+"</div>\
+                        <div class='fw b f16 ov-h tx-el item-name'>"+c.vn+"</div>\
                         <div class='fw f14 ov-h tx-el'>"+EVENTS[c.tp]+" - <span class='f10 b'>"+c.dt+"</span></div>\
                     </div>\
                 </div>";
@@ -3168,12 +3214,9 @@
     function buildRestaurants(p) {
         var h = '';
         p.forEach(function(c) {
+            if (!SHOPS.find(function(s) {return s.ui == c.ui})) { SHOPS.push(c); }
             h+="<div class='w85p-c i-b ov-h mg-r psr bs-r sh-a ba shop-link bg-ac bg-im-cv"
-                    +"' data-shop-id='"+c.ui
-                    +"' data-catg='"+c.cg
-                    +"' data-shop-name='"+c.nm
-                    +"' data-shop-address='"+c.ad
-                    +"' style='background-image: url("+MY_URL+"/img/users/"+c.ui+".jpg)'>\
+                    +"' data-shop-id='"+c.ui+"' style='background-image: url("+MY_URL+"/img/users/"+c.ui+".jpg)'>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
                         <div class='fw b f16 ov-h tx-el item-name'>"+c.nm+"</div>\
                         <div class='fw f14 ov-h tx-el'>"+c.ad+"</div>\
@@ -3192,14 +3235,11 @@
         return h;
     }
     function buildMoreRestaurants(p) {
+        if (!SHOPS.find(function(s) {return s.ui == c.ui})) { SHOPS.push(c); }
         var h = '';
         p.forEach(function(c) {
             h+="<div class='w85p-c-2 ov-h mg-b16 ba psr bs-r sh-a ba shop-link bg-ac bg-im-cv"
-                    +"' data-shop-id='"+c.ui
-                    +"' data-catg='"+c.cg
-                    +"' data-shop-name='"+c.nm
-                    +"' data-shop-address='"+c.ad
-                    +"' style='background-image: url("+MY_URL+"/img/users/"+c.ui+".jpg)'>\
+                    +"' data-shop-id='"+c.ui+"' style='background-image: url("+MY_URL+"/img/users/"+c.ui+".jpg)'>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
                         <div class='fw b f16 ov-h tx-el item-name'>"+c.nm+"</div>\
                         <div class='fw f14 ov-h tx-el'>"+c.ad+"</div>\
@@ -3211,12 +3251,9 @@
     function buildServices(p) {
         var h = '';
         p.forEach(function(c) {
+            if (!SHOPS.find(function(s) {return s.ui == c.ui})) { SHOPS.push(c); }
             h+="<div class='fw fx ov-h bb bg mg-b16 ba psr shop-link bg-ac"
-                    +"' data-shop-id='"+c.ui
-                    +"' data-catg='"+c.cg
-                    +"' data-shop-name='"+c.nm
-                    +"' data-shop-address='"+c.ad
-                    +"'>\
+                    +"' data-shop-id='"+c.ui+"'>\
                     <div class='box120 mg-r fx fx-ac fx-jc ov-h bg-ac bg-im-cv' style='background-image: url("+MY_URL+"/img/users/"+c.ui+".jpg)'></div>\
                     <div class='fx60 pd10'>\
                         <div class='fw b f16 item-name'>"+c.nm+"</div>\
@@ -3363,11 +3400,9 @@
     function buildItems(p, catg, local, opennow) {
         var h = '';
         var user = p[0].ownerID == UUID;
-        var toggleOpen;
+        //
         if (opennow == undefined) opennow = Store.getItem('open_toggle') || 1;
         $('#opennow').attr('data-status', opennow).text(OPENSTATE[opennow]);
-        if (opennow == 0) toggleOpen = 'Open'; else toggleOpen = 'Close';
-        $('#store-open-toggle').attr('data-toggle-to', toggleOpen).text('Tap here to ' + toggleOpen);
         //
         if (catg != 1) {
             if (local) ITEMS_DATA.push(p[0]);
@@ -3680,6 +3715,77 @@
         });
         return h;
     }
+    function trackThisOrder(cooked, type){
+        $.ajax({
+            url: MY_URL + "/send.php",
+            data: {
+                action: 'trackThisOrder',
+                cooked: cooked,
+                userID: UUID,
+                type: type
+            },
+            timeout: 30000,
+            dataType: 'json',
+            method: "POST",
+            success: function(p) {}
+        });
+    }
+    function fetchOldCart() {
+        $.ajax({
+            url: MY_URL + "/fetch.php",
+            data: {
+                action: 'fetchOldCart',
+                userID: UUID
+            },
+            timeout: 30000,
+            dataType: 'json',
+            method: "GET",
+            success: function(p) {
+                var cooked;
+                if (p.length > 0) {
+                    cooked = p[0].order_details;
+                } else {//check cookie
+                    cooked = cookieUtil.getCookie('wishlist');
+                }
+                if (cooked) {
+                    restoreWishlist(cooked);
+                } else {
+                    cookieUtil.deleteCookie('wishlist');
+                }
+            }
+        });
+    }
+    function restoreWishlist(cooked) {
+        var cook = JSON.parse(cooked);
+        var ids = cook.map(function(i) {return i.id;}).join(',');
+        //fetch full details, merge and add to selected items
+        $.ajax({
+            url: MY_URL + "/fetch.php",
+            data: {
+                action: 'fetchCartDetails',
+                ids: ids
+            },
+            timeout: 30000,
+            dataType: 'json',
+            method: "GET",
+            success: function(d) {
+                if (d.length > 0) {
+                    d.forEach(function(c_) {
+                        var z = cook.find(function(w) {return w.id == c_.itemID; });
+                        var c = {id: c_.itemID, oi: c_.ownerID, nm: c_.name, pr: parseFloat(c_.price).toFixed(2), ds: parseFloat(c_.discount).toFixed(2), tt: z.total, sz: z.sizes, cl: z.colors, sh: c_.shop_name, dl: c_.delivery, isproduct:true};                                    
+                        SELECTED_PRODUCTS.push(c);
+                        //update cart
+                    });
+                    cookieUtil.setCookie("wishlist", cooked, 180);
+                    //
+                    var total = SELECTED_PRODUCTS.reduce(function(a, b) { return a + parseInt(b.tt); }, 0);
+                    $('.shopping-cart').attr('data-total', total);
+                } else {
+                    //the products are gone...
+                }
+            }
+        });
+    }
     function buildInvoice(invoice, order) {
         var h = '';
         var total = 0;
@@ -3970,6 +4076,7 @@
                 App.changeViewTo('#home');
                 preparePage(true);//existing
                 loadUserPicture();
+                fetchOldCart();
             }
         });
     }
@@ -4001,7 +4108,7 @@
             el.style.display = '';
         });
     }
-    function showAllShopLink() {
+    function showAllShopLinks() {
         var items = document.querySelectorAll('#services-found .shop-link');
         items.forEach(function(el){
             el.style.display = '';

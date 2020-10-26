@@ -363,7 +363,15 @@
 			  	</div>
 
 			  	<div class="forSeller fh" data-role="screen">
-			  		<div class="fw fh pd30 fx fx-ac fx-jc cd">
+			  		<div class="fw pd30 fx fx-ac fx-jc cd mh100" style="margin-bottom: 56px;">
+			  			<div class="w80p fx fx-ac fx-jc mg-bx">
+							<div id="store_closed" class="b fx20 t-c c-o">Close store</div>
+							<div class="fx40 fx fx-jc">
+  							    <input class="tgl tgl-light" id="store-open-toggle" type="checkbox"/>
+  							    <label class="tgl-btn" for="store-open-toggle"></label>
+							</div>
+							<div id="store_open" class="b fx20 t-c c-g">Open store</div>
+						</div>
 			  			<div id="transaction-history-btn" class="w80p pd20 b4-r sh-a white psr Orange">
 			  				<div class="f24 psa">&#8358;</div>
 			  				<div id="amount-due" class="fw t-c pd16 b f24">0.00</div>
@@ -484,7 +492,7 @@
 	  					<img class="fw psa im-sh bg" src="">
 		  				<input type="file" accept="image/*" name="images" class="images fw fh psa t0 l0 op0">
 	  				</div>
-	  				<div class="add-more-photos psa t0 l0 mg-t mg-l pd5 ba b4-r Pink b5" data-limit="4" data-class-name="product-image">+ Add more photos</div>
+	  				<div class="add-more-photos psa t0 l0 mg-t mg-l pd5 ba b4-r Pink b5" data-limit="4" data-class-name="product-image">+ Add more</div>
 	  			</div>
 	  			<input type="text" name="name" class="fw pd20 bg mg-b16 b4-r ba" placeholder="Name">
 	  			<div class="triangle-down mg-b16"><select name="product_type" class="fw pd20 bg b4-r ba">
@@ -740,9 +748,8 @@
 			        </div>
 		  		</div>
 		        <div class="fw fx fx-ac fx-je h40 b psa b0 l0 mg-bm">
-		        	<div class="fx60 fx fx-ac fx-jc">
-			        	<div id="opennow" class="pd5 white bs-r b"></div>
-			        	<div id="store-open-toggle" class="forSeller pd5 mg-l Orange white bs-r b"></div>
+		        	<div class="fx20 fx fx-ac fx-jc">
+			        	<div id="opennow" class="pd5 white b4-r b f10"></div>
 			        </div>
 		        	<div id="special-services-buttons-container" class="fx fx-ac fx-jc">
 			          	<div class="Grey bs-r mg-r forBuyer" id="message-request" style="padding: 5px 10px;">
@@ -818,7 +825,7 @@
 	  					<img class="fw psa im-sh bg" src="">
 		  				<input type="file" accept="image/*" name="images" class="images fw fh psa t0 l0 op0">
 	  				</div>
-	  				<div class="add-more-photos psa t0 l0 mg-t mg-l pd5 ba b4-r Pink b5" data-limit="6" data-class-name="gallery-image">+ Add more photos</div>
+	  				<div class="add-more-photos psa t0 l0 mg-t mg-l pd5 ba b4-r Pink b5" data-limit="6" data-class-name="gallery-image">+ Add more</div>
 	  			</div>
 	  			<input type="submit" name="gallery-submit" class="fw psf b0 l0 b h56 pd020 fx fx-ac Orange white hideWhenShrink" value="SAVE & CONTINUE">
 	  		</form>
