@@ -379,11 +379,7 @@
     function onBackButton() {
         if ($MM.is(':visible')) return $MM.hide();
         if ($SM.is(':visible')) {
-            $SH.hide();//for animation
-            $SM.hide();
-            var type = document.querySelector('#search-input').dataset.type;
-            if (type == 'orders') showAllOrderEntries();
-            else if (type == 'services') showAllShopLinks();
+            hideSearchModal();
             return;
         }
         if ($('#side-nav-modal').is(':visible')) return navEnd.call(sideNav);
@@ -1906,14 +1902,10 @@
     }).on('click', '.info_box', function() {
         var $el = $(this);
         $el.fadeOut(600, function(){$el.remove();});
+    }).on('click', '.m-c', function() {
+        hideSearchModal();
     }).on('click', '.Modal', function() {
         $(this).hide();
-        if (this.id == 'searchModal') {
-            $SH.hide();
-            var type = document.querySelector('#search-input').dataset.type;
-            if (type == 'orders') showAllOrderEntries();
-            else if (type == 'services') showAllShopLinks();
-        }
     }).on('click', '.modalClose', function() {
         $MM.hide();
     }).on('touchmove', '.Modal', function(e) {
@@ -2176,11 +2168,20 @@
         if (invoice[0]) {
             CURRENT_ORDER = invoice;
             ORDER_TYPE = catg;
+            //
+            var value = JSON.stringify(invoice);
+            cookieUtil.setCookie('orderlist', value, 180);
+            //
+            var services_ = {"2":"food", "3":"events", "4":"design", "5":"make-up", "6":"laundry", "7":"gas"};
+            trackThisOrder(value, services_[catg]);
+            //
             App.changeViewTo('#invoiceView');
             $('#invoice-content').html(buildInvoice(invoice, null));
+            //
         } else toast('No item was added');
     }).on('click', '#accept-invoice', function(e) {
         App.changeViewTo('#orderOwnerView');
+        //
     }).on('click', '#submit-for-review', function(e) {
         var fm = document.querySelector('#dropoff-content');
         var address = fm.querySelector('input[name="address"]').value;
@@ -2230,22 +2231,25 @@
                         toast('Category (' + TICKETS[p.type] + ') has been sold out.');
                     } else toast(p.message);
                 } else {
-                    Views = ['#home'];
-                    if (ORDER_TYPE == 3) {
-                        App.changeViewTo('#cardView');
-                        $('.total-payment').html('&#8358;' + ORDER_TOTAL);
-                        ORDER_ID = p.generatedID;
-                    } else {
-                        App.changeViewTo('#successView');
-                        if (ORDER_TYPE==1) {
-                            SELECTED_PRODUCTS.length = 0;//reset
-                            $('.shopping-cart').attr('data-total', '0');
-                            cookieUtil.deleteCookie('wishlist');
-                        }
-                    }
                     Store.setItem('delivery_address', address);
                     Store.setItem('delivery_name', name);
                     Store.setItem('delivery_phone', phone);
+                    Views = ['#home'];
+                    //
+                    if (ORDER_TYPE==1) {
+                        SELECTED_PRODUCTS.length = 0;//reset
+                        $('.shopping-cart').attr('data-total', '0');
+                        cookieUtil.deleteCookie('wishlist');
+                    } else {
+                        cookieUtil.deleteCookie('orderlist');
+                        if (ORDER_TYPE == 3) {
+                            ORDER_ID = p.generatedID;
+                            App.changeViewTo('#cardView');
+                            $('.total-payment').html('&#8358;' + ORDER_TOTAL);
+                            return;
+                        }
+                    }
+                    App.changeViewTo('#successView');
                 }
             },
             error: function() {toast('No connection');},
@@ -3181,7 +3185,7 @@
             h+="<div class='w85p-c i-b ov-h mg-r sh-a ba psr bs-r shop-link bg-ac bg-im-cv"
                     +"' data-shop-id='"+c.ui+"' style='background-image: url("+MY_URL+"/img/items/events/"+c.id+".jpg)'>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
-                        <div class='fw b f16 ov-h tx-el item-name'>"+c.vn+"</div>\
+                        <div class='fw b f16 ov-h tx-el item-name'>"+c.nm+"</div>\
                         <div class='fw f14 ov-h tx-el'>"+EVENTS[c.tp]+" - <span class='f10 b'>"+c.dt+"</span></div>\
                     </div>\
                 </div>";
@@ -3204,7 +3208,7 @@
             h+="<div class='w85p-c-2 ov-h mg-b16 psr bs-r sh-a ba shop-link bg-ac bg-im-cv"
                     +"' data-shop-id='"+c.ui+"' style='background-image: url("+MY_URL+"/img/items/events/"+c.id+".jpg)'>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
-                        <div class='fw b f16 ov-h tx-el item-name'>"+c.vn+"</div>\
+                        <div class='fw b f16 ov-h tx-el item-name'>"+c.nm+"</div>\
                         <div class='fw f14 ov-h tx-el'>"+EVENTS[c.tp]+" - <span class='f10 b'>"+c.dt+"</span></div>\
                     </div>\
                 </div>";
@@ -3475,18 +3479,16 @@
             //
             p.forEach(function(c) {
                 c.tickets.forEach(function(v) {
-                    h+="<div class='ticket-entry fw pd16 bb' data-item-type='"+v.ticket_type+"'>\
+                    h+="<div class='ticket-entry fw pd16 mg-b16 sh-c' data-item-type='"+v.ticket_type+"'>\
                         <div class='fw fx fx-fs'>\
                             <div class='fx60'>\
                                 <div class='fw'>\
-                                    <div class='f16'><span class='c-o mg-rm icon-heart'></span>"+c.name+"</div>\
-                                    <div class='f16 b'>"+TICKETS[v.ticket_type]+(user && v.sales == v.seats ? "<span class='mg-l f8 b4-r bg-fd c-g' style='padding:1px 5px;'>SOLD OUT</span>":"")+"</div>\
-                                    <div class='c-g f10'>("+v.sales+") seats sold out of "+v.seats+" available seats</div>\
+                                    <div class='f16 b'>"+TICKETS[v.ticket_type]+(user && v.sales >= v.seats ? "<span class='mg-l f8 b4-r bg-fd c-g' style='padding:1px 5px;'>SOLD OUT</span>":"")+"</div>\
                                 </div>\
                                 <div class='fw fx fx-fe mg-t'>\
                                     <div class='fx50'>"
                                         +(v.discount > 0 ? "<div class='tx-lt c-g f10'>&#8358;"+comma(v.price)+"</div>" : "")+
-                                        "<div class='f16'>&#8358;"+comma((v.price - v.discount).toFixed(2))+"</div>\
+                                        "<div class='f16'>&#8358;"+comma(v.price - v.discount)+"</div>\
                                     </div>"+
                                     (user ? 
                                     "<div class='fx fx-je c-g'>\
@@ -3505,7 +3507,6 @@
                         </div>\
                     </div>";
                 });
-                h+="<div class='fw pd5 Dark'></div>";
             });
             //
             var $v = $('#events-container');
@@ -4096,10 +4097,16 @@
         $('.items-container[data-catg="'+catg+'"]').show().find('.items-wrapper').empty();
         if (catg == 4 || catg == 5) $('#special-services-buttons-container').show(); else $('#special-services-buttons-container').hide();
         var dlvAddr = document.querySelector('#dropoff-content').querySelector('input[name="address"]');
+        var dlvInst = document.querySelector('#dropoff-content').querySelector('textarea[name="deliveryInstruction"]');
         if (catg == 3) {
             dlvAddr.style.display = 'none';
             dlvAddr.value = '';
-        } else dlvAddr.style.display = '';
+            dlvInst.style.display = 'none';
+            dlvInst.value = '';
+        } else {
+            dlvAddr.style.display = '';
+            dlvInst.style.display = '';
+        }
     }
     function showAllOrderEntries() {
         var ct = document.querySelector('#search-input').dataset.container;
@@ -4113,6 +4120,14 @@
         items.forEach(function(el){
             el.style.display = '';
         });
+    }
+    function hideSearchModal() {
+        $SM.hide();
+        $SH.hide();
+        var type = document.querySelector('#search-input').dataset.type;
+        if (type == 'orders') showAllOrderEntries();
+        else if (type == 'services') showAllShopLinks();
+        return true;
     }
     function buildConfirm(id, message, key) {
         var h="<div class='pd16 st-p t-c b'>"+message+"</div>\
