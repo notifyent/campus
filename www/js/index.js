@@ -4,6 +4,7 @@
  //||
  /*
  * TODO
+ * searchModal closer...
  * to edit cookie cart
  *
  * SERVER
@@ -735,6 +736,7 @@
         App.switchTabTo(Tab);
         $('.tab-locator').removeClass('c-o');
         this.classList.add('c-o');
+        hideSearchModal();
     }).on('click', '.view-closer', function() {
         App.closeCurrentView();
     }).on('click', '.terms-link', function() {
@@ -2283,12 +2285,10 @@
                 error: function() {toast('No connection');},
                 complete: function(x) {
                     if (x.status === 0) {
-                        var h = $("<div class='fw fh fx fx-ac fx-jc'>"+
-                            "<div class='t-c'>"+
+                        var h = $("<div class='fw t-c' style='position: relative; top: 50%; transform: translateY(-50%);'>"+
                                 "<div class='c-g'>The connection to the server was lost</div>"+
                                 "<div class='pd516 bs-r mg-t Orange white i-b ac'>Retry</div>"+
-                            "</div>"+
-                        "</div>").click(function(){
+                            "</div>").click(function(){
                             fetchServices();
                             $(this).remove();
                         });
@@ -3105,12 +3105,10 @@
             complete: function(x) {
                 if (x.status === 0) {
                     if (source == 'more') {
-                        var h = $("<div class='fw fh fx fx-ac fx-jc'>"+
-                            "<div class='t-c'>"+
+                        var h = $("<div class='fw t-c' style='position: relative; top: 50%; transform: translateY(-50%);'>"+
                                 "<div class='c-g'>The connection to the server was lost</div>"+
                                 "<div class='pd516 bs-r mg-t Orange white i-b ac'>Retry</div>"+
-                            "</div>"+
-                        "</div>").click(function(){
+                            "</div>").click(function(){
                             $('body').spin();
                             fetchEvents(source,limit);
                             $(this).remove();
@@ -3161,12 +3159,10 @@
             complete: function(x) {
                 if (x.status === 0) {
                     if (source == 'more') {
-                        var h = $("<div class='fw fh fx fx-ac fx-jc'>"+
-                            "<div class='t-c'>"+
+                        var h = $("<div class='fw t-c' style='position: relative; top: 50%; transform: translateY(-50%);'>"+
                                 "<div class='c-g'>The connection to the server was lost</div>"+
                                 "<div class='pd516 bs-r mg-t Orange white i-b ac'>Retry</div>"+
-                            "</div>"+
-                        "</div>").click(function(){
+                            "</div>").click(function(){
                             $('body').spin();
                             fetchRestaurants(source,limit);
                             $(this).remove();
@@ -3675,12 +3671,10 @@
             complete: function(x) {
                 if (x.status === 0 && cue == 0) {
                     $cn.attr("placeholder","The connection to the server was lost.");
-                    var h = $("<div class='fw fh fx fx-ac fx-jc' style='margin-top:-50px;'>"+
-                        "<div class='t-c'>"+
+                    var h = $("<div class='fw t-c' style='position: relative; top: 50%; transform: translateY(-50%); margin-top: -50px;'>"+
                             "<div class='c-g'>The connection to the server was lost</div>"+
                             "<div class='pd516 bs-r mg-t Orange white i-b ac'>Retry</div>"+
-                        "</div>"+
-                    "</div>").click(function(){
+                        "</div>").click(function(){
                         $('body').spin();
                         fetchProducts(type, cue, catg);
                         $(this).remove();
@@ -3894,12 +3888,10 @@
             complete: function(x) {
                 if (x.status === 0) {
                     $wrapper.attr("placeholder","The connection to the server was lost.");
-                    var h = $("<div class='fw fh fx fx-ac fx-jc'>"+
-                        "<div class='t-c'>"+
+                    var h = $("<div class='fw t-c' style='position: relative; top: 50%; transform: translateY(-50%);'>"+
                             "<div class='c-g'>The connection to the server was lost</div>"+
                             "<div class='pd516 bs-r mg-t Orange white i-b ac'>Retry</div>"+
-                        "</div>"+
-                    "</div>").click(function(){
+                        "</div>").click(function(){
                         fetchMyOrders($wrapper, type);
                         $(this).remove();
                     });
