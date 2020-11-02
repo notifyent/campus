@@ -1399,7 +1399,7 @@
                   , Price = parseInt(el.querySelector('input[name="price"]').value, 10)
                   , Discount = el.querySelector('input[name="discount"]').value
                   ;
-                if (!Image || !Image[0] || Image[0].size > 2 * 1024 * 1024 && !error) error = "<div class='b bb pd10'>Image Error!</div><div class='pd10'>Please attach an image to your item (Maximum size = 2MB).</div>";
+                if ((!Image || !Image[0]) && !error) error = "<div class='b bb pd10'>Image Error!</div><div class='pd10'>Please attach an image to your item.</div>";
                 if (!FoodType && !error) error = "<div class='b bb pd10'>Please select a type</div><div class='pd10'>Select a type for this item.</div>";
                 if (!Name && !error) error = "<div class='b bb pd10'>Please add a Name</div><div class='pd10'>A name is required for meal description.</div>";
                 if ((!Price || isNaN(Price)) && !error) error = "<div class='b bb pd10'>Please add a Price</div><div class='pd10'>Price should include numbers only.</div>";
@@ -1488,7 +1488,7 @@
                 });
                 if (localError) return toast('Some entries are not valid');
 
-                if (!Image || !Image[0] || Image[0].size > 2 * 1024 * 1024 && !error) error = "<div class='b bb pd10'>Image Error!</div><div class='pd10'>Please attach an image to your item (Maximum size = 2MB).</div>";
+                if ((!Image || !Image[0]) && !error) error = "<div class='b bb pd10'>Image Error!</div><div class='pd10'>Please attach an image to your item.</div>";
                 if (EventType == '0' && !error) error = "<div class='b bb pd10'>Please select a type</div><div class='pd10'>Select a type for this ticket.</div>";
                 if (!Name && !error) error = "<div class='b bb pd10'>Please add a Name</div><div class='pd10'>A name is required to identify this event.</div>";
                 if (!Venue && !error) error = "<div class='b bb pd10'>Please add a Venue</div><div class='pd10'>Please state the venue for this event.</div>";
@@ -1549,7 +1549,7 @@
                   , GraphicsType = el.querySelector('select[name="graphics_type"]').value
                   , Price = parseInt(el.querySelector('input[name="price"]').value, 10) || 0
                   ;
-                if (!Image || !Image[0]/* || Image[0].size > 2 * 1024 * 1024*/ && !error) error = "<div class='b bb pd10'>Image Error!</div><div class='pd10'>Please attach an image to your item (Maximum size = 2MB).</div>";
+                if ((!Image || !Image[0]) && !error) error = "<div class='b bb pd10'>Image Error!</div><div class='pd10'>Please attach an image to your item.</div>";
                 if (!GraphicsType && !error) error = "<div class='b bb pd10'>Please select a type</div><div class='pd10'>Select a type for this item.</div>";
                 if (Price === 0 && !error) error = "<div class='b bb pd10'>Please add a Price</div><div class='pd10'>Price should include numbers only.</div>";
                 //
@@ -1605,7 +1605,7 @@
                   , Name = el.querySelector('input[name="name"]').value
                   , Price = parseInt(el.querySelector('input[name="price"]').value, 10)
                   ;
-                if (!Image || !Image[0] || Image[0].size > 2 * 1024 * 1024 && !error) error = "<div class='b bb pd10'>Image Error!</div><div class='pd10'>Please attach an image to your item (Maximum size = 2MB).</div>";
+                if ((!Image || !Image[0]) && !error) error = "<div class='b bb pd10'>Image Error!</div><div class='pd10'>Please attach an image to your item.</div>";
                 if (MakeupType == '0' && !error) error = "<div class='b bb pd10'>Please select a type</div><div class='pd10'>Select a type for this item.</div>";
                 if (!Name && !error) error = "<div class='b bb pd10'>Please add a Name</div><div class='pd10'>A name is required for item description.</div>";
                 if ((!Price || isNaN(Price)) && !error) error = "<div class='b bb pd10'>Please add a Price</div><div class='pd10'>Price should include numbers only.</div>";
@@ -1668,7 +1668,6 @@
                       , Iron = parseInt(fm.querySelector('input[name="iron"]').value, 10) || 0
                       , Full = parseInt(fm.querySelector('input[name="full"]').value, 10) || 0
                       ;
-                    // if (!Image || !Image[0] || Image[0].size > 2 * 1024 * 1024 && !error) error = "<div class='b bb pd10'>Image Error!</div><div class='pd10'>Please attach an image to your item (Maximum size = 2MB).</div>";
                     if (!LaundryType && !error) error = "<div class='b bb pd10'>Please select a category</div><div class='pd10'>Select a type for this item.</div>";
                     if (Wash == 0 && Iron == 0 && Full == 0 && !error) error = "<div class='b bb pd10'>Please add a Price</div><div class='pd10'>Add price for at least a category. Price should include numbers only.</div>";
                     //
@@ -2092,7 +2091,7 @@
                 cookieUtil.setCookie("wishlist", cooked, 180);
                 trackThisOrder(cooked, 'products');
                 //
-                var total = SELECTED_PRODUCTS.reduce(function(a, b) { return a + b.tt; }, 0);
+                var total = SELECTED_PRODUCTS.reduce(function(a, b) { return a + parseInt(b.tt); }, 0);
                 $('.shopping-cart').attr('data-total', total);
                 App.closeCurrentView();
                 toast('Item added to cart');
@@ -2120,7 +2119,7 @@
     }).on('click', '.remove-from-cart', function(e) {
         var i = this.dataset.index;
         SELECTED_PRODUCTS.splice(i, 1);
-        var total = SELECTED_PRODUCTS.reduce(function(a, b) { return a + b.tt; }, 0);
+        var total = SELECTED_PRODUCTS.reduce(function(a, b) { return a + parseInt(b.tt); }, 0);
         $('.shopping-cart').attr('data-total', total);
         if (SELECTED_PRODUCTS.length === 0) return App.closeCurrentView();
         $('#invoice-content').html(buildInvoice(SELECTED_PRODUCTS, null));
@@ -4001,7 +4000,7 @@
     }
     function checkPINSuccess(body) {
         if (body.data.amount < ORDER_TOTAL) return toast('Invalid amount.');
-        if (body.status == 'success' && body.data.chargeResponseCode == '02') {
+        if (body.status == 'success'/* && body.data.chargeResponseCode == '02'*/) {
             TRN_REF = body.data.flwRef;
             $('#token-instruction').text(body.data.chargeResponseMessage);
             App.changeViewTo('#OTPView');
@@ -4009,7 +4008,6 @@
         }
     }
     function updatePaymentStatus(body) {
-        // console.log(body.data.data.responsecode);
         if (body.databaseUpdate == 'success') {
             toast('Your payment was successful');
             $('.order-payment-btn[data-order-id="'+ORDER_ID+'"]').replaceWith("<div class='fw pd016 fx fx-jc'><div class='ba b4-r b5 pd1015'>Awaiting Delivery</div></div>");
@@ -4020,7 +4018,7 @@
             if(cv>-1)Views.splice(cv);//to avoid redundant cycling
             App.changeViewTo('#orderDetailsView');
         } else {
-            toast('Payment revalidation is required.');
+            toast('Payment successful. Contact customer care for revalidation.');
         }
     }
     function buildReviews(p) {
