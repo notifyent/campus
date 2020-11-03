@@ -4,7 +4,6 @@
  //||
  /*
  * TODO
- * searchModal closer...
  * to edit cookie cart
  *
  * SERVER
@@ -2181,8 +2180,11 @@
         } else toast('No item was added');
     }).on('click', '#accept-invoice', function(e) {
         App.changeViewTo('#orderOwnerView');
-        //
+        if (ORDER_TYPE == 3) $('#submit-for-review').click();
     }).on('click', '#submit-for-review', function(e) {
+        var el = this;
+        if (el.dataset.disabled == 'true') return;
+        //
         var fm = document.querySelector('#dropoff-content');
         var address = fm.querySelector('input[name="address"]').value;
         var name = fm.querySelector('input[name="name"]').value;
@@ -2195,7 +2197,11 @@
         var seller_ = CURRENT_ORDER[0].oi;
         var invoice_ = JSON.stringify(CURRENT_ORDER);
         //
-        if (!name || !phone || !frd) return toast('Provide all required fields');
+        if (ORDER_TYPE == 3) {
+            name = phone = address = deliveryInstruction = '';
+        } else if (!name || !phone || !frd) {
+            return toast('Provide all required fields');
+        }
         //
         var details = {address: address, name: name, phone: phone, friend: frd, instruction: deliveryInstruction};
         //
@@ -2203,6 +2209,7 @@
         //
         // return;
         //
+        el.dataset.disabled = 'true';
         $('body').spin();
         $.ajax({
             url: MY_URL + "/send.php",
@@ -2254,7 +2261,8 @@
             },
             error: function() {toast('No connection');},
             complete: function() {
-               $('body').unspin();
+                el.dataset.disabled = 'false';
+                $('body').unspin();
             }
         });
     }).on('click', '.services-link', function(e) {
@@ -3986,7 +3994,7 @@
     }
     function checkPaymentInitiationResponse(body) {
         if(body.status == "success" && body.data.suggested_auth == "NOAUTH_INTERNATIONAL") {
-            toast('International Card not accepted');
+            toast('We could not fetch your card details. Please try again or use another card.');
         } else if (body.status == "success" && body.data.suggested_auth == "PIN") {
             App.changeViewTo('#PINView');
         }else if (body.status == "success" && body.data.suggested_auth == "GTB_OTP") {
@@ -4085,17 +4093,6 @@
         $('#send-a-message').attr('data-shop-id', shopId);
         $('.items-container[data-catg="'+catg+'"]').show().find('.items-wrapper').empty();
         if (catg == 4 || catg == 5) $('#special-services-buttons-container').show(); else $('#special-services-buttons-container').hide();
-        var dlvAddr = document.querySelector('#dropoff-content').querySelector('input[name="address"]');
-        var dlvInst = document.querySelector('#dropoff-content').querySelector('textarea[name="deliveryInstruction"]');
-        if (catg == 3) {
-            dlvAddr.style.display = 'none';
-            dlvAddr.value = '';
-            dlvInst.style.display = 'none';
-            dlvInst.value = '';
-        } else {
-            dlvAddr.style.display = '';
-            dlvInst.style.display = '';
-        }
     }
     function showAllOrderEntries() {
         var ct = document.querySelector('#search-input').dataset.container;
