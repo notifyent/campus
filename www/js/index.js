@@ -2089,7 +2089,7 @@
                 var cook = SELECTED_PRODUCTS.map(function(e) { return {id: e.id, total: e.tt, colors: e.cl, sizes: e.sz}; });
                 var cooked = JSON.stringify(cook);
                 cookieUtil.setCookie("wishlist", cooked, 180);
-                trackThisOrder(cooked, 'products');
+                trackThisOrder(cooked, '1');
                 //
                 var total = SELECTED_PRODUCTS.reduce(function(a, b) { return a + parseInt(b.tt); }, 0);
                 $('.shopping-cart').attr('data-total', total);
@@ -2173,8 +2173,7 @@
             var value = JSON.stringify(invoice);
             cookieUtil.setCookie('orderlist', value, 180);
             //
-            var services_ = {"2":"food", "3":"events", "4":"design", "5":"make-up", "6":"laundry", "7":"gas"};
-            trackThisOrder(value, services_[catg]);
+            trackThisOrder(value, catg);
             //
             App.changeViewTo('#invoiceView');
             $('#invoice-content').html(buildInvoice(invoice, null));
