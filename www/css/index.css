@@ -1009,6 +1009,46 @@ img[src=""]{
           animation: pull-to-refresh-dash 1.5s ease-in-out infinite;
 }
 
+.scaling-out {
+    box-shadow: #171717 0px 0px 0px 100px;
+    -webkit-animation: scaleOut 300ms linear both;
+}
+
+.scaling-in {
+    box-shadow: #171717 0px 0px 0px 100px;
+    -webkit-animation: scaleIn 300ms linear both;
+}
+
+.sliding-in {
+    z-index: 999999;
+    -webkit-animation: slideIn 300ms ease-out both;
+}
+
+.sliding-out:not(.no-time) {
+    z-index: 999999;
+    -webkit-animation: slideOut 300ms ease-in both;
+}
+
+@-webkit-keyframes scaleOut {
+    0% { -webkit-transform: scale(1.0);}
+    100% { -webkit-transform: scale(0.9);}
+}
+
+@-webkit-keyframes slideIn {
+    0% { -webkit-transform: translateX(100%);}
+    100% { -webkit-transform: translateX(0);}
+}
+
+@-webkit-keyframes scaleIn {
+    0% { -webkit-transform: scale(0.9);}
+    100% { -webkit-transform: scale(1.0);}
+}
+
+@-webkit-keyframes slideOut {
+    0% { -webkit-transform: translateX(0%);}
+    100% { -webkit-transform: translateX(100%);}
+}
+
 @-webkit-keyframes pull-to-refresh-rotate {
   100% {
     -webkit-transform: rotate(360deg);

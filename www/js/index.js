@@ -34,7 +34,6 @@
     , BASE_URL = "https://www.oncampus.ng"
     //
     , Views = ['#splashView']
-    , ChangingView = false
     //
     , VIEWPORTWIDTH = $(window).width()
     , VIEWPORTHEIGHT = $(window).height()
@@ -50,7 +49,7 @@
     , SPINNER = `<svg class="pull-to-refresh-spinner loaderN" width="32" height="32" viewBox="25 25 50 50">
           <circle class="pull-to-refresh-path" cx="50" cy="50" r="20" fill="none" stroke="#fe5215" stroke-width="4" stroke-miterlimit="10" />
         </svg>`
-    , PAGELOADER = '<div class="loaderHolder box48 psa centered fx fx-ac fx-jc">' + SPINNER + '</div>'
+    , PAGELOADER = '<div class="loaderHolder box48 psa centered fx fx-ac fx-jc z4">' + SPINNER + '</div>'
     , $H = "<div class='fw fx ov-h bb bg mg-b16 ba psr'>\
             <div class='box120 mg-r fx fx-ac fx-jc ov-h bg-ac'></div>\
             <div class='fx60 pd10'></div>\
@@ -294,6 +293,8 @@
 
     , MY_MAILS = []
 
+    , CHANGINGVIEW = false
+
 
     ;
 
@@ -304,58 +305,63 @@
 
 
     var App = {
-        // LeavingView: false,
-        changeViewTo: function(View) {
+        changeViewTo: function(View, Back) {
+            if(CHANGINGVIEW)return;
             // console.log(this.Views);
-            if (View === Views[Views.length - 1]/* || document.querySelector(View) == null*/) return; // cannot translate to self
-            // if (ChangingView) return; // one ends before stacking another
-            // ChangingView = true;
-            // var active = $('.active-view').attr('id');
-            $('.active-view').removeClass('active-view');
-            $(View).addClass('active-view');
-            Views.push(View); // current
-            // LeavingView = false;
-            // ChangingView = false;
             $('body').unspin();
+            //
+            // if (View === Views[Views.length - 1]) return; // cannot translate to self
+            //
+            let a = document.querySelector('.active-view');
+            let b = document.querySelector(View);
+            if(a == b) return;//console.log('same page translation');
+            //
+            let chgto = Views.indexOf(View);
+            if(chgto > -1) Views.splice(chgto);//to avoid redundant cycling
+            //
+            CHANGINGVIEW = true;
+            var y,z;
+            if(Back){
+                y = 'sliding-out';
+                z = 'scaling-in';
+            }else{
+                y = 'scaling-out';
+                z = 'sliding-in';
+            }
+            //
+            a.classList.add(y);
+            if(!(z == 'sliding-in' && View == '#home'))b.classList.add(z);
+            b.classList.add('active-view');
+            //
+            setTimeout(function() {
+                a.classList.remove('active-view');
+                a.classList.remove(y);
+                b.classList.remove(z);
+                Views.push(View);//current
+                CHANGINGVIEW = false;
+            }, 300);
+            //
+            // $('.active-view').removeClass('active-view');
+            // $(View).addClass('active-view');
+            // Views.push(View);
         },
         closeCurrentView: function() {
-            var active = Views.pop();
-            var previous = Views.pop();
-            this.changeViewTo(previous);
+            if (CHANGINGVIEW) return;
+            var active=Views.pop();
+            App.changeViewTo(Views.pop(), true);
+            // var active = Views.pop();
+            // var previous = Views.pop();
+            // this.changeViewTo(previous);
         },
         switchTabTo: function(Tab) {
             $('.active-tab').removeClass('active-tab');
             $(Tab).addClass('active-tab');
         }
     }
-    var cookieUtil = {
-        setCookie: function(cname, cvalue, exdays) {
-            let d = new Date();
-            // console.log(d);
-            d.setTime(d.getTime() + (exdays*24*60*60*1000));
-            let expires = "expires="+ d.toUTCString();
-            // console.log(expires);
-            document.cookie = cname + "=" + cvalue + ";" + expires + ";";
-        },
-        getCookie: function(cname) {
-            var name = cname + "=";
-            var decodedCookie = decodeURIComponent(document.cookie);
-            var ca = decodedCookie.split(';');
-            for(var i = 0; i <ca.length; i++) {
-                var c = ca[i];
-                while (c.charAt(0) == ' ') {
-                    c = c.substring(1);
-                }
-                if (c.indexOf(name) == 0) {
-                    return c.substring(name.length, c.length);
-                }
-            }
-            return "";
-        },
-        deleteCookie: function(cname) {
-            this.setCookie(cname, '', Date.now(), -1);
-        }
-    }
+
+    /*popPage:x=>{
+        
+    }*/
 
     function comma(x) {
         var parts = x.toString().split(".");
@@ -407,10 +413,10 @@
         }
     }
     function onOnline() {
-        preparePage(true);
+        preparePage(true,true);
     }
     function onResume() {
-        preparePage(true);
+        preparePage(true,true);
     }
     $.fn.extend({
         spin: function(e) {
@@ -422,11 +428,6 @@
             return this;
         },
         unspin: function() { this.find('.loaderHolder').remove(); return this; },
-        /*scrollToPosition: function(value, callback) {
-            var h = this.prop('scrollHeight');
-            this.animate({ scrollTop: h - value }, 500, callback);
-            return this;
-        },*/
         zoom: function(level) {
             var el = this;
             el.addClass('zoom');
@@ -471,10 +472,13 @@
                         if (r.channel == 0) showChannelScreen();
                         else {
                             App.changeViewTo('#home');
-                            preparePage(true);
-                            fetchOldCart();
+                            preparePage(true,true);
+                            restoreOldCart(true);
                         }
-                    }//else App.changeViewTo('#emailRegView');
+                    } else {//no-account
+                        restoreOldCart(false);
+                    }
+                    //else App.changeViewTo('#emailRegView');
                 });
             });
     }, function() {/*error*/}, function() {/*success*/});
@@ -493,8 +497,16 @@
     function showChannelScreen() {
         App.changeViewTo('#channelPrompt');
     }
-    function preparePage(existing) {
+    function preparePage(existing, has_account) {
         if (existing) checkMail();
+        if (has_account) {
+            $('.has-account').show();
+            $('.no-account').hide();
+        } else {
+            $('.has-account').hide();
+            $('.no-account').show();
+
+        }
         if (USERTYPE == 0) {//buyer
             $('.forSeller').addClass('hd');
             $('.forBuyer').removeClass('hd');
@@ -566,13 +578,15 @@
     }).on('click', '#contact-link', function() {
         App.changeViewTo('#contactView');
     }).on('click', '#logoutLink', function() {
+        $MM.show();
+        $MF.html('<div class="fx fx-ac fx-jc pd10">'+SPINNER+' Logging you out...</div>');
         SQL.transaction(function(i){
             i.executeSql("DROP TABLE IF EXISTS on_user");
         });
         Store.clear();
         setTimeout(function() {
             window.location.reload();
-        }, 300);
+        }, 5000);
     }).on('mousedown', 'select', function(e) {
         e.preventDefault();
         ACTIVESELECT = this;
@@ -594,18 +608,24 @@
         var idx = this.dataset.index;
         ACTIVESELECT.selectedIndex = idx;
         if (ACTIVESELECT.id == 'order_for_select') {
-            var name, phone;
-            if (idx) {
-                if (idx == 1) {
-                    name = 'Your full name';
-                    phone = 'Your phone number';
-                } else if (idx == 2) {
-                    name = 'Name of receiver';
-                    phone = 'Phone number of receiver';
-                } else return;
+            var fm = document.querySelector('#dropoff-content'), name, phone;
+            var sm = document.querySelector('#submit-for-review');
+            // if (idx) {
+            if (idx == 1) {
+                name = 'Your full name';
+                phone = 'Your phone number';
+            } else if (idx == 2) {
+                name = 'Name of receiver';
+                phone = 'Phone number of receiver';
+            } else {
+                fm.style.display = 'none';
+                sm.style.display = 'none';
+                return;
             }
-            App.changeViewTo('#dropoffView');
-            var fm = document.querySelector('#dropoff-content');
+            // }
+            fm.style.display = '';
+            sm.style.display = '';
+            //
             fm.querySelector('input[name="address"]').value = Store.getItem('delivery_address');
             //
             fm.querySelector('input[name="name"]').value = Store.getItem('delivery_name');
@@ -613,6 +633,11 @@
             //
             fm.querySelector('input[name="phone"]').value = Store.getItem('delivery_phone');
             fm.querySelector('input[name="phone"]').setAttribute('placeholder', phone);
+        } else if (ACTIVESELECT.id == 'pre_institute_select') {
+            CAMPUSKEY = idx;
+            USERTYPE = 0;
+            App.changeViewTo('#home');
+            preparePage(false,false);
         }
     }).on('click', '.color-picker', function() {
         COLORPICKER = this;
@@ -1096,7 +1121,7 @@
                         if (p == 1) {
                             toast('Thanks for your feedback');
                             App.changeViewTo('#home');
-                            preparePage(false);
+                            preparePage(false,true);
                             SQL.transaction(function(i) {
                                 i.executeSql("UPDATE on_user SET channel=? WHERE id=?", [channelIndex, 1]);
                             });
@@ -2087,8 +2112,9 @@
                 //
                 var cook = SELECTED_PRODUCTS.map(function(e) { return {id: e.id, total: e.tt, colors: e.cl, sizes: e.sz}; });
                 var cooked = JSON.stringify(cook);
-                cookieUtil.setCookie("wishlist", cooked, 180);
-                trackThisOrder(cooked, '1');
+                Store.setItem("wishlist", cooked);
+
+                if (UUID) trackThisOrder(cooked, '1');
                 //
                 var total = SELECTED_PRODUCTS.reduce(function(a, b) { return a + parseInt(b.tt); }, 0);
                 $('.shopping-cart').attr('data-total', total);
@@ -2170,17 +2196,19 @@
             ORDER_TYPE = catg;
             //
             var value = JSON.stringify(invoice);
-            cookieUtil.setCookie('orderlist', value, 180);
+            Store.setItem('orderlist', value);
             //
             trackThisOrder(value, catg);
             //
             App.changeViewTo('#invoiceView');
             $('#invoice-content').html(buildInvoice(invoice, null));
-            //
         } else toast('No item was added');
     }).on('click', '#accept-invoice', function(e) {
-        App.changeViewTo('#orderOwnerView');
-        if (ORDER_TYPE == 3) $('#submit-for-review').click();
+        if (ORDER_TYPE == 3) {
+            $('#submit-for-review').click();
+        } else {
+            App.changeViewTo('#dropoffView');
+        }
     }).on('click', '#submit-for-review', function(e) {
         var el = this;
         if (el.dataset.disabled == 'true') return;
@@ -2246,9 +2274,9 @@
                     if (ORDER_TYPE==1) {
                         SELECTED_PRODUCTS.length = 0;//reset
                         $('.shopping-cart').attr('data-total', '0');
-                        cookieUtil.deleteCookie('wishlist');
+                        Store.removeItem('wishlist');
                     } else {
-                        cookieUtil.deleteCookie('orderlist');
+                        Store.removeItem('orderlist');
                         if (ORDER_TYPE == 3) {
                             ORDER_ID = p.generatedID;
                             App.changeViewTo('#cardView');
@@ -2624,7 +2652,7 @@
     }).on('click', '#product-menu-bar', function(e) {
         $('#productModal').show();
     }).on('click', '#copy-product-link', function(e) {
-        var tx = 'https://oncampus.ng/products/' + this.dataset.itemId;
+        var tx = 'https://oncampus.ng/product.php?id=' + this.dataset.itemId;
         var ip = document.createElement('input');
         ip.value = tx;
         document.body.appendChild(ip);
@@ -3742,19 +3770,22 @@
             dataType: 'json',
             method: "GET",
             success: function(p) {
-                var cooked;
                 if (p.length > 0) {
-                    cooked = p[0].order_details;
-                } else {//check cookie
-                    cooked = cookieUtil.getCookie('wishlist');
-                }
-                if (cooked) {
+                    var cooked = p[0].order_details;
                     restoreWishlist(cooked);
                 } else {
-                    cookieUtil.deleteCookie('wishlist');
+                    Store.removeItem('wishlist');
                 }
             }
         });
+    }
+    function restoreOldCart(has_account) {
+        var cooked = Store.getItem('wishlist');
+        if (cooked) {
+            restoreWishlist(cooked);
+        } else if (has_account) {
+            fetchOldCart();
+        }
     }
     function restoreWishlist(cooked) {
         var cook = JSON.parse(cooked);
@@ -3771,13 +3802,14 @@
             method: "GET",
             success: function(d) {
                 if (d.length > 0) {
+                    SELECTED_PRODUCTS.length = 0;
                     d.forEach(function(c_) {
                         var z = cook.find(function(w) {return w.id == c_.itemID; });
                         var c = {id: c_.itemID, oi: c_.ownerID, nm: c_.name, pr: parseFloat(c_.price).toFixed(2), ds: parseFloat(c_.discount).toFixed(2), tt: z.total, sz: z.sizes, cl: z.colors, sh: c_.shop_name, dl: c_.delivery, isproduct:true};                                    
                         SELECTED_PRODUCTS.push(c);
                         //update cart
                     });
-                    cookieUtil.setCookie("wishlist", cooked, 180);
+                    Store.setItem("wishlist", cooked);
                     //
                     var total = SELECTED_PRODUCTS.reduce(function(a, b) { return a + parseInt(b.tt); }, 0);
                     $('.shopping-cart').attr('data-total', total);
@@ -4072,9 +4104,9 @@
             if (action == 'signup' || p.ch == 0) showChannelScreen();//sign in? if ch == 0, means no activities yet
             else {//has passed ch check, possibly has some activities
                 App.changeViewTo('#home');
-                preparePage(true);//existing
+                preparePage(true,true);//existing
                 loadUserPicture();
-                fetchOldCart();
+                restoreOldCart(true);
             }
         });
     }
