@@ -500,11 +500,11 @@
     function preparePage(existing, has_account) {
         if (existing) checkMail();
         if (has_account) {
-            $('.has-account').show();
-            $('.no-account').hide();
+            $('.has-account').removeClass('hd').css('display','');
+            $('.no-account').addClass('hd');
         } else {
-            $('.has-account').hide();
-            $('.no-account').show();
+            $('.has-account').addClass('hd');
+            $('.no-account').removeClass('hd').css('display','');
 
         }
         if (USERTYPE == 0) {//buyer
@@ -598,7 +598,7 @@
         //
         var h = '';
         Array.prototype.slice.call(options).forEach(function(op, i) {
-            h += '<div class="fx fx-ac c-g option pd1215 f16 bb" data-index="'+op.index+'" data-selected="'+(selIdx==i)+'">'+op.text+'</div>';
+            h += '<div class="fx fx-ac c-g option pd16 f16 bb" data-index="'+op.index+'" data-selected="'+(selIdx==i)+'">'+op.text+'</div>';
         });
         //
         $MM.show();
@@ -710,7 +710,7 @@
                 <div id='size-palette-submit' class='modalClose c-o b'>Done</div>\
             </div>";
         sizes.forEach(function(c) {
-            h += "<div class='radio multipo psr fx fx-ac pd10 bb' data-index='"+c.dex+"' data-value='"+c.val+"'>"+c.val+"</div>";
+            h += "<div class='radio multipo psr fx fx-ac pd16 bb' data-index='"+c.dex+"' data-value='"+c.val+"'>"+c.val+"</div>";
         });
         h += "</div>";
         $MM.show();
@@ -2609,46 +2609,67 @@
         if (c) {
             var images = '';
             if (c.images > 1) {
-                for (var i = 0; i < c.images; i++) images += "<img src='"+MY_URL+"/img/items/products/"+c.itemID+"_"+i+".jpg' class='thumbnail box96 ba bs-r mg-r "+(i==0?'active':'')+"'>";
+                for (var i = 0; i < c.images; i++) images += "<img src='"+(i>0?""+MY_URL+"/img/items/products/"+c.itemID+"_"+i+".jpg":"")+"' class='thumbnail box96 ba bs-r mg-r "+(i==0?'active':'')+"'>";
             }
-            var h = "<div class='fw fx fx-ac fx-jc bb'>"+
+            var h = "<div class='fx product-container'>"+
                 (isadded ? "<div class='fw pd16 psf z4 t0 l0 info_box'><div class='fw bs-r sh-c pd16 psr bg c-o'>Item already in cart. This selection will override the previous one.<div class='box32 psa fx fx-ac fx-jc t0 r0 icon-cancel'></div></div></div>" : "")+
-                "<img src='"+MY_URL+"/img/items/products/"+c.itemID+"_0.jpg' id='featured-photo' class='fw'>\
-            </div>"+
-            (c.images > 1 ? "<div class='carousel pd16 f0 bb'>"+images+"</div>" : "")+
-            "<div class='pd1020'>\
-                <div class='f24 b'>"+c.name+"</div>"+
-                (c.discount > 0 ? "<div class='c-g tx-lt'>&#8358;"+comma(c.price)+"</div>" : "")+
-                "<div class='f16 b'>&#8358;"+comma((c.price - c.discount).toFixed(2))+"</div>\
-                <div class='c-g fx'>Sold by "+c.shop_name+(c.delivery == 1 ? "<div class='mg-l' style='width:54px;'><img src='res/img/logo.png' class='fw'></div><i class='b'>Express</i>" : "")+"</div>\
-                <div class='c-o f10'>AVAILABLE IN STOCK: "+comma(c.pieces_available)+" PCS</div>\
-                <div class='description pd16z c-g'>"+(c.description||'')+"</div>"+
-                (c.ownerID != UUID ?
-                    "<div class='fw fx fx-ac b5 pd516 mg-bx b4-r ba'>\
-                        <div class='fx40 b'>PCS:</div>\
-                        <div class='fx60 h50 mg-lxx pd020'><input class='fw fh f16' type='number' name='item-count' value='1' min='1' placeholder='1'></div>\
-                    </div>"+
-                    (c.sizes ? "<div class='fw fx fx-ac pd516 mg-bx b4-r ba triangle-down'>\
-                        <div class='fx40 b'>SIZE:</div>\
-                        <div class='size-picker picker psr fx fx-ac fx60 h50 mg-lxx pd020 ov-h ovx-a not-null' data-available-sizes='"+c.sizes+"' data-selected-options='' placeholder='Select size'></div>\
-                    </div>" : "")+
-                    (c.colors ? "<div class='fw fx fx-ac pd516 mg-bx b4-r ba triangle-down'>\
-                        <div class='fx40 b'>COLOUR:</div>\
-                        <div class='color-picker picker psr fx fx-ac fx60 h50 mg-lxx pd020 ov-h ovx-a not-null' data-available-colors='"+c.colors+"' data-selected-options='' placeholder='Select colours'></div>\
-                    </div>" : "")+
-                    "<div id='add-to-cart' class='fw mg-tx Orange white b4-r pd16 t-c b' data-item-id='"+c.itemID+"'>ADD TO CART</div>"
-                    :"<div class='item-remove fw mg-tx Orange white b4-r pd16 t-c b' data-item-id='"+c.itemID+"' data-catg='1'>DELETE THIS ITEM</div>"
-                )+
+                "<div class='image-area fx60 fx fx-jc Dark' style='min-width:320px;'>\
+                    <div class='fw'>\
+                        <div class='image-frame fx fx-ac fx-jc ov-h'><img src='' id='featured-photo'></div>"+
+                        (c.images > 1 ? "<div class='carousel pd16 f0 t-c bg ba'>"+images+"</div>" : "<img class='thumbnail hd ba bs-r mg-r active'>")+
+                    "</div>\
+                </div>"+
+                "<div class='pd1020'>\
+                    <div class='f24 b'>"+c.name+"</div>"+
+                    (c.discount > 0 ? "<div class='c-g tx-lt'>&#8358;"+comma(c.price)+"</div>" : "")+
+                    "<div class='f16 b'>&#8358;"+comma((c.price - c.discount).toFixed(2))+"</div>\
+                    <div class='c-g fx'>Sold by "+c.shop_name+(c.delivery == 1 ? "<div class='mg-l' style='width:54px;'><img src='res/img/logo.png' class='fw'></div><i class='b'>Express</i>" : "")+"</div>\
+                    <div class='c-o f10'>AVAILABLE IN STOCK: "+comma(c.pieces_available)+" PCS</div>\
+                    <div class='description pd16z c-g'>"+(c.description||'')+"</div>"+
+                    (c.ownerID != UUID ?
+                        "<div class='fw fx fx-ac b5 pd516 mg-bx b4-r ba'>\
+                            <div class='fx40 b'>PCS:</div>\
+                            <div class='fx60 h50 mg-lxx pd020'><input class='fw fh f16' type='number' name='item-count' value='1' min='1' placeholder='1'></div>\
+                        </div>"+
+                        (c.sizes ? "<div class='fw fx fx-ac pd516 mg-bx b4-r ba triangle-down'>\
+                            <div class='fx40 b'>SIZE:</div>\
+                            <div class='size-picker picker psr fx fx-ac fx60 h50 mg-lxx pd020 ov-h ovx-a not-null' data-available-sizes='"+c.sizes+"' data-selected-options='' placeholder='Select size'></div>\
+                        </div>" : "")+
+                        (c.colors ? "<div class='fw fx fx-ac pd516 mg-bx b4-r ba triangle-down'>\
+                            <div class='fx40 b'>COLOUR:</div>\
+                            <div class='color-picker picker psr fx fx-ac fx60 h50 mg-lxx pd020 ov-h ovx-a not-null' data-available-colors='"+c.colors+"' data-selected-options='' placeholder='Select colours'></div>\
+                        </div>" : "")+
+                        "<div id='add-to-cart' class='fw mg-tx Orange white b4-r pd16 t-c b' data-item-id='"+c.itemID+"'>ADD TO CART</div>"
+                        :"<div class='item-remove fw mg-tx Orange white b4-r pd16 t-c b' data-item-id='"+c.itemID+"' data-catg='1'>DELETE THIS ITEM</div>"
+                    )+
+                "</div>"+
             "</div>";
             $('#productWrapper').html(h);
             $('.product-menu-item').attr('data-item-id', itemId);
             App.changeViewTo('#productView');
             $('#productWrapper').parent().scrollTop(0);
+            //
+            var img = new Image();
+            img.onload = function() {
+                $('.thumbnail').first().attr('src', img.src).click();
+            }
+            img.src = MY_URL+"/img/items/products/"+c.itemID+"_0.jpg";
+            // setTimeout(function(){},500);
         }
     }).on('click', '.thumbnail', function(e) {
         $('.thumbnail.active').removeClass('active');
         this.classList.add('active');
-        $('#featured-photo').attr('src', this.src).hide().fadeIn();
+        var width = this.naturalWidth;
+        var height = this.naturalHeight;
+        var w,h;
+        if (width < height) {
+            w = 'auto';
+            h = '80%';
+        } else {
+            w = '100%';
+            h = 'auto';
+        }
+        $('#featured-photo').attr({'src': this.src, 'width': w, 'height': h}).hide().fadeIn();
     }).on('click', '#product-menu-bar', function(e) {
         $('#productModal').show();
     }).on('click', '#copy-product-link', function(e) {
@@ -3725,7 +3746,7 @@
             if (buyer && check && $('#catalog-items-container .product-entry[data-item-id="'+c.itemID+'"]')[0]) return;
             //
             h+="<div class='boxes2 product-entry i-b bg ac' data-item-id='"+c.itemID+"' data-item-key='"+c.pk+"'>\
-                    <div class='fw fx h50w bg-ac ba mg-b bs-r ba ov-h psr'>"+
+                    <div class='fw fx img-box bg-ac ba mg-b bs-r ba ov-h psr'>"+
                         (!buyer ? "<div class='psa t0 r0 ba Grey tx-ws f10 pd5 c-o'>"+(c.admin_status == 0 ? "Not yet approved" : "Approved")+"</div>" : "")+
                         "<img class='fw im-sh' src='"+MY_URL+"/img/items/products/"+c.itemID+"_0.jpg'>\
                     </div>\
