@@ -777,39 +777,65 @@
     }).on('change', '.images', function(e) {
         var that = this;
         if (this.files && this.files[0]) {
+            var result = null;
             var reader = new FileReader();
-            reader.onloadend = function(e) {
-                that.previousElementSibling.src = this.result;
-            }
-            reader.readAsDataURL(this.files[0]);
-            if (this.id == 'profile-picture') {
-                var fd = new FormData();
-                fd.append('action', 'updateDisplayPix');
-                fd.append('displaypix', this.files[0]);
-                fd.append('me', UUID);
+            var elem = this.previousElementSibling;
+            reader.onloadend = function() {
+                result = this.result;
+                elem.src = result;
                 //
-                toast("Uploading your profile picture...");
-                $.ajax({
-                    url: MY_URL + "/send.php",
-                    data: fd,
-                    method: "POST",
-                    cache: false,
-                    processData: false,
-                    contentType: false,
-                    timeout: 30000,
-                    success: function(p) {
-                        if (p == 1) {
-                            loadUserPicture();
-                            toast("Profile picture uploaded successfully");
-                        } else toast(p);
-                    },
-                    error: function() {
-                        toast('No network');
+                var img = new Image();
+                img.onload = function() {
+                    if (that.id == 'profile-picture') {
+                        if (img.width < 1024) {
+                            toast('Banner must be at least 1,024px wide.');
+                            return;
+                        } else {
+                            var r = img.width / img.height;
+                            if (r < 2.84 || r > 2.86) {
+                                toast("Banner's width must be 2.85 times the height.");
+                                return;
+                            }
+                        }
+                        var fd = new FormData();
+                        fd.append('action', 'updateDisplayPix');
+                        fd.append('displaypix', that.files[0]);
+                        fd.append('me', UUID);
+                        //
+                        toast("Uploading your profile picture...");
+                        $.ajax({
+                            url: MY_URL + "/send.php",
+                            data: fd,
+                            method: "POST",
+                            cache: false,
+                            processData: false,
+                            contentType: false,
+                            timeout: 30000,
+                            success: function(p) {
+                                if (p == 1) {
+                                    loadUserPicture();
+                                    toast("Profile picture uploaded successfully");
+                                } else toast(p);
+                            },
+                            error: function() {
+                                toast('No network');
+                            }
+                        });
+                    }else if (that.classList.contains('xtra')) {
+                        if (img.width > img.height) {
+                            elem.style.width = '100%';
+                            elem.style.height = 'auto';
+                        } else {
+                            elem.style.width = 'auto';
+                            elem.style.height = '100%';
+                        }
                     }
-                });
+                }
+                img.src = result;
             }
+            reader.readAsDataURL(this.files[0]);            
         } else {
-            that.previousElementSibling.src = '';
+            this.previousElementSibling.src = '';
         }
     }).on('submit', '.start-form', function(evt) {
         evt.preventDefault();
@@ -1320,8 +1346,8 @@
         var h = `<div class="${className} xtra-img mg-t main-wrapper fx40 h200 mg-l bg b4-r fx fx-ac fx-jc ov-h ba bg-im-ct psr" style="display:none;">
             <img src="res/img/icon/upload.png">
             <img class="fw psa im-sh" src="">
-            <input type="file" accept="image/*" name="images" class="images fw fh psa t0 l0 op0">
-            <div class="wrapper-closer box32 f20 psa fx fx-ac Pink c-g b5 b bm-r mg-r mg-t t0 r0 fx-jc">&times;</div>
+            <input type="file" accept="image/*" name="images" class="images xtra fw fh psa t0 l0 op0">
+            <div class="wrapper-closer fx fx-ac fx-jc box48 psa t0 l0 ba f32 mg-tm mg-lm b-rd white tx-sh">&times;</div>
         </div>`;
         $(this).before(h);
         $('.'+className).last().slideDown();
@@ -2198,7 +2224,7 @@
             var value = JSON.stringify(invoice);
             Store.setItem('orderlist', value);
             //
-            trackThisOrder(value, catg);
+            if (UUID) trackThisOrder(value, catg);
             //
             App.changeViewTo('#invoiceView');
             $('#invoice-content').html(buildInvoice(invoice, null));
@@ -3138,7 +3164,7 @@
                     if (source == 'timeline') {
                         var h = "<div class='w85p-c i-b ov-h mg-r ba psr bs-r more-services' data-catg='3' data-name='Events'>\
                                 <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'>\
-                                    <img src='res/img/icon/party.jpg' width='110%'>\
+                                    <img src='res/img/icon/party.jpg' width='100%'>\
                                 </div>\
                                 <div class='fw psa white info-banner h60 lh-i b0 l0 pd10'>\
                                     <div class='fw b f16'>No suggested events</div>\
@@ -3192,7 +3218,7 @@
                     if (source == 'timeline') {
                         var h = "<div class='w85p-c i-b ov-h mg-r ba psr bs-r more-services' data-catg='2' data-name='Restaurants'>\
                                 <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'>\
-                                    <img src='res/img/icon/food.jpg' width='110%'>\
+                                    <img src='res/img/icon/food.jpg' width='100%'>\
                                 </div>\
                                 <div class='fw psa white info-banner h60 lh-i b0 l0 pd10'>\
                                     <div class='fw b f16'>No suggested restaurants</div>\
@@ -3232,9 +3258,11 @@
     function buildEvents(p) {
         var h = '';
         p.forEach(function(c) {
-            if (!SHOPS.find(function(s) {return s.ui == c.ui})) { SHOPS.push(c); }
-            h+="<div class='w85p-c i-b ov-h mg-r sh-a ba psr bs-r shop-link bg-ac bg-im-cv"
-                    +"' data-shop-id='"+c.ui+"' style='background-image: url("+MY_URL+"/img/items/events/"+c.id+".jpg)'>\
+            if (!SHOPS.find(function(s) {return s.ui == c.ui;})) { SHOPS.push(c); }
+            h+="<div class='w85p-c i-b ov-h mg-r sh-a ba psr bs-r shop-link bg-ac' data-shop-id='"+c.ui+"'>\
+                    <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'>\
+                        <img src='"+MY_URL+"/img/items/events/"+c.id+".jpg' width='100%'>\
+                    </div>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
                         <div class='fw b f16 ov-h tx-el item-name'>"+c.nm+"</div>\
                         <div class='fw f14 ov-h tx-el'>"+EVENTS[c.tp]+" - <span class='f10 b'>"+c.dt+"</span></div>\
@@ -3243,7 +3271,7 @@
         });
         h+="<div class='w85p-c i-b ov-h mg-r sh-a ba psr bs-r more-services' data-catg='3' data-name='Events'>\
                 <div class='fw fh fx fx-ac fx-jc ov-h bg-mod'>\
-                    <img src='res/img/icon/party.jpg' width='110%'>\
+                    <img src='res/img/icon/party.jpg' width='100%'>\
                 </div>\
                 <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
                     <div class='fw b f16'>Want something different?</div>\
@@ -3255,9 +3283,11 @@
     function buildMoreEvents(p) {
         var h = '';
         p.forEach(function(c) {
-            if (!SHOPS.find(function(s) {return s.ui == c.ui})) { SHOPS.push(c); }
-            h+="<div class='w85p-c-2 ov-h mg-b16 psr bs-r sh-a ba shop-link bg-ac bg-im-cv"
-                    +"' data-shop-id='"+c.ui+"' style='background-image: url("+MY_URL+"/img/items/events/"+c.id+".jpg)'>\
+            if (!SHOPS.find(function(s) {return s.ui == c.ui;})) { SHOPS.push(c); }
+            h+="<div class='w85p-c-2 ov-h mg-b16 psr bs-r sh-a ba shop-link bg-ac' data-shop-id='"+c.ui+"'>\
+                    <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'>\
+                        <img src='"+MY_URL+"/img/items/events/"+c.id+".jpg' width='100%'>\
+                    </div>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
                         <div class='fw b f16 ov-h tx-el item-name'>"+c.nm+"</div>\
                         <div class='fw f14 ov-h tx-el'>"+EVENTS[c.tp]+" - <span class='f10 b'>"+c.dt+"</span></div>\
@@ -3269,9 +3299,11 @@
     function buildRestaurants(p) {
         var h = '';
         p.forEach(function(c) {
-            if (!SHOPS.find(function(s) {return s.ui == c.ui})) { SHOPS.push(c); }
-            h+="<div class='w85p-c i-b ov-h mg-r psr bs-r sh-a ba shop-link bg-ac bg-im-cv"
-                    +"' data-shop-id='"+c.ui+"' style='background-image: url("+MY_URL+"/img/users/"+c.ui+".jpg)'>\
+            if (!SHOPS.find(function(s) {return s.ui == c.ui;})) { SHOPS.push(c); }
+            h+="<div class='w85p-c i-b ov-h mg-r psr bs-r sh-a ba shop-link bg-ac' data-shop-id='"+c.ui+"'>\
+                    <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'>\
+                        <img src='"+MY_URL+"/img/users/"+c.ui+".jpg' width='100%'>\
+                    </div>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
                         <div class='fw b f16 ov-h tx-el item-name'>"+c.nm+"</div>\
                         <div class='fw f14 ov-h tx-el'>"+c.ad+"</div>\
@@ -3280,7 +3312,7 @@
         });
         h+="<div class='w85p-c i-b ov-h mg-r psr bs-r sh-a ba more-services' data-catg='2' data-name='Restaurants'>\
                 <div class='fw fh fx fx-ac fx-jc ov-h bg-mod'>\
-                    <img src='res/img/icon/food.jpg' width='110%'>\
+                    <img src='res/img/icon/food.jpg' width='100%'>\
                 </div>\
                 <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
                     <div class='fw b f16'>More...</div>\
@@ -3290,11 +3322,13 @@
         return h;
     }
     function buildMoreRestaurants(p) {
-        if (!SHOPS.find(function(s) {return s.ui == c.ui})) { SHOPS.push(c); }
         var h = '';
         p.forEach(function(c) {
-            h+="<div class='w85p-c-2 ov-h mg-b16 ba psr bs-r sh-a ba shop-link bg-ac bg-im-cv"
-                    +"' data-shop-id='"+c.ui+"' style='background-image: url("+MY_URL+"/img/users/"+c.ui+".jpg)'>\
+            if (!SHOPS.find(function(s) {return s.ui == c.ui;})) { SHOPS.push(c); }
+            h+="<div class='w85p-c-2 ov-h mg-b16 ba psr bs-r sh-a ba shop-link bg-ac' data-shop-id='"+c.ui+"'>\
+                    <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'>\
+                        <img src='"+MY_URL+"/img/users/"+c.ui+".jpg' width='100%'>\
+                    </div>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
                         <div class='fw b f16 ov-h tx-el item-name'>"+c.nm+"</div>\
                         <div class='fw f14 ov-h tx-el'>"+c.ad+"</div>\
@@ -3306,9 +3340,8 @@
     function buildServices(p) {
         var h = '';
         p.forEach(function(c) {
-            if (!SHOPS.find(function(s) {return s.ui == c.ui})) { SHOPS.push(c); }
-            h+="<div class='fw fx ov-h bb bg mg-b16 ba psr shop-link bg-ac"
-                    +"' data-shop-id='"+c.ui+"'>\
+            if (!SHOPS.find(function(s) {return s.ui == c.ui;})) { SHOPS.push(c); }
+            h+="<div class='fw fx ov-h bb bg mg-b16 ba psr bs-r shop-link bg-ac' data-shop-id='"+c.ui+"'>\
                     <div class='box120 mg-r fx fx-ac fx-jc ov-h bg-ac bg-im-cv' style='background-image: url("+MY_URL+"/img/users/"+c.ui+".jpg)'></div>\
                     <div class='fx60 pd10'>\
                         <div class='fw b f16 item-name'>"+c.nm+"</div>\
@@ -4216,7 +4249,7 @@
     POLLING_TRACKER = null;
     POLLING_TRACKER = setInterval(function() {
         if (POLLING_TIME == 0) {
-            checkMail();
+            if (UUID) checkMail();
             POLLING_TIME = 3;
         } else POLLING_TIME--;
     }, 60000);

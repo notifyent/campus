@@ -319,7 +319,7 @@
 			  				<div class="w42v-c psr i-b ov-h sh-a mg-r16 ba bs-r item-filter bg-im-cv" style="background-image: url(res/img/icon/electronics.jpg);" data-catg="5" data-name="Electronics">
 		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el Pink">ELECTRONICS</div>
 			  				</div>
-			  				<div class="w42v-c psr i-b ov-h sh-a mg-r16 ba bs-r item-filter bg-im-cv" style="background-image: url(res/img/icon/fashion.jpg);" data-catg="4" data-name="Fashion Products">
+			  				<div class="w42v-c psr i-b ov-h sh-a mg-r16 ba bs-r item-filter bg-im-cv" style="background-image: url(res/img/icon/fashion.jpg);background-position-x: left;" data-catg="4" data-name="Fashion Products">
 		  						<div class="fw f10 psa b0 l0 b h20p fx fx-ac fx-jc pd012 tx-el Pink">FASHION PRODUCTS</div>
 			  				</div>
 			  				<div class="w42v-c psr i-b ov-h sh-a mg-r16 ba bs-r item-filter bg-im-cv" style="background-image: url(res/img/icon/phones.jpg);" data-catg="10" data-name="Mobile Phones & Gadgets">
@@ -336,7 +336,7 @@
 						<div id="carousel-buy-ticket" class="carousel pd16 f0 lh0">
 							<div class='w85p-c i-b ov-h mg-r ba psr bs-r more-services' data-catg='3' data-name='Events'>
                                 <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'>
-                                    <img src='res/img/icon/party.jpg' width='110%'>
+                                    <img src='res/img/icon/party.jpg' width='100%'>
                                 </div>
                                 <div class='fw psa white info-banner h60 lh-i b0 l0 pd10'>
                                     <div class='fw b f16'>No suggested events</div>
@@ -363,7 +363,7 @@
 						<div id="carousel-buy-food" class="carousel pd16 f0 lh0">
 							<div class='w85p-c i-b ov-h mg-r ba psr bs-r more-services' data-catg='2' data-name='Restaurants'>
                                 <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'>
-                                    <img src='res/img/icon/food.jpg' width='110%'>
+                                    <img src='res/img/icon/food.jpg' width='100%'>
                                 </div>
                                 <div class='fw psa white info-banner h60 lh-i b0 l0 pd10'>
                                     <div class='fw b f16'>No suggested restaurants</div>
@@ -468,11 +468,11 @@
 		<div id="side-nav-wrapper" class="fh psa t0 l0">
 		    <div id="side-nav-modal" class="vw fh psa t0 l0 z2 ov-h bg-fd"></div>
 		    <div id="side-nav-panel" class="fh fx cd psa t0 l0 fx-jc pd100b c-g bg ovx-h ovy-a">
-		        <div class="fw pd20 st-p">
-		        	<div class="no-account box120 ba ov-h psr fx fx-ac fx-jc bg-ac b-rd side-menu-button"></div>
-			        <div class="has-account view-locator box120 ba ov-h psr fx fx-ac fx-jc b-rd side-menu-button" data-view="#dpEditor" style="margin: 0 auto;">
+		        <div class="fw view-locator st-p" data-view="#dpEditor" style="height: 28vw;">
+		        	<div class="no-account fh ov-h bg-ac side-menu-button"></div>
+			        <div class="has-account fh ov-h psr fx fx-ac fx-jc side-menu-button" style="margin: 0 auto;">
 			    	    <img src="res/img/icon/upload.png">
-			    	    <img src="" class="fw fh user-display-picture psa t0 l0">
+			    	    <img src="" class="fh user-display-picture psa" style="left: 50%; transform: translateX(-50%);">
 			        </div>
 			    </div>
 			    <div class="no-account">
@@ -526,7 +526,7 @@
 	  				<div class="product-image xtra-img fx40 h200 bg b4-r fx fx-ac fx-jc ov-h ba bg-im-ct psr">
 	  					<img src="res/img/icon/upload.png">
 	  					<img class="fw psa im-sh bg" src="">
-		  				<input type="file" accept="image/*" name="images" class="images fw fh psa t0 l0 op0">
+		  				<input type="file" accept="image/*" name="images" class="images xtra fw fh psa t0 l0 op0">
 	  				</div>
 	  				<div class="add-more-photos psa t0 l0 mg-t mg-l pd5 ba b4-r Pink b5" data-limit="4" data-class-name="product-image">+ Add more</div>
 	  			</div>
@@ -860,7 +860,7 @@
 	  				<div class="gallery-image xtra-img fx40 h200 bg b4-r fx fx-ac fx-jc ov-h ba bg-im-ct psr">
 	  					<img src="res/img/icon/upload.png">
 	  					<img class="fw psa im-sh bg" src="">
-		  				<input type="file" accept="image/*" name="images" class="images fw fh psa t0 l0 op0">
+		  				<input type="file" accept="image/*" name="images" class="images xtra fw fh psa t0 l0 op0">
 	  				</div>
 	  				<div class="add-more-photos psa t0 l0 mg-t mg-l pd5 ba b4-r Pink b5" data-limit="6" data-class-name="gallery-image">+ Add more</div>
 	  			</div>
@@ -1097,10 +1097,10 @@
   		</div>
 		<div class="fw fh bg-ac pd60t pd60b ovx-h ovy-a">
 	  		<div class="pd30">
-	  			<div class="fw pd020 mg-bx st-p">
-			        <div class="view-locator box120 ba ov-h psr fx fx-ac fx-jc b-rd side-menu-button" data-view="#dpEditor" style="margin: 0 auto;">
+	  			<div class="fw mg-bx st-p">
+		        	<div class="view-locator fx fx-ac fx-jc bg-ac psr ov-h" data-view="#dpEditor" style="width: 80vw; max-width: 540px; height: 28vw; max-height: 189.5px;">
 			    	    <img src="res/img/icon/upload.png">
-			    	    <img src="" class="fw fh user-display-picture psa t0 l0">
+			    	    <img src="" class="fw fh user-display-picture psa t0 l0" style="left: 50%; transform: translateX(-50%);">
 			        </div>
 			    </div>
 		  		<form id="profile-edit-form" class="start-form fw pd16 f16" autocomplete="off">
@@ -1121,8 +1121,9 @@
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
   			<div class="b f16">Update Profile Picture</div>
   		</div>
-  		<div class="fw fh fx fx-ac fx-jc pd60t bg-ac ovx-h ovy-a">
-			<div class="box200 ba b-rd bg-ac mg-bx psr ov-h">
+  		<div class="fw fh fx fx-ac cd pd60t bg-ac ovx-h ovy-a">
+  			<div class="pd20 t-c">Banner dimension for sellers must be at least 1,024px wide and the width must be 2.85 times the height. Eg. 1,024 x 359px.</div>
+			<div class="bg-ac psr ov-h" style="width: 80vw; max-width: 540px; height: 28vw; max-height: 189.5px;">
 	  			<div class="fw fh psa fx fx-ac fx-jc f24 b z1 white tx-sh">+</div>
 	  			<img src="" class="fw fh t0 l0 psa user-display-picture">
 	  			<img src="" class="fw fh psa im-sh">
