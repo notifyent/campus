@@ -896,7 +896,7 @@ img[src=""]{
   outline: 0;
   display: block;
   width: 4em;
-  height: 2em;
+  height: 0.5em;
   position: relative;
   cursor: pointer;
   -webkit-user-select: none;
@@ -906,19 +906,21 @@ img[src=""]{
 }
 .tgl + .tgl-btn:after, .tgl + .tgl-btn:before {
   position: relative;
-  display: block;
-  content: "";
-  width: 50%;
-  height: 100%;
+    top: -0.9em;
+    display: block;
+    content: "";
+    width: 2em;
+    height: 2em;
+    border: 1px solid #fe5215;
 }
 .tgl + .tgl-btn:after {
-  left: 0;
+  left: -4px;
 }
 .tgl + .tgl-btn:before {
   display: none;
 }
 .tgl:checked + .tgl-btn:after {
-  left: 50%;
+  left: 54%;
 }
 
 .tgl-light + .tgl-btn {

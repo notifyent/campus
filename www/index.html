@@ -467,8 +467,8 @@
 		<div id="drawer-listener" class="bg-tr psf z3 fh t0 l0" style="width: 12px;"></div>
 		<div id="side-nav-wrapper" class="fh psa t0 l0">
 		    <div id="side-nav-modal" class="vw fh psa t0 l0 z2 ov-h bg-fd"></div>
-		    <div id="side-nav-panel" class="fh fx cd psa t0 l0 fx-jc pd100b c-g bg ovx-h ovy-a">
-		        <div class="fw view-locator st-p" data-view="#dpEditor" style="height: 28vw;">
+		    <div id="side-nav-panel" class="fh psa t0 l0 pd100b c-g bg ovx-h ovy-a">
+		        <div class="fw view-locator st-p bb" data-view="#dpEditor" style="height: 28vw;">
 		        	<div class="no-account fh ov-h bg-ac side-menu-button"></div>
 			        <div class="has-account fh ov-h psr fx fx-ac fx-jc side-menu-button" style="margin: 0 auto;">
 			    	    <img src="res/img/icon/upload.png">
@@ -590,12 +590,16 @@
 			</form>
 
 			<form id="event-add-form" class="create-form fw pd16" data-catg="3" autocomplete="off">
-  				<div class="fw h200 bg bs-r fx fx-ac fx-jc ov-h ba psr mg-b16">
+  				<!-- <div class="fw h200 bg bs-r fx fx-ac fx-jc ov-h ba psr mg-b16">
   					<img src="res/img/icon/upload.png">
   					<img class="fw psa im-sh bg" src="">
 	  				<input type="file" accept="image/*" name="images" class="images fw fh psa t0 l0 op0">
+  				</div> -->
+  				<div class="view-locator fw h200 bg bs-r fx fx-ac fx-jc ov-h ba psr mg-b16" data-view="#dpEditor">
+  					<img src="res/img/icon/upload.png">
+  					<img class="fw psa im-sh bg user-display-picture" src="">
   				</div>
-	  			<div class="triangle-down"><select name="event_type" class="fw pd20 bg mg-b16 b4-r ba">
+	  			<div class="triangle-down mg-b16"><select name="event_type" class="fw pd20 bg b4-r ba">
 	  				<option value="0">Select Event Type</option>
 	  				<option value="1">Club Party</option>
 	  				<option value="2">Pool Party</option>
@@ -635,9 +639,9 @@
 					</div>
 				</div>
 
-				<div class="fw ticket_category pd10 b4-r mg-b16 bg">
+				<div class="fw ticket_category pd10 ba b4-r mg-b16 bg">
 					<div class="fw f10 t-c mg-b b">ADD A TICKET</div>
-					<div class="triangle-down"><select name="category" class="fw pd20 bg mg-b16 b4-r ba">
+					<div class="triangle-down mg-b16"><select name="category" class="fw pd20 bg b4-r ba">
 						<option value="0">Select Ticket Type</option>
 						<option value="1">Regular</option>
 						<option value="2">Couple</option>
@@ -652,7 +656,7 @@
 					<input type="number" name="discount" class="fw pd20 bg mg-b16 b4-r ba" placeholder="Add Discount">
 					<input type="number" name="seats" class="fw pd20 bg b4-r ba" placeholder="Available Seats">
 				</div>
-				<div id="ticket-add" class="fw pd20 t-c bg b4-r ba">Add another ticket</div>
+				<div id="ticket-add" class="fw pd20 Pink t-c bg b4-r ba">Add another ticket</div>
 
 				<input type="submit" name="create-submit" class="fw psf b0 l0 b h56 pd020 fx fx-ac Orange white hideWhenShrink" value="SAVE & CONTINUE">
 			</form>
@@ -1097,21 +1101,21 @@
   		</div>
 		<div class="fw fh bg-ac pd60t pd60b ovx-h ovy-a">
 	  		<div class="pd30">
-	  			<div class="fw mg-bx st-p">
-		        	<div class="view-locator fx fx-ac fx-jc bg-ac psr ov-h" data-view="#dpEditor" style="width: 80vw; max-width: 540px; height: 28vw; max-height: 189.5px;">
-			    	    <img src="res/img/icon/upload.png">
-			    	    <img src="" class="fw fh user-display-picture psa t0 l0" style="left: 50%; transform: translateX(-50%);">
-			        </div>
-			    </div>
-		  		<form id="profile-edit-form" class="start-form fw pd16 f16" autocomplete="off">
-					<div id="user-email" class="fw pd20 c-o mg-b16 ba b4-r b"></div>
-					<input type="text" name="fullname" class="fw pd20 Grey mg-b16 b4-r ba" placeholder="Full Name">
-					<input type="text" name="username" class="fw pd20 Grey mg-b16 b4-r ba" placeholder="Display/Brand Name">
-					<input type="tel" name="phone" class="fw pd20 Grey mg-b16 b4-r ba" placeholder="Phone Number">
-					<div class="triangle-down mg-b16"><span class="pd20 Grey ba b4-r mg-rx b f14">DOB</span> <input type="date" name="birthday" class="fw pd20 Grey b4-r ba" value="2000-12-31"></div>
-	  				<textarea name="officeAddress" class="fw pd20 Grey mg-b16 b4-r ba h60" placeholder="Address"></textarea>
-					<input type="submit" name="edit-submit" class="fw psf b0 l0 b h56 pd020 fx fx-ac Orange white hideWhenShrink" value="SAVE & CONTINUE">
-				</form>
+	  			<div style="max-width: 600px; margin: 0 auto;">
+			  		<form id="profile-edit-form" class="start-form fw f16" autocomplete="off">
+			        	<div class="view-locator fx fx-ac fx-jc bg-ac psr b4-r ov-h mg-bx" data-view="#dpEditor" style="width: calc(100vw - 60px); max-width: 600px; height: calc(35vw - 21px); max-height: 210px;">
+				    	    <img src="res/img/icon/upload.png">
+				    	    <img src="" class="fw fh user-display-picture psa t0 l0" style="left: 50%; transform: translateX(-50%);">
+				        </div>
+						<div id="user-email" class="fw pd20 c-o mg-b16 ba b4-r b"></div>
+						<input type="text" name="fullname" class="fw pd20 Grey mg-b16 b4-r ba" placeholder="Full Name">
+						<input type="text" name="username" class="fw pd20 Grey mg-b16 b4-r ba" placeholder="Display/Brand Name">
+						<input type="tel" name="phone" class="fw pd20 Grey mg-b16 b4-r ba" placeholder="Phone Number">
+						<div class="triangle-down mg-b16"><span class="pd20 Grey ba b4-r mg-rx b f14">DOB</span> <input type="date" name="birthday" class="fw pd20 Grey b4-r ba" value="2000-12-31"></div>
+		  				<textarea name="officeAddress" class="fw pd20 Grey mg-b16 b4-r ba h60" placeholder="Address"></textarea>
+						<input type="submit" name="edit-submit" class="fw psf b0 l0 b h56 pd020 fx fx-ac Orange white hideWhenShrink" value="SAVE & CONTINUE">
+					</form>
+				</div>
 			</div>
 		</div>
   	</div>
@@ -1119,10 +1123,10 @@
   	<div id="dpEditor" class="bg" data-function="View">
   		<div class="hr h60 fw sh-b fx fx-ac psa t0 l0 z1 Orange white">
   			<div class="view-closer psr t0 l0 fx fx-ac fx-jc f24 icon-left box60"></div>
-  			<div class="b f16">Update Profile Picture</div>
+  			<div class="b f16">Update Your Banner</div>
   		</div>
   		<div class="fw fh fx fx-ac cd pd60t bg-ac ovx-h ovy-a">
-  			<div class="pd20 t-c">Banner dimension for sellers must be at least 1,024px wide and the width must be 2.85 times the height. Eg. 1,024 x 359px.</div>
+  			<div class="pd20 t-c">Banner dimension must be at least 1,024px wide and the width must be 2.85 times the height. Eg. 1,024 x 359px.</div>
 			<div class="bg-ac psr ov-h" style="width: 80vw; max-width: 540px; height: 28vw; max-height: 189.5px;">
 	  			<div class="fw fh psa fx fx-ac fx-jc f24 b z1 white tx-sh">+</div>
 	  			<img src="" class="fw fh t0 l0 psa user-display-picture">

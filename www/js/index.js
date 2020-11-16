@@ -1505,10 +1505,10 @@
                 });
                 break;
             case '3'://event-add-form
-                var Image = el.querySelector('input[name="images"]').files
-                  , Name = el.querySelector('input[name="name"]').value
+                var Name = el.querySelector('input[name="name"]').value
                   , EventType = el.querySelector('select[name="event_type"]').value
                   , Venue = el.querySelector('textarea[name="venue"]').value
+                  // , Image = el.querySelector('input[name="images"]').files
 
                   , Year = el.querySelector('input[name="year"]').value
                   , Month = el.querySelector('input[name="month"]').value
@@ -1538,7 +1538,7 @@
                 });
                 if (localError) return toast('Some entries are not valid');
 
-                if ((!Image || !Image[0]) && !error) error = "<div class='b bb pd10'>Image Error!</div><div class='pd10'>Please attach an image to your item.</div>";
+                // if ((!Image || !Image[0]) && !error) error = "<div class='b bb pd10'>Image Error!</div><div class='pd10'>Please attach an image to your item.</div>";
                 if (EventType == '0' && !error) error = "<div class='b bb pd10'>Please select a type</div><div class='pd10'>Select a type for this ticket.</div>";
                 if (!Name && !error) error = "<div class='b bb pd10'>Please add a Name</div><div class='pd10'>A name is required to identify this event.</div>";
                 if (!Venue && !error) error = "<div class='b bb pd10'>Please add a Venue</div><div class='pd10'>Please state the venue for this event.</div>";
@@ -1559,7 +1559,7 @@
                 fd.append('event_date', EventDate);
                 fd.append('venue', Venue);
                 fd.append('event_type', EventType);//pool,hangout,club...
-                fd.append('image', Image[0]);
+                // fd.append('image', Image[0]);
                 fd.append('all_tickets', JSON.stringify(AllTickets));//regular,VIP...//all in one JSON stringified object
                 fd.append('campusKey', CAMPUSKEY);
 
@@ -1872,9 +1872,9 @@
             $el.remove();
         });
     }).on('click', '#ticket-add', function(e) {
-        var h="<div class='fw main-wrapper ticket_category pd10 b4-r mg-b16 bg'>\
-                <div class='fw f10 t-c mg-b b psr'>ADD ANOTHER TICKET<span class='wrapper-closer psa t-c t0 r0 w32'>x</span></div>\
-                <select name='category' class='fw pd20 bg mg-b16 b4-r ba'>\
+        var h="<div class='fw main-wrapper ticket_category pd10 ba b4-r mg-b16 bg'>\
+                <div class='fw f10 t-c mg-b b psr'>ADD ANOTHER TICKET<span class='wrapper-closer psa t-c t0 r0 w32 f24'>&times;</span></div>\
+                <div class='triangle-down mg-b16'><select name='category' class='fw pd20 bg b4-r ba'>\
                     <option value='0'>Select Ticket Type</option>\
                     <option value='1'>Regular</option>\
                     <option value='2'>Couple</option>\
@@ -1884,7 +1884,7 @@
                     <option value='6'>Table for 5</option>\
                     <option value='7'>Table for 6</option>\
                     <option value='8'>Table for 10</option>\
-                </select>\
+                </select></div>\
                 <input type='number' name='price' class='fw pd20 bg mg-b16 b4-r ba' placeholder='Price'>\
                 <input type='number' name='discount' class='fw pd20 bg mg-b16 b4-r ba' placeholder='Add Discount'>\
                 <input type='number' name='seats' class='fw pd20 bg b4-r ba' placeholder='Available Seats'>\
@@ -3261,7 +3261,7 @@
             if (!SHOPS.find(function(s) {return s.ui == c.ui;})) { SHOPS.push(c); }
             h+="<div class='w85p-c i-b ov-h mg-r sh-a ba psr bs-r shop-link bg-ac' data-shop-id='"+c.ui+"'>\
                     <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'>\
-                        <img src='"+MY_URL+"/img/items/events/"+c.id+".jpg' width='100%'>\
+                        <img src='"+MY_URL+"/img/users/"+c.ui+".jpg' width='100%'>\
                     </div>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
                         <div class='fw b f16 ov-h tx-el item-name'>"+c.nm+"</div>\
@@ -3286,7 +3286,7 @@
             if (!SHOPS.find(function(s) {return s.ui == c.ui;})) { SHOPS.push(c); }
             h+="<div class='w85p-c-2 ov-h mg-b16 psr bs-r sh-a ba shop-link bg-ac' data-shop-id='"+c.ui+"'>\
                     <div class='fw fh fx fx-ac fx-jc ov-h bg-ac'>\
-                        <img src='"+MY_URL+"/img/items/events/"+c.id+".jpg' width='100%'>\
+                        <img src='"+MY_URL+"/img/users/"+c.ui+".jpg' width='100%'>\
                     </div>\
                     <div class='fw psa white info-banner lh-i b0 l0 pd10'>\
                         <div class='fw b f16 ov-h tx-el item-name'>"+c.nm+"</div>\
@@ -3555,12 +3555,6 @@
                 $v.find('[data-menu="4"]').html(h4);
             }
         } else if (catg == '3') {//ticket
-            var img = new Image();
-            img.onload = function() {
-                $('#shop-banner').css('backgroundImage', 'url('+img.src+')');
-            }
-            img.src = MY_URL+"/img/items/events/"+p[0].itemID+".jpg";
-            //
             p.forEach(function(c) {
                 c.tickets.forEach(function(v) {
                     h+="<div class='ticket-entry fw pd16 mg-b16 sh-c' data-item-type='"+v.ticket_type+"'>\
